@@ -106,6 +106,7 @@ class Library: public QObject {
     /// Triggers a new search in the internal track collection
     /// and shows the results by switching the view.
     void searchTracksInCollection(const QString& query);
+    bool importPlaylistFile(const QString& playlistFile, const QString& playlistName = {});
     void showAutoDJ();
 
     static const QString kAutoDJViewName;

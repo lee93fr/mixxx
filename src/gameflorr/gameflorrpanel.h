@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QJsonObject>
+#include <QSet>
 #include <QWidget>
 #include <functional>
 #include <optional>
@@ -17,6 +19,29 @@ class QTableWidget;
 class QWizard;
 
 namespace gameflorr {
+class MusicdlPanel : public QWidget {
+  public:
+    MusicdlPanel(QWidget* parent, Library* library);
+
+  private:
+    void refresh();
+    void updateActions();
+    QJsonObject selectedPlaylist() const;
+    void sendCommand(const QString& action);
+    Library* m_pLibrary;
+    QLabel* m_pStatus;
+    QLabel* m_pFeedback;
+    QLineEdit* m_pFilter;
+    QTableWidget* m_pTable;
+    QPushButton* m_pRefresh;
+    QPushButton* m_pPrepare;
+    QPushButton* m_pImport;
+    QJsonObject m_snapshot;
+    QString m_pendingCommand;
+    qint64 m_commandSentAt = 0;
+    QSet<QString> m_importedPaths;
+};
+
 QWizard* createSetupWizard(QWidget* parent,
         UserSettingsPointer settings,
         SoundManager* soundManager,

@@ -562,7 +562,7 @@ void WMainMenuBar::initialize() {
 #endif
     auto* setup = gameflorrMenu->addAction(tr("Assistant de configuration…"));
     connect(setup, &QAction::triggered, this, &WMainMenuBar::showGameflorrSetup);
-    auto* requests = gameflorrMenu->addAction(tr("Demandes du public"));
+    auto* requests = gameflorrMenu->addAction(tr("Demandes du public et playlists MusicDL"));
     connect(requests, &QAction::triggered, this, &WMainMenuBar::showGameflorrRequests);
     addMenu(gameflorrMenu);
 

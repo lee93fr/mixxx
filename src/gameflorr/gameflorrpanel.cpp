@@ -3,7 +3,9 @@
 #include <QCheckBox>
 #include <QCoreApplication>
 #include <QDateTime>
+#include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QJsonArray>
@@ -499,6 +501,229 @@ void RequestsPanel::download() {
     m_pendingCommand = id;
     m_commandSentAt = now;
     m_pFeedback->setText(text("En attente de confirmation de l’agent…"));
+    updateActions();
+}
+
+MusicdlPanel::MusicdlPanel(QWidget* parent, Library* library)
+        : QWidget(parent),
+          m_pLibrary(library) {
+    applyDarkPalette(this);
+    setObjectName(QStringLiteral("MusicdlPlaylists"));
+    auto* layout = new QVBoxLayout(this);
+    m_pStatus = label({}, layout);
+    m_pFilter = new QLineEdit;
+    m_pFilter->setPlaceholderText(text("Filtrer les playlists MusicDL"));
+    layout->addWidget(m_pFilter);
+    m_pTable = new QTableWidget(0, 4);
+    m_pTable->setMinimumHeight(120);
+    m_pTable->setHorizontalHeaderLabels(
+            {text("Playlist"), text("Dossier"), text("Morceaux"), text("Préparation")});
+    m_pTable->setAlternatingRowColors(true);
+    m_pTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_pTable->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_pTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    m_pTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    m_pTable->verticalHeader()->hide();
+    layout->addWidget(m_pTable);
+    auto* actions = new QHBoxLayout;
+    m_pRefresh = new QPushButton(text("Actualiser MusicDL"));
+    m_pPrepare = new QPushButton(text("Télécharger la playlist"));
+    m_pImport = new QPushButton(text("Importer dans Mixxx"));
+    actions->addWidget(m_pRefresh);
+    actions->addWidget(m_pPrepare);
+    actions->addWidget(m_pImport);
+    layout->addLayout(actions);
+    m_pFeedback = label({}, layout);
+    connect(m_pRefresh, &QPushButton::clicked, this, [this] {
+        sendCommand(QStringLiteral("refresh"));
+    });
+    connect(m_pPrepare, &QPushButton::clicked, this, [this] {
+        sendCommand(QStringLiteral("prepare"));
+    });
+    connect(m_pImport, &QPushButton::clicked, this, [this] {
+        const auto playlist = selectedPlaylist();
+        const QString path = playlist.value(QStringLiteral("m3uPath")).toString();
+        const QFileInfo file(path);
+        const QDir expected(QFileInfo(requestsPath())
+                        .absoluteDir()
+                        .filePath(QStringLiteral("musicdl-playlists")));
+        if (m_importedPaths.contains(path) || path.isEmpty() || !file.isAbsolute() ||
+                !file.isFile() || file.suffix() != QStringLiteral("m3u8") ||
+                file.canonicalPath() != expected.canonicalPath()) {
+            m_pFeedback->setText(text("Playlist locale indisponible. Télécharge-la à nouveau."));
+            return;
+        }
+        if (m_pLibrary->importPlaylistFile(path,
+                    QStringLiteral("MusicDL · ") +
+                            playlist.value(QStringLiteral("name")).toString())) {
+            m_importedPaths.insert(path);
+            m_pFeedback->setText(text("Playlist importée dans la bibliothèque Mixxx."));
+        } else {
+            m_pFeedback->setText(text("L’import de la playlist a échoué."));
+        }
+        updateActions();
+    });
+    connect(m_pTable, &QTableWidget::itemSelectionChanged, this, [this] { updateActions(); });
+    connect(m_pFilter, &QLineEdit::textChanged, this, [this] { refresh(); });
+    auto* timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, [this] {
+        if (isVisible()) {
+            refresh();
+        }
+    });
+    timer->start(500);
+    refresh();
+}
+
+QJsonObject MusicdlPanel::selectedPlaylist() const {
+    const auto* item = m_pTable->item(m_pTable->currentRow(), 0);
+    if (!item || m_pTable->isRowHidden(m_pTable->currentRow())) {
+        return {};
+    }
+    const QString id = item->data(Qt::UserRole).toString();
+    for (const auto& value : m_snapshot.value(QStringLiteral("playlists")).toArray()) {
+        const auto playlist = value.toObject();
+        if (playlist.value(QStringLiteral("id")).toString() == id) {
+            return playlist;
+        }
+    }
+    return {};
+}
+
+void MusicdlPanel::refresh() {
+    const QString selection = selectedPlaylist().value(QStringLiteral("id")).toString();
+    QFile file(QFileInfo(requestsPath())
+                    .absoluteDir()
+                    .filePath(QStringLiteral("musicdl-playlists.json")));
+    QJsonObject snapshot;
+    if (file.open(QIODevice::ReadOnly) && file.size() <= 8 * 1024 * 1024) {
+        snapshot = QJsonDocument::fromJson(file.readAll()).object();
+    }
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    const double updatedAt = snapshot.value(QStringLiteral("updatedAt")).toDouble();
+    const bool online = snapshot.value(QStringLiteral("version")).toInt() == 1 &&
+            !snapshot.value(QStringLiteral("sessionId")).toString().isEmpty() &&
+            snapshot.value(QStringLiteral("online")).toBool() && updatedAt <= now + 2000 &&
+            updatedAt >= now - 5000;
+    if (!online) {
+        snapshot = {};
+    }
+    m_snapshot = snapshot;
+    QString status;
+    if (!online) {
+        status =
+                text("Démarre l’agent Gameflorr avec la source Mixxx et le mode DJ pour accéder à "
+                     "MusicDL.");
+    } else if (!snapshot.value(QStringLiteral("configured")).toBool()) {
+        status = text(
+                "Configure l’URL MusicDL et ton jeton personnel dans les réglages de l’agent.");
+    } else if (snapshot.value(QStringLiteral("busy")).toBool()) {
+        status = text("Lecture des playlists MusicDL…");
+    } else if (!snapshot.value(QStringLiteral("error")).toString().isEmpty()) {
+        status = snapshot.value(QStringLiteral("error")).toString();
+    } else {
+        status =
+                text("MusicDL connecté · choisis une playlist, télécharge ses morceaux puis "
+                     "importe-la dans Mixxx.");
+    }
+    m_pStatus->setText(status);
+    if (!m_pendingCommand.isEmpty()) {
+        const auto result = snapshot.value(QStringLiteral("lastCommand")).toObject();
+        if (result.value(QStringLiteral("id")).toString() == m_pendingCommand) {
+            m_pFeedback->setText(result.value(QStringLiteral("ok")).toBool()
+                            ? text("Demande acceptée. La progression s’affiche dans la liste.")
+                            : result.value(QStringLiteral("error")).toString());
+            m_pendingCommand.clear();
+        } else if (!online || now - m_commandSentAt > 120000) {
+            m_pFeedback->setText(
+                    text("L’agent n’a pas confirmé la demande. Actualise avant de réessayer."));
+            m_pendingCommand.clear();
+        }
+    }
+    const auto playlists = snapshot.value(QStringLiteral("playlists")).toArray();
+    const auto folders = snapshot.value(QStringLiteral("folders")).toArray();
+    QSignalBlocker blocker(m_pTable);
+    m_pTable->setRowCount(qMin<int>(playlists.size(), 5000));
+    for (int row = 0; row < m_pTable->rowCount(); ++row) {
+        const auto playlist = playlists[row].toObject();
+        const QString id = playlist.value(QStringLiteral("id")).toString();
+        QString folderName;
+        for (const auto& folder : folders) {
+            if (folder.toObject().value(QStringLiteral("id")) ==
+                    playlist.value(QStringLiteral("folder_id"))) {
+                folderName = folder.toObject().value(QStringLiteral("name")).toString();
+                break;
+            }
+        }
+        const QString name = playlist.value(QStringLiteral("name")).toString();
+        const QString path = playlist.value(QStringLiteral("m3uPath")).toString();
+        const int total = playlist.value(QStringLiteral("track_count")).toInt();
+        const int ready = playlist.value(QStringLiteral("ready")).toInt();
+        const int failed = playlist.value(QStringLiteral("failed")).toInt();
+        QString progress = QStringLiteral("%1 / %2").arg(ready).arg(total);
+        if (failed) {
+            progress += text(" · %1 échec(s)").arg(failed);
+        } else if (m_importedPaths.contains(path)) {
+            progress += text(" · Importée");
+        } else if (!path.isEmpty()) {
+            progress += text(" · Prête à importer");
+        }
+        const QStringList values{name, folderName, QString::number(total), progress};
+        for (int column = 0; column < values.size(); ++column) {
+            auto* item = new QTableWidgetItem(values[column]);
+            item->setData(Qt::UserRole, id);
+            m_pTable->setItem(row, column, item);
+        }
+        m_pTable->setRowHidden(
+                row, !QString(name + folderName).contains(m_pFilter->text(), Qt::CaseInsensitive));
+        if (id == selection) {
+            m_pTable->selectRow(row);
+        }
+    }
+    updateActions();
+}
+
+void MusicdlPanel::updateActions() {
+    const auto playlist = selectedPlaylist();
+    const bool online = !m_snapshot.isEmpty();
+    const bool idle = online && !m_snapshot.value(QStringLiteral("busy")).toBool() &&
+            m_pendingCommand.isEmpty();
+    m_pRefresh->setEnabled(idle && m_snapshot.value(QStringLiteral("configured")).toBool());
+    m_pPrepare->setEnabled(idle && m_snapshot.value(QStringLiteral("connected")).toBool() &&
+            !playlist.isEmpty() && playlist.value(QStringLiteral("track_count")).toInt() > 0 &&
+            !playlist.value(QStringLiteral("preparing")).toBool());
+    const QString path = playlist.value(QStringLiteral("m3uPath")).toString();
+    m_pImport->setEnabled(online && !path.isEmpty() && !m_importedPaths.contains(path) &&
+            QFileInfo(path).isFile() &&
+            playlist.value(QStringLiteral("ready")).toInt() ==
+                    playlist.value(QStringLiteral("track_count")).toInt() &&
+            !playlist.value(QStringLiteral("preparing")).toBool());
+}
+
+void MusicdlPanel::sendCommand(const QString& action) {
+    if (m_snapshot.isEmpty() || !m_pendingCommand.isEmpty()) {
+        return;
+    }
+    m_pendingCommand = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    m_commandSentAt = QDateTime::currentMSecsSinceEpoch();
+    const QJsonObject command{{QStringLiteral("version"), 1},
+            {QStringLiteral("id"), m_pendingCommand},
+            {QStringLiteral("sessionId"), m_snapshot.value(QStringLiteral("sessionId"))},
+            {QStringLiteral("updatedAt"), static_cast<double>(m_commandSentAt)},
+            {QStringLiteral("action"), action},
+            {QStringLiteral("playlistId"), selectedPlaylist().value(QStringLiteral("id"))}};
+    QSaveFile file(QFileInfo(requestsPath())
+                    .absoluteDir()
+                    .filePath(QStringLiteral("musicdl-command.json")));
+    const QByteArray data = QJsonDocument(command).toJson(QJsonDocument::Compact);
+    if (!file.open(QIODevice::WriteOnly) ||
+            !file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner) ||
+            file.write(data) != data.size() || !file.commit()) {
+        m_pendingCommand.clear();
+        m_pFeedback->setText(text("Impossible de transmettre la demande à l’agent."));
+    } else {
+        m_pFeedback->setText(text("Demande envoyée à l’agent…"));
+    }
     updateActions();
 }
 } // namespace gameflorr

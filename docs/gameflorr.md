@@ -58,4 +58,10 @@ Ces fichiers restent sur le compte utilisateur et ne contiennent pas les clés d
 
 L’indexation de la bibliothèque vers l’agent, les commandes de transport à distance et l’installation automatique sur Windows/macOS restent à développer. L’assistant ne valide pas automatiquement le son ou le matériel réellement branché. Le mapping RANE ONE reste expérimental, sans pilotage des moteurs ni scratch. Les tests automatisés ne remplacent pas un essai sur une installation DJ réelle, prévu après la fusion par le propriétaire du fork.
 
+## Playlists MusicDL
+
+Dans **Gameflorr → Demandes du public et playlists MusicDL**, l’onglet **Playlists MusicDL** affiche les playlists personnelles et leurs dossiers. Renseignez l’URL MusicDL et un jeton lié au compte propriétaire dans les réglages de l’agent, avec la source Mixxx et le mode DJ. Le serveur doit disposer de l’API `/api/integrations/playlists`.
+
+**Actualiser MusicDL** récupère la liste ; **Télécharger la playlist** prépare les titres sélectionnés via l’agent. **Importer dans Mixxx** devient disponible lorsque tous les fichiers sont prêts. L’import crée une playlist native dans l’ordre MusicDL, sans lecture automatique et sans écraser une playlist existante. Corrigez les échecs dans l’agent puis réessayez. Les jetons restent dans l’agent ; le pont local utilise `musicdl-playlists.json`, `musicdl-command.json` et des M3U8 privés à côté du fichier d’état. Une nouvelle session de l’agent demande une nouvelle préparation ; les fichiers déjà téléchargés peuvent être retrouvés.
+
 Fin du texte généré par Codex (IA).

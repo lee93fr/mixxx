@@ -592,6 +592,26 @@ void BasePlaylistFeature::slotCreateImportPlaylist() {
     activatePlaylist(lastPlaylistId);
 }
 
+bool BasePlaylistFeature::importPlaylistFile(const QString& playlistFile, const QString& playlistName) {
+    const QFileInfo fileInfo(playlistFile);
+    if (!fileInfo.isAbsolute() || !fileInfo.isFile() || !fileInfo.isReadable()) {
+        return false;
+    }
+    const QString baseName = playlistName.isEmpty() ? fileInfo.completeBaseName() : playlistName;
+    QString name = baseName;
+    int suffix = 1;
+    while (m_playlistDao.getPlaylistIdFromName(name) != kInvalidPlaylistId) {
+        name = baseName + QChar(' ') + QString::number(suffix++);
+    }
+    const int id = m_playlistDao.createPlaylist(name);
+    if (id == kInvalidPlaylistId) {
+        return false;
+    }
+    slotImportPlaylistFile(playlistFile, id);
+    activatePlaylist(id);
+    return true;
+}
+
 void BasePlaylistFeature::slotExportPlaylist() {
     int playlistId = playlistIdFromIndex(m_lastRightClickedIndex);
     if (playlistId == kInvalidPlaylistId) {
