@@ -12,6 +12,7 @@
 #include "defs_urls.h"
 #include "moc_dlgprefinterface.cpp"
 #include "preferences/constants.h"
+#include "preferences/gameflorrsettings.h"
 #include "preferences/usersettings.h"
 #include "qml/qmlconfigproxybase.h"
 #include "skin/legacy/legacyskinparser.h"
@@ -354,6 +355,11 @@ void DlgPrefInterface::slotUpdateSchemes() {
 
 void DlgPrefInterface::slotUpdate() {
     updateScreenMetrics();
+    const bool gameflorrOverride = !qEnvironmentVariableIsEmpty("GAMEFLORR_MIXXX_STATE_PATH");
+    checkBoxGameflorr->setChecked(gameflorrOverride || m_pConfig->getValue(
+            ConfigKey("[Gameflorr]", "enabled"), false));
+    checkBoxGameflorr->setEnabled(!gameflorrOverride);
+    gameflorrPath->setText(QDir::toNativeSeparators(gameflorrStatePath()));
 
     if (m_pSkinLoader) {
         slotUpdateSkins();
@@ -391,6 +397,9 @@ void DlgPrefInterface::slotUpdate() {
 }
 
 void DlgPrefInterface::slotResetToDefaults() {
+    if (checkBoxGameflorr->isEnabled()) {
+        checkBoxGameflorr->setChecked(false);
+    }
     if (m_pSkinLoader) {
         int index = ComboBoxSkinconf->findData(m_pSkinLoader->getDefaultSkinName());
         ComboBoxSkinconf->setCurrentIndex(index);
@@ -526,6 +535,10 @@ void DlgPrefInterface::slotSetSkin(int) {
 }
 
 void DlgPrefInterface::slotApply() {
+    if (checkBoxGameflorr->isEnabled()) {
+        m_pConfig->setValue(ConfigKey("[Gameflorr]", "enabled"),
+                checkBoxGameflorr->isChecked());
+    }
     if (m_pSkinLoader) {
         m_pConfig->set(ConfigKey(kConfigGroup, kResizableSkinKey), m_pSkin->name());
         m_pConfig->set(ConfigKey(kConfigGroup, kSchemeKey), m_colorScheme);

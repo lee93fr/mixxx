@@ -321,6 +321,45 @@
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="groupBoxGameflorr">
+     <property name="title">
+      <string>Gameflorr (experimental)</string>
+     </property>
+     <layout class="QVBoxLayout" name="gameflorrLayout">
+      <item>
+       <widget class="QCheckBox" name="checkBoxGameflorr">
+        <property name="text">
+         <string>Share the current track with the local Gameflorr Agent</string>
+        </property>
+        <property name="toolTip">
+         <string>Apply to enable sharing. GAMEFLORR_MIXXX_STATE_PATH overrides this setting when set before starting Mixxx.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gameflorrInstructions">
+        <property name="text">
+         <string>Select Mixxx in the Gameflorr Agent settings. Only a single deck routed to the main mix is published. During transitions, the last published track remains displayed. External hardware mixing is not detected.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="gameflorrPath">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="accessibleName">
+         <string>Gameflorr shared state file</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
