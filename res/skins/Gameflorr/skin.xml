@@ -4,13 +4,14 @@
   <manifest>
     <title>Gameflorr</title>
     <author>Gameflorr, based on Deere by RJ Ryan and S.Brandt</author>
-    <version>1.0</version>
-    <description>Deux platines, commandes essentielles lisibles et fonctions avancées à la demande. Basé sur Deere.</description>
+    <version>1.1</version>
+    <description>Vue Extended : cadrans circulaires, huit hotcues, formes d’onde parallèles et bibliothèque étendue. Basé sur Deere.</description>
     <language>fr</language>
     <license>Creative Commons Attribution, Share-Alike 3.0 Unported</license>
     <attributes>
       <attribute persist="true" config_key="[GameflorrSkin],panel">0</attribute>
-      <attribute persist="true" config_key="[GameflorrSkin],help">1</attribute>
+      <attribute persist="true" config_key="[GameflorrSkin],mixer">0</attribute>
+      <attribute persist="true" config_key="[GameflorrSkin],help">0</attribute>
 
 
       <attribute config_key="[App],num_decks">4</attribute>
@@ -19,7 +20,7 @@
       <attribute persist="false" config_key="[Deere],show_parallel_waveforms">1</attribute>
 
       <attribute persist="false" config_key="[Skin],show_4decks">0</attribute>
-      <attribute persist="false" config_key="[Skin],show_8_hotcues">0</attribute>
+      <attribute persist="false" config_key="[Skin],show_8_hotcues">1</attribute>
       <attribute persist="false" config_key="[Skin],show_intro_outro_cues">0</attribute>
       <attribute persist="false" config_key="[Skin],show_coverart">0</attribute>
       <attribute persist="false" config_key="[Skin],show_spinnies">0</attribute>
@@ -118,26 +119,26 @@
     <SetVariable name="VerticalStretchButtonSizePolicy">f,me</SetVariable>
 
 
-    <SetVariable name="SignalColor">#FF8000</SetVariable>
+    <SetVariable name="SignalColor">#58b5ed</SetVariable>
 
 
-    <Template src="skins:Deere/deck_singletons.xml">
+    <Template src="skins:Gameflorr/deck_singletons.xml">
       <SetVariable name="i">1</SetVariable>
 
-      <SetVariable name="DeckSignalColor">#38BDF8</SetVariable>
-      <SetVariable name="DeckBackgroundColor">#101A28</SetVariable>
+      <SetVariable name="DeckSignalColor">#58b5ed</SetVariable>
+      <SetVariable name="DeckBackgroundColor">#080808</SetVariable>
       <SetVariable name="PlayedOverlayColor">#b8000000</SetVariable>
     </Template>
 
-    <Template src="skins:Deere/deck_singletons.xml">
+    <Template src="skins:Gameflorr/deck_singletons.xml">
       <SetVariable name="i">2</SetVariable>
 
-      <SetVariable name="DeckSignalColor">#FB923C</SetVariable>
-      <SetVariable name="DeckBackgroundColor">#241A15</SetVariable>
+      <SetVariable name="DeckSignalColor">#58b5ed</SetVariable>
+      <SetVariable name="DeckBackgroundColor">#080808</SetVariable>
       <SetVariable name="PlayedOverlayColor">#b8000000</SetVariable>
     </Template>
 
-    <Template src="skins:Deere/deck_singletons.xml">
+    <Template src="skins:Gameflorr/deck_singletons.xml">
       <SetVariable name="i">3</SetVariable>
 
       <SetVariable name="DeckSignalColor">#B500B5</SetVariable>
@@ -145,7 +146,7 @@
       <SetVariable name="PlayedOverlayColor">#b8000000</SetVariable>
     </Template>
 
-    <Template src="skins:Deere/deck_singletons.xml">
+    <Template src="skins:Gameflorr/deck_singletons.xml">
       <SetVariable name="i">4</SetVariable>
 
       <SetVariable name="DeckSignalColor">#AABD00</SetVariable>
@@ -167,6 +168,7 @@
       </Children>
     </SingletonDefinition>
 
+
     <WidgetGroup>
       <ObjectName>GameflorrWorkspace</ObjectName>
       <Style src="skins:Gameflorr/style.qss"/>
@@ -180,15 +182,28 @@
             <WidgetGroup>
               <ObjectName>GameflorrPerformance</ObjectName><Layout>vertical</Layout><SizePolicy>me,max</SizePolicy>
               <Children>
-                <WidgetGroup><Layout>vertical</Layout><Size>-1me,110f</Size><Children><Template src="skins:Deere/parallel_waveforms.xml"/></Children></WidgetGroup>
                 <WidgetGroup>
                   <ObjectName>GameflorrDecks</ObjectName><Layout>horizontal</Layout><SizePolicy>me,max</SizePolicy>
                   <Children>
-                    <Template src="skins:Gameflorr/deck.xml"><SetVariable name="i">1</SetVariable></Template>
-                    <Template src="skins:Deere/mixer.xml"/>
-                    <Template src="skins:Gameflorr/deck.xml"><SetVariable name="i">2</SetVariable></Template>
+                    <WidgetGroup><ObjectName>GameflorrDeck1</ObjectName><Layout>horizontal</Layout><SizePolicy>me,min</SizePolicy><Children>
+                      <Template src="skins:Gameflorr/deck.xml"><SetVariable name="i">1</SetVariable></Template>
+                      <Template src="skins:Gameflorr/platter.xml"><SetVariable name="i">1</SetVariable><SetVariable name="group">[Channel1]</SetVariable></Template>
+                    </Children></WidgetGroup>
+                    <WidgetGroup><SizePolicy>min,max</SizePolicy><Layout>vertical</Layout>
+                      <Connection><ConfigKey>[GameflorrSkin],mixer</ConfigKey><BindProperty>visible</BindProperty><Transform><Not/></Transform></Connection>
+                      <Children><Template src="skins:Gameflorr/mixer_compact.xml"/></Children>
+                    </WidgetGroup>
+                    <WidgetGroup><SizePolicy>min,max</SizePolicy><Layout>vertical</Layout>
+                      <Connection><ConfigKey>[GameflorrSkin],mixer</ConfigKey><BindProperty>visible</BindProperty></Connection>
+                      <Children><Template src="skins:Deere/mixer.xml"/></Children>
+                    </WidgetGroup>
+                    <WidgetGroup><ObjectName>GameflorrDeck2</ObjectName><Layout>horizontal</Layout><SizePolicy>me,min</SizePolicy><Children>
+                      <Template src="skins:Gameflorr/platter.xml"><SetVariable name="i">2</SetVariable><SetVariable name="group">[Channel2]</SetVariable></Template>
+                      <Template src="skins:Gameflorr/deck.xml"><SetVariable name="i">2</SetVariable></Template>
+                    </Children></WidgetGroup>
                   </Children>
                 </WidgetGroup>
+                <Template src="skins:Gameflorr/waveforms.xml"/>
                 <WidgetGroup>
                   <Layout>vertical</Layout><SizePolicy>me,max</SizePolicy>
                   <Connection><ConfigKey>[GameflorrSkin],panel</ConfigKey><BindProperty>visible</BindProperty><Transform><IsEqual>1</IsEqual></Transform></Connection>

@@ -6,7 +6,7 @@
     <Connection><ConfigKey>[GameflorrSkin],help</ConfigKey><BindProperty>visible</BindProperty></Connection>
     <Children>
       <WidgetGroup><Layout>horizontal</Layout><SizePolicy>me,min</SizePolicy><Children>
-<WidgetGroup><Layout>vertical</Layout><SizePolicy>me,min</SizePolicy><Children><Label><ObjectName>GameflorrStep</ObjectName><Text>01  CHARGER</Text><Size>-1me,20f</Size></Label><Label><ObjectName>GameflorrHelpText</ObjectName><Text>Sélectionnez un titre, puis Charger 1 ou 2.</Text><Size>-1me,20f</Size></Label></Children></WidgetGroup>
+<WidgetGroup><Layout>vertical</Layout><SizePolicy>me,min</SizePolicy><Children><Label><ObjectName>GameflorrStep</ObjectName><Text>01  CHARGER</Text><Size>-1me,20f</Size></Label><Label><ObjectName>GameflorrHelpText</ObjectName><Text>Sélectionnez un titre, puis Charger sur la platine voulue.</Text><Size>-1me,20f</Size></Label></Children></WidgetGroup>
 <WidgetGroup><Layout>vertical</Layout><SizePolicy>me,min</SizePolicy><Children><Label><ObjectName>GameflorrStep</ObjectName><Text>02  PRÉÉCOUTER</Text><Size>-1me,20f</Size></Label><Label><ObjectName>GameflorrHelpText</ObjectName><Text>Activez Casque sur la prochaine platine.</Text><Size>-1me,20f</Size></Label></Children></WidgetGroup>
 <WidgetGroup><Layout>vertical</Layout><SizePolicy>me,min</SizePolicy><Children><Label><ObjectName>GameflorrStep</ObjectName><Text>03  MIXER</Text><Size>-1me,20f</Size></Label><Label><ObjectName>GameflorrHelpText</ObjectName><Text>Lancez la lecture, puis ouvrez les faders.</Text><Size>-1me,20f</Size></Label></Children></WidgetGroup>
 </Children></WidgetGroup>
