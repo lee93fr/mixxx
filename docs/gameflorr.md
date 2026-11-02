@@ -14,7 +14,7 @@ Cette version expérimentale ajoute un partage local du titre en cours. Elle né
 
 ## Un parcours simple pour mixer
 
-Commencez avec deux platines et une disposition d’interface qui vous convient dans Préférences → Interface. Chargez le titre suivant sur la platine libre, écoutez-le au casque, puis faites votre transition avec les faders. Le pont observe les réglages du mix principal ; il ne change ni la lecture, ni la synchronisation, ni les points cue.
+Choisissez le skin **Gameflorr** dans Préférences → Interface pour le nouveau parcours à deux platines. Le [guide de l’interface](gameflorr-interface.md) détaille les commandes et les panneaux à la demande. Chargez le titre suivant sur la platine libre, écoutez-le au casque, puis faites votre transition avec les faders. Le pont observe les réglages du mix principal ; il ne change ni la lecture, ni la synchronisation, ni les points cue.
 
 Pour les demandes du public, configurez l’API musique dans l’agent. Après téléchargement, utilisez **Ouvrir le dossier des titres à charger**, puis glissez le fichier terminé dans une platine Mixxx. L’agent n’écrit pas dans la base de bibliothèque Mixxx.
 
@@ -39,6 +39,6 @@ Un objet JSON de version `2` contient `sessionId` (UUID du lancement), `updatedA
 
 ## Limites et prochaines améliorations
 
-Cette intégration ne fournit pas encore les commandes Gameflorr vers Mixxx, l’indexation de sa bibliothèque, l’installation automatique sur Windows/macOS, ni une refonte complète de l’interface comparable à Serato. Les étapes suivantes sont un assistant de configuration audio/contrôleur, un parcours à deux platines avec progressive découverte des fonctions, puis une file de demandes intégrée à la bibliothèque. Leur validation nécessite des essais sur du matériel DJ réel. Les tests automatisés ne remplacent pas cet essai, prévu après la fusion par le propriétaire du fork.
+Le skin Gameflorr fournit maintenant un parcours à deux platines avec découverte progressive des fonctions. Cette intégration ne fournit pas encore les commandes Gameflorr vers Mixxx, l’indexation de sa bibliothèque ni l’installation automatique sur Windows/macOS. Les étapes suivantes sont un assistant de configuration audio/contrôleur et une file de demandes intégrée à la bibliothèque. Leur validation nécessite des essais sur du matériel DJ réel. Les tests automatisés ne remplacent pas cet essai, prévu après la fusion par le propriétaire du fork.
 
 Fin du texte généré par Codex (IA).

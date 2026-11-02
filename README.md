@@ -89,6 +89,6 @@ license.
 
 ## Gameflorr dans ce fork
 
-Le [guide Gameflorr](docs/gameflorr.md) explique comment activer le pont expérimental et charger les demandes du public.
+Le [guide Gameflorr](docs/gameflorr.md) explique comment activer le pont expérimental et charger les demandes du public. Le [guide de l’interface](docs/gameflorr-interface.md) présente le nouveau skin à deux platines, ses commandes essentielles et ses panneaux à la demande.
 
 <!-- Fin du texte généré par Codex (IA). -->
