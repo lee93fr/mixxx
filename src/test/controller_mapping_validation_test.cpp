@@ -5,6 +5,7 @@
 
 #include <QApplication>
 #include <QRegularExpression>
+#include <QTemporaryFile>
 #include <QUrl>
 
 #include "controllers/defs_controllers.h"
@@ -260,6 +261,24 @@ bool lintMappingInfo(const MappingInfo& mapping) {
 std::string PrintMappingName(const ::testing::TestParamInfo<std::string>& info) {
     auto name = QFileInfo(QString::fromStdString(info.param));
     return name.fileName().replace(kNonWordPattern, "_").toStdString();
+}
+
+TEST(MappingInfoTest, ReadsDisplayNameFromInfoHeader) {
+    QTemporaryFile file;
+    ASSERT_TRUE(file.open());
+    ASSERT_GT(file.write(
+                      "<MixxxControllerPreset><info>"
+                      "<name>Experimental controller without platter support</name>"
+                      "<author>Test author</author>"
+                      "</info></MixxxControllerPreset>"),
+            0);
+    ASSERT_TRUE(file.flush());
+
+    const MappingInfo info{QFileInfo(file.fileName())};
+    EXPECT_TRUE(info.isValid());
+    EXPECT_EQ(info.getName(),
+            QStringLiteral("Experimental controller without platter support"));
+    EXPECT_EQ(info.getAuthor(), QStringLiteral("Test author"));
 }
 
 TEST_P(MappingTestFixture, ValidateMappingXML) {
