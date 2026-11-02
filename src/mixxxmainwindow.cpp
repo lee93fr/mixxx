@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QDockWidget>
 #include <QFileDialog>
+#include <QLayout>
 #include <QOpenGLContext>
 #include <QScreen>
 #include <QUrl>
@@ -1189,6 +1190,7 @@ void MixxxMainWindow::slotGameflorrRequests() {
         m_pGameflorrRequests->move(
                 available.left() + (available.width() - m_pGameflorrRequests->width()) / 2,
                 qMax(available.top(), available.bottom() - m_pGameflorrRequests->height() + 1));
+        layout()->activate();
         resize(previousSize);
     }
     m_pGameflorrRequests->raise();
