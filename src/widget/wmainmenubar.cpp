@@ -564,6 +564,11 @@ void WMainMenuBar::initialize() {
     connect(setup, &QAction::triggered, this, &WMainMenuBar::showGameflorrSetup);
     auto* requests = gameflorrMenu->addAction(tr("Demandes du public et playlists MusicDL"));
     connect(requests, &QAction::triggered, this, &WMainMenuBar::showGameflorrRequests);
+    gameflorrMenu->addSeparator();
+    auto* settings = gameflorrMenu->addAction(tr("Paramètres et clés API…"));
+    connect(settings, &QAction::triggered, this, &WMainMenuBar::showGameflorrSettings);
+    auto* screen = gameflorrMenu->addAction(tr("Écran public Gameflorr…"));
+    connect(screen, &QAction::triggered, this, &WMainMenuBar::showGameflorrDisplay);
     addMenu(gameflorrMenu);
 
     // DEVELOPER MENU

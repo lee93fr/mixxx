@@ -12,6 +12,8 @@
 #include "util/parented_ptr.h"
 
 class QWizard;
+class QDialog;
+class QPushButton;
 class QDockWidget;
 class ControlObject;
 class DlgDeveloperTools;
@@ -68,6 +70,8 @@ class MixxxMainWindow : public QMainWindow {
     void slotOptionsPreferences();
     void slotGameflorrSetup();
     void slotGameflorrRequests();
+    void slotGameflorrSettings();
+    void slotGameflorrDisplay();
     /// show the about dialog
     void slotHelpAbout();
     /// show popup with library scan results
@@ -156,6 +160,9 @@ class MixxxMainWindow : public QMainWindow {
     DlgDeveloperTools* m_pDeveloperToolsDlg;
 
     DlgPreferences* m_pPrefDlg;
+    QPointer<QDialog> m_pGameflorrSettings;
+    QPointer<QDialog> m_pGameflorrDisplay;
+    QPointer<QPushButton> m_pGameflorrScreenButton;
     QPointer<QWizard> m_pGameflorrSetup;
     QDockWidget* m_pGameflorrRequests = nullptr;
     parented_ptr<DlgKeywheel> m_pKeywheel;

@@ -4,6 +4,7 @@
 #include <QCloseEvent>
 #include <QDebug>
 #include <QDockWidget>
+#include <QPushButton>
 #include <QFileDialog>
 #include <QLayout>
 #include <QOpenGLContext>
@@ -474,6 +475,8 @@ void MixxxMainWindow::initialize() {
 MixxxMainWindow::~MixxxMainWindow() {
     Timer t("~MixxxMainWindow");
     t.start();
+    delete m_pGameflorrSettings.data();
+    delete m_pGameflorrDisplay.data();
     delete m_pGameflorrSetup.data();
     delete m_pGameflorrRequests;
 
@@ -854,6 +857,16 @@ void MixxxMainWindow::connectMenuBar() {
             this,
             &MixxxMainWindow::slotGameflorrRequests,
             Qt::UniqueConnection);
+    connect(m_pMenuBar,
+            &WMainMenuBar::showGameflorrSettings,
+            this,
+            &MixxxMainWindow::slotGameflorrSettings,
+            Qt::UniqueConnection);
+    connect(m_pMenuBar,
+            &WMainMenuBar::showGameflorrDisplay,
+            this,
+            &MixxxMainWindow::slotGameflorrDisplay,
+            Qt::UniqueConnection);
     // Misc
     connect(m_pMenuBar,
             &WMainMenuBar::quit,
@@ -1171,6 +1184,29 @@ void MixxxMainWindow::slotGameflorrSetup() {
     m_pGameflorrSetup->activateWindow();
 }
 
+void MixxxMainWindow::slotGameflorrSettings() {
+    if (!m_pGameflorrSettings) {
+        m_pGameflorrSettings = gameflorr::createSettingsDialog(this,
+                m_pCoreServices->getSettings(), [this](bool visible) {
+                    if (m_pGameflorrScreenButton) {
+                        m_pGameflorrScreenButton->setVisible(visible);
+                    }
+                });
+    }
+    m_pGameflorrSettings->show();
+    m_pGameflorrSettings->raise();
+    m_pGameflorrSettings->activateWindow();
+}
+
+void MixxxMainWindow::slotGameflorrDisplay() {
+    if (!m_pGameflorrDisplay) {
+        m_pGameflorrDisplay = gameflorr::createDisplayDialog(this);
+    }
+    m_pGameflorrDisplay->show();
+    m_pGameflorrDisplay->raise();
+    m_pGameflorrDisplay->activateWindow();
+}
+
 void MixxxMainWindow::slotGameflorrRequests() {
     const QSize previousSize = size();
     if (!m_pGameflorrRequests) {
@@ -1184,6 +1220,18 @@ void MixxxMainWindow::slotGameflorrRequests() {
         auto* tabs = new QTabWidget(m_pGameflorrRequests);
         tabs->addTab(new gameflorr::RequestsPanel(tabs, m_pCoreServices->getLibrary().get()), tr("Demandes du public"));
         tabs->addTab(new gameflorr::MusicdlPanel(tabs, m_pCoreServices->getLibrary().get()), tr("Playlists MusicDL"));
+        m_pGameflorrScreenButton = new QPushButton(tr("Écran Gameflorr…"), tabs);
+        m_pGameflorrScreenButton->setObjectName(QStringLiteral("gameflorrScreenButton"));
+        m_pGameflorrScreenButton->setToolTip(tr("Choisir le contenu diffusé sur l’écran public"));
+        m_pGameflorrScreenButton->setStyleSheet(QStringLiteral(
+                "QPushButton { background: #30343b; color: #ededed; "
+                "border: 1px solid #555b65; border-radius: 3px; padding: 4px 9px; }"
+                "QPushButton:hover { background: #414854; }"));
+        tabs->setCornerWidget(m_pGameflorrScreenButton, Qt::TopRightCorner);
+        m_pGameflorrScreenButton->setVisible(m_pCoreServices->getSettings()->getValue(
+                ConfigKey("[Gameflorr]", "showScreenButton"), true));
+        connect(m_pGameflorrScreenButton, &QPushButton::clicked,
+                this, &MixxxMainWindow::slotGameflorrDisplay);
         m_pGameflorrRequests->setWidget(tabs);
         addDockWidget(Qt::BottomDockWidgetArea, m_pGameflorrRequests);
         resizeDocks({m_pGameflorrRequests}, {340}, Qt::Vertical);

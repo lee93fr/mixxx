@@ -13,6 +13,7 @@ class ControllerManager;
 class Library;
 class SoundManager;
 class QLabel;
+class QDialog;
 class QLineEdit;
 class QPushButton;
 class QTableWidget;
@@ -41,6 +42,10 @@ class MusicdlPanel : public QWidget {
     qint64 m_commandSentAt = 0;
     QSet<QString> m_importedPaths;
 };
+
+QDialog* createSettingsDialog(QWidget* parent, UserSettingsPointer settings,
+        std::function<void(bool)> setScreenButtonVisible);
+QDialog* createDisplayDialog(QWidget* parent);
 
 QWizard* createSetupWizard(QWidget* parent,
         UserSettingsPointer settings,
