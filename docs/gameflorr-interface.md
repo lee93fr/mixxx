@@ -1,4 +1,4 @@
-Texte généré par Codex (IA).
+<!-- Texte généré par Codex (IA). -->
 
 # Interface Gameflorr
 
@@ -13,9 +13,9 @@ Dans **Préférences → Interface**, choisissez **Gameflorr** et appliquez. Une
 ## Charger, écouter, mixer
 
 1. Recherchez un morceau au-dessus de la bibliothèque. Sélectionnez sa ligne, puis cliquez sur **Charger** sur la platine 1 ou 2. Le glisser-déposer reste disponible.
-2. Activez **CASQUE** sur la platine à préparer. Réglez **Casque** et **Mix** dans la barre supérieure. Configurez la sortie casque dans **Préférences → Matériel sonore**.
-3. Utilisez **CUE**, **▶ / Ⅱ** et **SYNC**. **KEY** conserve la tonalité quand le tempo change. Le curseur sous le cadran ajuste le tempo ; les touches **− / +** le ralentissent ou l’accélèrent pendant le maintien. Le cadran affiche le BPM courant et la variation de tempo en pourcentage. C’est un affichage de tempo, sans animation de rotation ni commande de scratch ; les formes d’onde conservent leurs interactions natives.
-4. Les huit pads créent ou rappellent les hotcues selon le comportement Mixxx. Les boutons **1 / 2 / 4 / 8** activent ou quittent une boucle de ce nombre de temps.
+2. Activez **PFL** sur la platine à préparer. Réglez **Casque** et **Mix** dans la barre supérieure. Configurez la sortie casque dans **Préférences → Matériel sonore**.
+3. Utilisez **CUE**, **▶ / Ⅱ** et **SYNC**. **KEY** conserve la tonalité quand le tempo change. Le curseur sous le cadran ajuste le tempo ; les touches **− / +** le ralentissent ou l’accélèrent pendant le maintien. Le cadran affiche le BPM courant, la variation de tempo en pourcentage et le temps. Cliquez sur le temps pour alterner entre temps écoulé, temps restant et les deux, selon les préférences natives de Mixxx. C’est un affichage de tempo, sans animation de rotation ni commande de scratch ; les formes d’onde conservent leurs interactions natives.
+4. Les huit pads créent ou rappellent les hotcues selon le comportement Mixxx. Ils reprennent la couleur des repères dans les formes d’onde. Le clic droit permet de modifier leur couleur ; la coloration automatique des nouveaux hotcues se règle dans **Préférences → Couleurs**. Les boutons **1 / 2 / 4 / 8** activent ou quittent une boucle de ce nombre de temps.
 5. Les deux faders, les vumètres et le crossfader restent au centre dans la vue compacte. **Mixeur** affiche les gains, égaliseurs et filtres natifs. **Master** règle la sortie principale.
 
 ## Afficher davantage de commandes

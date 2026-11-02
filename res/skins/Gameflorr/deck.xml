@@ -3,28 +3,28 @@
 <Template>
   <SetVariable name="group">[Channel<Variable name="i"/>]</SetVariable>
       <WidgetGroup>
-        <ObjectName>GameflorrDeckBody</ObjectName><Layout>vertical</Layout><MinimumSize>290,0</MinimumSize><SizePolicy>me,min</SizePolicy>
+        <ObjectName>GameflorrDeckBody</ObjectName><Layout>vertical</Layout><MinimumSize>270,0</MinimumSize><SizePolicy>me,min</SizePolicy>
         <Children>
           <WidgetGroup><Layout>horizontal</Layout><SizePolicy>me,min</SizePolicy><Children>
-            <Label><ObjectName>GameflorrDeckNumber</ObjectName><Text><Variable name="i"/></Text><Size>24f,24f</Size><Alignment>center</Alignment></Label>
-            <TrackProperty><ObjectName>GameflorrTitle</ObjectName><Group><Variable name="group"/></Group><Property>title</Property><Size>-1me,26f</Size><TooltipId>track_title</TooltipId></TrackProperty>
-            <PushButton><ObjectName>GameflorrLoad</ObjectName><Size>58f,24f</Size><Tooltip>Charger le titre sélectionné sur cette platine.</Tooltip><NumberStates>1</NumberStates><State><Number>0</Number><Text>Charger</Text></State><Connection><ConfigKey><Variable name="group"/>,LoadSelectedTrack</ConfigKey><EmitOnPressAndRelease>true</EmitOnPressAndRelease></Connection></PushButton>
+            <Label><ObjectName>GameflorrDeckNumber</ObjectName><Text><Variable name="i"/></Text><Size>20f,20f</Size><Alignment>center</Alignment></Label>
+            <TrackProperty><ObjectName>GameflorrTitle</ObjectName><Group><Variable name="group"/></Group><Property>title</Property><Size>-1me,22f</Size><TooltipId>track_title</TooltipId></TrackProperty>
+            <PushButton><ObjectName>GameflorrLoad</ObjectName><Size>54f,20f</Size><Tooltip>Charger le titre sélectionné sur cette platine.</Tooltip><NumberStates>1</NumberStates><State><Number>0</Number><Text>Charger</Text></State><Connection><ConfigKey><Variable name="group"/>,LoadSelectedTrack</ConfigKey><EmitOnPressAndRelease>true</EmitOnPressAndRelease></Connection></PushButton>
           </Children></WidgetGroup>
           <WidgetGroup><ObjectName>GameflorrTrackInfo</ObjectName><Layout>horizontal</Layout><SizePolicy>me,min</SizePolicy><Children>
-            <TrackProperty><ObjectName>GameflorrArtist</ObjectName><Group><Variable name="group"/></Group><Property>artist</Property><Size>-1me,21f</Size></TrackProperty>
-            <Key><ObjectName>BpmKeyEditTriggerLabel</ObjectName><Size>36f,21f</Size><Group><Variable name="group"/></Group><DisplayCents>false</DisplayCents><Connection><ConfigKey><Variable name="group"/>,visual_key</ConfigKey></Connection></Key>
-            <NumberPos><ObjectName>GameflorrTime</ObjectName><Size>175f,21f</Size><Group><Variable name="group"/></Group><TooltipId>track_time</TooltipId></NumberPos>
+            <TrackProperty><ObjectName>GameflorrArtist</ObjectName><Group><Variable name="group"/></Group><Property>artist</Property><Size>-1me,17f</Size></TrackProperty>
+            <Key><ObjectName>BpmKeyEditTriggerLabel</ObjectName><Size>36f,17f</Size><Group><Variable name="group"/></Group><DisplayCents>false</DisplayCents><Connection><ConfigKey><Variable name="group"/>,visual_key</ConfigKey></Connection></Key>
+
           </Children></WidgetGroup>
-          <SingletonContainer><ObjectName>DeckOverview<Variable name="i"/></ObjectName><Size>-1me,24f</Size></SingletonContainer>
-          <Label><ObjectName>GameflorrSectionLabel</ObjectName><Text>HOT CUES</Text><Size>-1me,16f</Size></Label>
+          <SingletonContainer><ObjectName>DeckOverview<Variable name="i"/></ObjectName><Size>-1me,18f</Size></SingletonContainer>
+
           <WidgetGroup><ObjectName>GameflorrPads</ObjectName><Layout>horizontal</Layout><SizePolicy>me,min</SizePolicy><Children><Template src="skins:Gameflorr/hotcue.xml"><SetVariable name="hotcue">1</SetVariable></Template><Template src="skins:Gameflorr/hotcue.xml"><SetVariable name="hotcue">2</SetVariable></Template><Template src="skins:Gameflorr/hotcue.xml"><SetVariable name="hotcue">3</SetVariable></Template><Template src="skins:Gameflorr/hotcue.xml"><SetVariable name="hotcue">4</SetVariable></Template></Children></WidgetGroup>
 <WidgetGroup><ObjectName>GameflorrPads</ObjectName><Layout>horizontal</Layout><SizePolicy>me,min</SizePolicy><Children><Template src="skins:Gameflorr/hotcue.xml"><SetVariable name="hotcue">5</SetVariable></Template><Template src="skins:Gameflorr/hotcue.xml"><SetVariable name="hotcue">6</SetVariable></Template><Template src="skins:Gameflorr/hotcue.xml"><SetVariable name="hotcue">7</SetVariable></Template><Template src="skins:Gameflorr/hotcue.xml"><SetVariable name="hotcue">8</SetVariable></Template></Children></WidgetGroup>
           <WidgetGroup><ObjectName>GameflorrLoops</ObjectName><Layout>horizontal</Layout><SizePolicy>me,min</SizePolicy><Children>
-            <Label><ObjectName>GameflorrUnit</ObjectName><Text>LOOP</Text><Size>40f,24f</Size></Label><Template src="skins:Gameflorr/loop_button.xml"><SetVariable name="beats">1</SetVariable></Template><Template src="skins:Gameflorr/loop_button.xml"><SetVariable name="beats">2</SetVariable></Template><Template src="skins:Gameflorr/loop_button.xml"><SetVariable name="beats">4</SetVariable></Template><Template src="skins:Gameflorr/loop_button.xml"><SetVariable name="beats">8</SetVariable></Template>
+            <Label><ObjectName>GameflorrUnit</ObjectName><Text>LOOP</Text><Size>34f,20f</Size></Label><Template src="skins:Gameflorr/loop_button.xml"><SetVariable name="beats">1</SetVariable></Template><Template src="skins:Gameflorr/loop_button.xml"><SetVariable name="beats">2</SetVariable></Template><Template src="skins:Gameflorr/loop_button.xml"><SetVariable name="beats">4</SetVariable></Template><Template src="skins:Gameflorr/loop_button.xml"><SetVariable name="beats">8</SetVariable></Template>
           </Children></WidgetGroup>
           <WidgetGroup><ObjectName>GameflorrTransport</ObjectName><Layout>horizontal</Layout><SizePolicy>me,min</SizePolicy><Children>
             <CueButton>
-              <ObjectName>GameflorrCue</ObjectName><Size>52f,28f</Size><Group><Variable name="group"/></Group><NumberStates>2</NumberStates>
+              <ObjectName>GameflorrCue</ObjectName><Size>52f,24f</Size><Group><Variable name="group"/></Group><NumberStates>2</NumberStates>
               <TooltipId>cue_default_cue_gotoandstop</TooltipId><LeftClickIsPushButton>true</LeftClickIsPushButton><RightClickIsPushButton>true</RightClickIsPushButton>
               <State><Number>0</Number><Text>CUE</Text></State><State><Number>1</Number><Text>CUE</Text></State>
               <Connection><ConfigKey><Variable name="group"/>,cue_default</ConfigKey><EmitOnPressAndRelease>true</EmitOnPressAndRelease><ButtonState>LeftButton</ButtonState><ConnectValueToWidget>false</ConnectValueToWidget></Connection>
@@ -32,16 +32,16 @@
               <Connection><ConfigKey><Variable name="group"/>,cue_indicator</ConfigKey><ConnectValueFromWidget>false</ConnectValueFromWidget></Connection>
             </CueButton>
             <PlayButton>
-              <ObjectName>GameflorrPlay</ObjectName><Size>58f,28f</Size><Group><Variable name="group"/></Group><NumberStates>2</NumberStates><TooltipId>play_cue_set</TooltipId>
+              <ObjectName>GameflorrPlay</ObjectName><Size>58f,24f</Size><Group><Variable name="group"/></Group><NumberStates>2</NumberStates><TooltipId>play_cue_set</TooltipId>
               <State><Number>0</Number><Text>▶</Text></State><State><Number>1</Number><Text>Ⅱ</Text></State>
               <Connection><ConfigKey><Variable name="group"/>,play</ConfigKey><EmitOnPressAndRelease>true</EmitOnPressAndRelease><ButtonState>LeftButton</ButtonState><ConnectValueToWidget>false</ConnectValueToWidget></Connection>
               <Connection><ConfigKey><Variable name="group"/>,cue_set</ConfigKey><EmitOnPressAndRelease>true</EmitOnPressAndRelease><ButtonState>RightButton</ButtonState><ConnectValueToWidget>false</ConnectValueToWidget></Connection>
               <Connection><ConfigKey><Variable name="group"/>,play_latched</ConfigKey><ConnectValueFromWidget>false</ConnectValueFromWidget></Connection>
             </PlayButton>
-            <Template src="skins:Gameflorr/button.xml"><SetVariable name="name">GameflorrSync</SetVariable><SetVariable name="size">58f,28f</SetVariable><SetVariable name="text">SYNC</SetVariable><SetVariable name="control"><Variable name="group"/>,sync_enabled</SetVariable><SetVariable name="tip">Synchroniser le tempo et les temps avec la platine de référence.</SetVariable></Template>
-            <Template src="skins:Gameflorr/button.xml"><SetVariable name="name">GameflorrKeylock</SetVariable><SetVariable name="size">40f,28f</SetVariable><SetVariable name="text">KEY</SetVariable><SetVariable name="control"><Variable name="group"/>,keylock</SetVariable><SetVariable name="tip">Conserver la tonalité pendant un changement de tempo.</SetVariable></Template>
-            <PushButton><ObjectName>GameflorrNudge</ObjectName><Size>28f,28f</Size><Tooltip>Ralentir temporairement pendant le maintien.</Tooltip><NumberStates>1</NumberStates><State><Number>0</Number><Text>−</Text></State><Connection><ConfigKey><Variable name="group"/>,rate_temp_down</ConfigKey><EmitOnPressAndRelease>true</EmitOnPressAndRelease></Connection></PushButton>
-            <PushButton><ObjectName>GameflorrNudge</ObjectName><Size>28f,28f</Size><Tooltip>Accélérer temporairement pendant le maintien.</Tooltip><NumberStates>1</NumberStates><State><Number>0</Number><Text>+</Text></State><Connection><ConfigKey><Variable name="group"/>,rate_temp_up</ConfigKey><EmitOnPressAndRelease>true</EmitOnPressAndRelease></Connection></PushButton>
+            <Template src="skins:Gameflorr/button.xml"><SetVariable name="name">GameflorrSync</SetVariable><SetVariable name="size">58f,24f</SetVariable><SetVariable name="text">SYNC</SetVariable><SetVariable name="control"><Variable name="group"/>,sync_enabled</SetVariable><SetVariable name="tip">Synchroniser le tempo et les temps avec la platine de référence.</SetVariable></Template>
+            <Template src="skins:Gameflorr/button.xml"><SetVariable name="name">GameflorrKeylock</SetVariable><SetVariable name="size">40f,24f</SetVariable><SetVariable name="text">KEY</SetVariable><SetVariable name="control"><Variable name="group"/>,keylock</SetVariable><SetVariable name="tip">Conserver la tonalité pendant un changement de tempo.</SetVariable></Template>
+            <PushButton><ObjectName>GameflorrNudge</ObjectName><Size>28f,24f</Size><Tooltip>Ralentir temporairement pendant le maintien.</Tooltip><NumberStates>1</NumberStates><State><Number>0</Number><Text>−</Text></State><Connection><ConfigKey><Variable name="group"/>,rate_temp_down</ConfigKey><EmitOnPressAndRelease>true</EmitOnPressAndRelease></Connection></PushButton>
+            <PushButton><ObjectName>GameflorrNudge</ObjectName><Size>28f,24f</Size><Tooltip>Accélérer temporairement pendant le maintien.</Tooltip><NumberStates>1</NumberStates><State><Number>0</Number><Text>+</Text></State><Connection><ConfigKey><Variable name="group"/>,rate_temp_up</ConfigKey><EmitOnPressAndRelease>true</EmitOnPressAndRelease></Connection></PushButton>
             <WidgetGroup><Size>0me,0f</Size></WidgetGroup>
           </Children></WidgetGroup>
           <WidgetGroup><ObjectName>GameflorrAdvanced</ObjectName><Layout>vertical</Layout><SizePolicy>me,min</SizePolicy>
