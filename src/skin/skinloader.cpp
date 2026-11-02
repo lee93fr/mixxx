@@ -159,7 +159,7 @@ SkinPointer SkinLoader::getConfiguredSkin() const {
 }
 
 QString SkinLoader::getDefaultSkinName() const {
-    return "LateNight";
+    return QStringLiteral("Gameflorr");
 }
 
 QWidget* SkinLoader::loadConfiguredSkin(QWidget* pParent,
