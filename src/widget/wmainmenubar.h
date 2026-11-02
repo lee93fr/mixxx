@@ -76,6 +76,8 @@ class WMainMenuBar : public QMenuBar {
     void showAbout();
     void showKeywheel(bool visible);
     void showPreferences();
+    void showGameflorrSetup();
+    void showGameflorrRequests();
     void toggleDeveloperTools(bool toggle);
     void toggleFullScreen(bool toggle);
     void toggleKeyboardShortcuts(bool toggle);

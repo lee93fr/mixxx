@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QPointer>
+
 #include <QString>
 #include <memory>
 
@@ -9,6 +11,8 @@
 #include "track/track_decl.h"
 #include "util/parented_ptr.h"
 
+class QWizard;
+class QDockWidget;
 class ControlObject;
 class DlgDeveloperTools;
 class DlgPreferences;
@@ -62,6 +66,8 @@ class MixxxMainWindow : public QMainWindow {
     void slotFileLoadSongPlayer(int deck);
     /// show the preferences dialog
     void slotOptionsPreferences();
+    void slotGameflorrSetup();
+    void slotGameflorrRequests();
     /// show the about dialog
     void slotHelpAbout();
     /// show popup with library scan results
@@ -150,6 +156,8 @@ class MixxxMainWindow : public QMainWindow {
     DlgDeveloperTools* m_pDeveloperToolsDlg;
 
     DlgPreferences* m_pPrefDlg;
+    QPointer<QWizard> m_pGameflorrSetup;
+    QDockWidget* m_pGameflorrRequests = nullptr;
     parented_ptr<DlgKeywheel> m_pKeywheel;
 
 #ifdef __ENGINEPRIME__

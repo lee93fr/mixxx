@@ -3,9 +3,14 @@
 #include <QCheckBox>
 #include <QCloseEvent>
 #include <QDebug>
+#include <QDockWidget>
 #include <QFileDialog>
 #include <QOpenGLContext>
+#include <QScreen>
 #include <QUrl>
+#include <QWizard>
+
+#include "gameflorr/gameflorrpanel.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QGLFormat>
@@ -454,11 +459,21 @@ void MixxxMainWindow::initialize() {
         // AutoDj is second from the top by default, all features collapsed).
         pLibrary->showAutoDJ();
     }
+    auto settings = m_pCoreServices->getSettings();
+    const QString skin = settings->getValueString(ConfigKey("[Config]", "ResizableSkin"));
+    if ((skin.isEmpty() || skin == QStringLiteral("Gameflorr")) &&
+            !settings->getValue(ConfigKey("[Gameflorr]", "setupPrompted"), false)) {
+        settings->setValue(ConfigKey("[Gameflorr]", "setupPrompted"), true);
+        settings->save();
+        QTimer::singleShot(0, this, &MixxxMainWindow::slotGameflorrSetup);
+    }
 }
 
 MixxxMainWindow::~MixxxMainWindow() {
     Timer t("~MixxxMainWindow");
     t.start();
+    delete m_pGameflorrSetup.data();
+    delete m_pGameflorrRequests;
 
     // Save the current window state (position, maximized, etc)
     // Note(ronso0): Unfortunately saveGeometry() also stores the fullscreen state.
@@ -827,6 +842,16 @@ void MixxxMainWindow::connectMenuBar() {
             &WMainMenuBar::onNewSkinLoaded,
             Qt::UniqueConnection);
 
+    connect(m_pMenuBar,
+            &WMainMenuBar::showGameflorrSetup,
+            this,
+            &MixxxMainWindow::slotGameflorrSetup,
+            Qt::UniqueConnection);
+    connect(m_pMenuBar,
+            &WMainMenuBar::showGameflorrRequests,
+            this,
+            &MixxxMainWindow::slotGameflorrRequests,
+            Qt::UniqueConnection);
     // Misc
     connect(m_pMenuBar,
             &WMainMenuBar::quit,
@@ -1112,6 +1137,61 @@ void MixxxMainWindow::slotViewFullScreen(bool toggle) {
     } else {
         showNormal();
     }
+}
+
+void MixxxMainWindow::slotGameflorrSetup() {
+    if (!m_pGameflorrSetup) {
+        m_pGameflorrSetup = gameflorr::createSetupWizard(this,
+                m_pCoreServices->getSettings(),
+                m_pCoreServices->getSoundManager().get(),
+                m_pCoreServices->getControllerManager().get(),
+                [this](int page) {
+                    m_pGameflorrSetup->setProperty("waitingForPreferences", true);
+                    m_pGameflorrSetup->hide();
+                    if (page == 0)
+                        m_pPrefDlg->showSoundHardwarePage();
+                    else
+                        m_pPrefDlg->showControllersPage();
+                    slotOptionsPreferences();
+                });
+        connect(m_pPrefDlg, &QDialog::finished, m_pGameflorrSetup, [this] {
+            if (m_pGameflorrSetup &&
+                    m_pGameflorrSetup->property("waitingForPreferences")
+                            .toBool()) {
+                m_pGameflorrSetup->setProperty("waitingForPreferences", false);
+                m_pGameflorrSetup->show();
+                m_pGameflorrSetup->raise();
+            }
+        });
+    }
+    m_pGameflorrSetup->show();
+    m_pGameflorrSetup->raise();
+    m_pGameflorrSetup->activateWindow();
+}
+
+void MixxxMainWindow::slotGameflorrRequests() {
+    const QSize previousSize = size();
+    if (!m_pGameflorrRequests) {
+        m_pGameflorrRequests = new QDockWidget(tr("Demandes Gameflorr"), this);
+        m_pGameflorrRequests->setObjectName(QStringLiteral("GameflorrRequestsDock"));
+        m_pGameflorrRequests->setStyleSheet(
+                QStringLiteral("QDockWidget { color: #ededed; }"));
+        m_pGameflorrRequests->setWidget(new gameflorr::RequestsPanel(
+                m_pGameflorrRequests, m_pCoreServices->getLibrary().get()));
+        addDockWidget(Qt::BottomDockWidgetArea, m_pGameflorrRequests);
+    }
+    m_pGameflorrRequests->show();
+    if (!m_pGameflorrRequests->isFloating() &&
+            minimumSizeHint().height() > screen()->availableGeometry().height()) {
+        m_pGameflorrRequests->setFloating(true);
+        const QRect available = screen()->availableGeometry();
+        m_pGameflorrRequests->resize(qMin(900, available.width()), 320);
+        m_pGameflorrRequests->move(
+                available.left() + (available.width() - m_pGameflorrRequests->width()) / 2,
+                qMax(available.top(), available.bottom() - m_pGameflorrRequests->height() + 1));
+        resize(previousSize);
+    }
+    m_pGameflorrRequests->raise();
 }
 
 void MixxxMainWindow::slotOptionsPreferences() {
