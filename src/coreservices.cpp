@@ -1,10 +1,19 @@
 #include "coreservices.h"
 
 #include <QApplication>
+#include <QDateTime>
+#include <QDir>
 #include <QFileDialog>
+#include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QProcess>
 #include <QProcessEnvironment>
+#include <QSaveFile>
 #include <QStandardPaths>
+#include <QTimer>
+#include <QUuid>
 #include <QtGlobal>
 #include <gsl/pointers>
 
@@ -12,12 +21,14 @@
 #include "broadcast/broadcastmanager.h"
 #endif
 #include "control/controlindicatortimer.h"
+#include "control/controlobject.h"
 #include "controllers/controllermanager.h"
 #include "controllers/keyboard/keyboardeventfilter.h"
 #include "controllers/scripting/controllerscriptenginebase.h"
 #include "database/mixxxdb.h"
 #include "effects/effectsmanager.h"
 #include "engine/enginemixer.h"
+#include "engine/enginexfader.h"
 #ifdef __RUBBERBAND__
 #include "engine/bufferscalers/rubberbandworkerpool.h"
 #endif
@@ -28,10 +39,12 @@
 #include "library/overviewcache.h"
 #include "library/trackcollection.h"
 #include "library/trackcollectionmanager.h"
+#include "mixer/basetrackplayer.h"
 #include "mixer/playerinfo.h"
 #include "mixer/playermanager.h"
 #include "moc_coreservices.cpp"
 #include "preferences/dialog/dlgpreferences.h"
+#include "preferences/gameflorrsettings.h"
 #include "preferences/settingsmanager.h"
 #ifdef __MODPLUG__
 #include "preferences/dialog/dlgprefmodplug.h"
@@ -52,10 +65,12 @@
 #endif
 #include "soundio/soundmanager.h"
 #include "sources/soundsourceproxy.h"
+#include "track/track.h"
 #include "util/clipboard.h"
 #include "util/db/dbconnectionpooled.h"
 #include "util/font.h"
 #include "util/logger.h"
+#include "util/parented_ptr.h"
 #include "util/screensavermanager.h"
 #include "util/statsmanager.h"
 #include "util/time.h"
@@ -91,6 +106,84 @@ const mixxx::Logger kLogger("CoreServices");
 constexpr int kMicrophoneCount = 4;
 constexpr int kAuxiliaryCount = 4;
 constexpr int kSamplerCount = 4;
+
+void startGameflorrSnapshot(PlayerManager* playerManager, UserSettingsPointer settings) {
+    const QString path = gameflorrStatePath();
+    const bool enabledByEnvironment = !qEnvironmentVariableIsEmpty("GAMEFLORR_MIXXX_STATE_PATH");
+    const QString sessionId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    auto timer = make_parented<QTimer>(playerManager);
+    QObject::connect(timer.get(), &QTimer::timeout, playerManager, [playerManager, settings, path, sessionId, enabledByEnvironment]() {
+        if (!enabledByEnvironment && !settings->getValue(ConfigKey("[Gameflorr]", "enabled"), false)) {
+            return;
+        }
+        const QFileInfo stateFile(path);
+        if (!stateFile.isAbsolute() || !stateFile.absoluteDir().mkpath(QStringLiteral("."))) {
+            return;
+        }
+        QJsonArray decks;
+        int onAirDeck = 0;
+        int onAirCount = 0;
+        CSAMPLE_GAIN leftGain, rightGain;
+        const QString xfaderGroup = QString::fromLatin1(EngineXfader::kXfaderConfigKey);
+        EngineXfader::getXfadeGains(
+                ControlObject::get(ConfigKey("[Master]", "crossfader")),
+                ControlObject::get(ConfigKey(xfaderGroup, "xFaderCurve")),
+                ControlObject::get(ConfigKey(xfaderGroup, "xFaderCalibration")),
+                ControlObject::get(ConfigKey(xfaderGroup, "xFaderMode")),
+                ControlObject::get(ConfigKey(xfaderGroup, "xFaderReverse")) > 0.0,
+                &leftGain,
+                &rightGain);
+        for (int i = 0; i < playerManager->numberOfDecks(); ++i) {
+            const auto* player = playerManager->getDeckBase(i);
+            const auto track = player ? player->getLoadedTrack() : TrackPointer();
+            if (!track) {
+                continue;
+            }
+            const QString group = PlayerManager::groupForDeck(i);
+            const bool playing = ControlObject::get(ConfigKey(group, "play")) > 0.0;
+            const double orientation = ControlObject::get(ConfigKey(group, "orientation"));
+            const double crossfaderGain = orientation == 0.0 ? leftGain : orientation == 2.0 ? rightGain : 1.0;
+            const bool onAir = playing &&
+                    ControlObject::get(ConfigKey(group, "main_mix")) > 0.0 &&
+                    ControlObject::get(ConfigKey(group, "mute")) == 0.0 &&
+                    ControlObject::get(ConfigKey(group, "passthrough")) == 0.0 &&
+                    ControlObject::get(ConfigKey(group, "volume")) * crossfaderGain > 0.001;
+            if (onAir) {
+                onAirDeck = i + 1;
+                ++onAirCount;
+            }
+            const double bpm = ControlObject::get(ConfigKey(group, "bpm"));
+            decks.append(QJsonObject{
+                    {QStringLiteral("deck"), i + 1},
+                    {QStringLiteral("playing"), playing},
+                    {QStringLiteral("onAir"), onAir},
+                    {QStringLiteral("title"), track->getTitle()},
+                    {QStringLiteral("artist"), track->getArtist()},
+                    {QStringLiteral("bpm"), bpm},
+                    {QStringLiteral("durationMs"), track->getDuration() * 1000.0},
+                    {QStringLiteral("position"), ControlObject::get(ConfigKey(group, "playposition"))},
+            });
+        }
+        const QJsonObject snapshot{
+                {QStringLiteral("version"), 2},
+                {QStringLiteral("sessionId"), sessionId},
+                {QStringLiteral("updatedAt"), static_cast<double>(QDateTime::currentMSecsSinceEpoch())},
+                {QStringLiteral("singleOnAirDeck"), onAirCount == 1 ? onAirDeck : 0},
+                {QStringLiteral("decks"), decks},
+        };
+        QSaveFile file(path);
+        if (!file.open(QIODevice::WriteOnly)) {
+            return;
+        }
+        if (!file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner)) {
+            file.cancelWriting();
+            return;
+        }
+        file.write(QJsonDocument(snapshot).toJson(QJsonDocument::Compact));
+        file.commit();
+    });
+    timer->start(1000);
+}
 
 #define CLEAR_AND_CHECK_DELETED(x) clearHelper(x, #x);
 
@@ -790,6 +883,8 @@ void CoreServices::initialize(QApplication* pApp) {
             m_pPlayerManager->slotLoadToDeck(musicFiles.at(i), i + 1);
         }
     }
+
+    startGameflorrSnapshot(m_pPlayerManager.get(), getSettings());
 
     m_isInitialized = true;
 

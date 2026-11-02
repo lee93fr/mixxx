@@ -6041,6 +6041,26 @@ Appliquer les paramètres et continuer ?</translation>
         <source>Library and Skin</source>
         <translation>Bibliothèque et Thème</translation>
     </message>
+    <message>
+        <source>Gameflorr (experimental)</source>
+        <translation>Gameflorr (expérimental)</translation>
+    </message>
+    <message>
+        <source>Share the current track with the local Gameflorr Agent</source>
+        <translation>Partager le titre en cours avec l’agent Gameflorr local</translation>
+    </message>
+    <message>
+        <source>Apply to enable sharing. GAMEFLORR_MIXXX_STATE_PATH overrides this setting when set before starting Mixxx.</source>
+        <translation>Cliquez sur Appliquer pour activer le partage. GAMEFLORR_MIXXX_STATE_PATH impose ce réglage si cette variable est définie avant le lancement de Mixxx.</translation>
+    </message>
+    <message>
+        <source>Select Mixxx in the Gameflorr Agent settings. Only a single deck routed to the main mix is published. During transitions, the last published track remains displayed. External hardware mixing is not detected.</source>
+        <translation>Sélectionnez Mixxx dans les réglages de l’agent Gameflorr. Le titre est envoyé lorsqu’une seule platine alimente le mix principal. Pendant les transitions, le dernier titre publié reste affiché. Le mixage sur une table externe n’est pas détecté.</translation>
+    </message>
+    <message>
+        <source>Gameflorr shared state file</source>
+        <translation>Fichier de partage Gameflorr</translation>
+    </message>
 </context>
 <context>
     <name>DlgPrefDeck</name>

@@ -84,3 +84,11 @@ license.
 [hardware compatibility]: https://manual.mixxx.org/2.3/en/hardware/manuals.html
 [zulip]: https://mixxx.zulipchat.com/
 [discourse]: https://mixxx.discourse.group/
+
+<!-- Texte généré par Codex (IA). -->
+
+## Gameflorr dans ce fork
+
+Le [guide Gameflorr](docs/gameflorr.md) explique comment activer le pont expérimental et charger les demandes du public.
+
+<!-- Fin du texte généré par Codex (IA). -->
