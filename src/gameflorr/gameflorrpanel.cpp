@@ -2,6 +2,9 @@
 
 #include <QCheckBox>
 #include <QCoreApplication>
+#include <QComboBox>
+#include <QDialog>
+#include <QFormLayout>
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
@@ -89,6 +92,336 @@ QString stageText(const QString& stage) {
     return text("À vérifier dans l’agent");
 }
 } // namespace
+
+namespace {
+QString settingsBridgePath(const QString& name) {
+    return QFileInfo(gameflorrStatePath()).absoluteDir().filePath(name);
+}
+
+class BridgeDialog : public QDialog {
+  public:
+    explicit BridgeDialog(QWidget* parent)
+            : QDialog(parent) {
+        setAttribute(Qt::WA_DeleteOnClose);
+        applyDarkPalette(this);
+        m_layout = new QVBoxLayout(this);
+        m_status = label({}, m_layout);
+        auto* timer = new QTimer(this);
+        QObject::connect(timer, &QTimer::timeout, this, [this] { refresh(); });
+        timer->start(500);
+    }
+
+    ~BridgeDialog() override {
+        removePendingCommand();
+    }
+
+  protected:
+    void refresh() {
+        QFile file(settingsBridgePath(QStringLiteral("gameflorr-settings.json")));
+        m_snapshot = {};
+        if (file.open(QIODevice::ReadOnly) && file.size() <= 64 * 1024) {
+            const auto candidate = QJsonDocument::fromJson(file.readAll()).object();
+            const auto updated = candidate.value(QStringLiteral("updatedAt")).toDouble();
+            const auto now = QDateTime::currentMSecsSinceEpoch();
+            if (candidate.value(QStringLiteral("version")).toInt() == 1 &&
+                    candidate.value(QStringLiteral("online")).toBool() &&
+                    !candidate.value(QStringLiteral("sessionId")).toString().isEmpty() &&
+                    updated > 0 && now - updated <= 5000 && updated <= now + 2000) {
+                m_snapshot = candidate;
+            }
+        }
+        if (!m_pending.isEmpty()) {
+            const auto result = m_snapshot.value(QStringLiteral("lastCommand")).toObject();
+            if (result.value(QStringLiteral("id")).toString() == m_pending) {
+                m_status->setText(result.value(QStringLiteral("message")).toString());
+                m_pending.clear();
+                commandFinished(result.value(QStringLiteral("ok")).toBool());
+            } else if (QDateTime::currentMSecsSinceEpoch() - m_sentAt > 15000) {
+                removePendingCommand();
+                m_pending.clear();
+                m_status->setText(text("Aucune réponse. Vérifiez que l’agent est ouvert."));
+            }
+        }
+        if (m_snapshot.isEmpty()) {
+            m_status->setText(
+                    text("Ouvrez Gameflorr Agent sur cet ordinateur pour régler les connexions."));
+        } else if (!m_pending.isEmpty()) {
+            m_status->setText(text("Commande en cours…"));
+        } else if (m_status->text().isEmpty() || m_wasOffline) {
+            m_status->setText(
+                    text("Agent disponible. Les clés déjà enregistrées sont conservées si les "
+                         "champs restent vides."));
+        }
+        m_wasOffline = m_snapshot.isEmpty();
+        updateState();
+    }
+
+    bool available() const {
+        return !m_snapshot.isEmpty() && m_pending.isEmpty() &&
+                !m_snapshot.value(QStringLiteral("busy")).toBool();
+    }
+
+    void send(const QString& action, QJsonObject payload = {}) {
+        if (!available()) {
+            return;
+        }
+        const auto path = settingsBridgePath(QStringLiteral("gameflorr-settings-command.json"));
+        if (QFileInfo::exists(path)) {
+            m_status->setText(text("Une autre commande est en cours. Réessayez dans un instant."));
+            return;
+        }
+        m_pending = QUuid::createUuid().toString(QUuid::WithoutBraces);
+        m_sentAt = QDateTime::currentMSecsSinceEpoch();
+        payload.insert(QStringLiteral("version"), 1);
+        payload.insert(QStringLiteral("id"), m_pending);
+        payload.insert(QStringLiteral("sessionId"), m_snapshot.value(QStringLiteral("sessionId")));
+        payload.insert(QStringLiteral("createdAt"), m_sentAt);
+        payload.insert(QStringLiteral("action"), action);
+        QSaveFile file(path);
+        const auto bytes = QJsonDocument(payload).toJson(QJsonDocument::Compact);
+        if (!file.open(QIODevice::WriteOnly)) {
+            m_pending.clear();
+            m_status->setText(text("Impossible d’écrire les réglages pour l’agent."));
+            return;
+        }
+        if (!file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner) ||
+                file.write(bytes) != bytes.size() || !file.commit()) {
+            m_pending.clear();
+            m_status->setText(text("Impossible de transmettre les réglages privés."));
+            return;
+        }
+        refresh();
+    }
+
+    virtual void updateState() = 0;
+    virtual void commandFinished(bool) {
+    }
+    QVBoxLayout* m_layout;
+    QLabel* m_status;
+    QJsonObject m_snapshot;
+
+  private:
+    void removePendingCommand() {
+        if (m_pending.isEmpty()) {
+            return;
+        }
+        const auto path = settingsBridgePath(QStringLiteral("gameflorr-settings-command.json"));
+        QFile file(path);
+        if (file.open(QIODevice::ReadOnly) && file.size() <= 32 * 1024 &&
+                QJsonDocument::fromJson(file.readAll())
+                                .object()
+                                .value(QStringLiteral("id"))
+                                .toString() == m_pending) {
+            file.close();
+            QFile::remove(path);
+        }
+    }
+    QString m_pending;
+    qint64 m_sentAt = 0;
+    bool m_wasOffline = true;
+};
+
+class SettingsDialog : public BridgeDialog {
+  public:
+    SettingsDialog(QWidget* parent,
+            UserSettingsPointer settings,
+            std::function<void(bool)> setScreenButtonVisible)
+            : BridgeDialog(parent) {
+        setWindowTitle(text("Gameflorr · Paramètres et clés API"));
+        setObjectName(QStringLiteral("GameflorrSettings"));
+        setMinimumWidth(610);
+        auto* form = new QFormLayout;
+        m_layout->addLayout(form);
+        auto addField = [this, form](const QString& title, const char* name, bool secret = false) {
+            auto* field = new QLineEdit(this);
+            field->setObjectName(QString::fromLatin1(name));
+            field->setMaxLength(4096);
+            if (secret) {
+                field->setEchoMode(QLineEdit::Password);
+                field->setPlaceholderText(text("Laisser vide pour conserver la clé"));
+            }
+            form->addRow(title, field);
+            return field;
+        };
+        m_api = addField(text("API Gameflorr"), "gameflorrApiUrl");
+        m_event = addField(text("ID événement (facultatif)"), "gameflorrEventId");
+        m_key = addField(text("Clé de l’événement"), "gameflorrAgentKey", true);
+        m_musicApi = addField(text("API MusicDL"), "musicdlApiUrl");
+        m_musicKey = addField(text("Jeton MusicDL"), "musicdlApiToken", true);
+        m_credentials = label({}, m_layout);
+        auto* visibility =
+                new QCheckBox(text("Afficher le bouton « Écran Gameflorr » dans le panneau"));
+        visibility->setObjectName(QStringLiteral("showGameflorrScreenButton"));
+        visibility->setChecked(
+                settings->getValue(ConfigKey("[Gameflorr]", "showScreenButton"), true));
+        m_layout->addWidget(visibility);
+        QObject::connect(visibility,
+                &QCheckBox::toggled,
+                this,
+                [settings, setScreenButtonVisible](bool enabled) {
+                    settings->setValue(ConfigKey("[Gameflorr]", "showScreenButton"), enabled);
+                    settings->save();
+                    setScreenButtonVisible(enabled);
+                });
+        label(text("Les clés restent dans la configuration privée de l’agent. "
+                   "Enregistrer démarre ou reconnecte l’agent en mode Mixxx. "
+                   "Les tests utilisent les champs saisis sans les enregistrer."),
+                m_layout);
+        auto* actions = new QHBoxLayout;
+        m_layout->addLayout(actions);
+        m_testEvent = new QPushButton(text("Tester l’événement"));
+        m_testMusic = new QPushButton(text("Tester MusicDL"));
+        m_save = new QPushButton(text("Enregistrer et appliquer"));
+        m_save->setObjectName(QStringLiteral("saveGameflorrSettings"));
+        auto* close = new QPushButton(text("Fermer"));
+        for (auto* button : {m_testEvent, m_testMusic, m_save, close}) {
+            actions->addWidget(button);
+        }
+        QObject::connect(close, &QPushButton::clicked, this, &QDialog::close);
+        QObject::connect(m_testEvent, &QPushButton::clicked, this, [this] {
+            send(QStringLiteral("test-event"), {{QStringLiteral("config"), config()}});
+        });
+        QObject::connect(m_testMusic, &QPushButton::clicked, this, [this] {
+            send(QStringLiteral("test-music"), {{QStringLiteral("config"), config()}});
+        });
+        QObject::connect(m_save, &QPushButton::clicked, this, [this] {
+            m_saving = true;
+            send(QStringLiteral("save"), {{QStringLiteral("config"), config()}});
+        });
+        refresh();
+    }
+
+  private:
+    QJsonObject config() const {
+        QJsonObject result{{QStringLiteral("apiUrl"), m_api->text().trimmed()},
+                {QStringLiteral("eventId"), m_event->text().trimmed()},
+                {QStringLiteral("musicDownloadApiUrl"), m_musicApi->text().trimmed()}};
+        if (!m_key->text().isEmpty()) {
+            result.insert(QStringLiteral("agentKey"), m_key->text().trimmed());
+        }
+        if (!m_musicKey->text().isEmpty()) {
+            result.insert(QStringLiteral("musicDownloadApiToken"), m_musicKey->text().trimmed());
+        }
+        return result;
+    }
+    void updateState() override {
+        const auto cfg = m_snapshot.value(QStringLiteral("config")).toObject();
+        if (!m_initialized && !cfg.isEmpty()) {
+            m_api->setText(cfg.value(QStringLiteral("apiUrl")).toString());
+            m_event->setText(cfg.value(QStringLiteral("eventId")).toString());
+            m_musicApi->setText(cfg.value(QStringLiteral("musicDownloadApiUrl")).toString());
+            m_musicApi->setPlaceholderText(QStringLiteral("https://musicdl.leelyan.ovh/api"));
+            m_initialized = true;
+        }
+        m_credentials->setText(text("Clé événement : %1 · Jeton MusicDL : %2")
+                        .arg(cfg.value(QStringLiteral("agentKeyConfigured")).toBool()
+                                        ? text("enregistrée")
+                                        : text("à renseigner"),
+                                cfg.value(QStringLiteral("musicTokenConfigured")).toBool()
+                                        ? text("enregistré")
+                                        : text("à renseigner")));
+        for (auto* button : {m_testEvent, m_testMusic, m_save}) {
+            button->setEnabled(available());
+        }
+    }
+    void commandFinished(bool ok) override {
+        if (m_saving && ok) {
+            m_key->clear();
+            m_musicKey->clear();
+        }
+        m_saving = false;
+    }
+    QLineEdit *m_api, *m_event, *m_key, *m_musicApi, *m_musicKey;
+    QLabel* m_credentials;
+    QPushButton *m_testEvent, *m_testMusic, *m_save;
+    bool m_initialized = false;
+    bool m_saving = false;
+};
+
+class DisplayDialog : public BridgeDialog {
+  public:
+    explicit DisplayDialog(QWidget* parent)
+            : BridgeDialog(parent) {
+        setWindowTitle(text("Écran public Gameflorr"));
+        setObjectName(QStringLiteral("GameflorrDisplay"));
+        setMinimumWidth(540);
+        m_current = label(text("Actualisez pour consulter l’écran de l’événement."), m_layout);
+        m_modes = new QComboBox;
+        m_modes->setObjectName(QStringLiteral("gameflorrDisplayMode"));
+        const QList<QPair<const char*, const char*>> modes{{"NOW_PLAYING", "Titre en cours"},
+                {"VOTE", "Votes musicaux"},
+                {"REACTIONS", "Réactions"},
+                {"DEDICATION", "Dédicaces"},
+                {"PHOTOS", "Photos"},
+                {"WALL", "Mur de photos"},
+                {"PHOTO_PODIUM", "Podium photos"},
+                {"LEADERBOARD", "Classement"},
+                {"SUMMARY", "Résumé"},
+                {"PROGRAM", "Programme"},
+                {"ROTATE", "Rotation configurée dans Gameflorr"}};
+        for (const auto& mode : modes) {
+            m_modes->addItem(text(mode.second), QString::fromLatin1(mode.first));
+        }
+        m_layout->addWidget(m_modes);
+        label(text("Appliquer change immédiatement le contenu de l’écran public. "
+                   "La rotation reprend la sélection configurée dans Gameflorr."),
+                m_layout);
+        auto* actions = new QHBoxLayout;
+        m_layout->addLayout(actions);
+        m_reload = new QPushButton(text("Actualiser"));
+        m_apply = new QPushButton(text("Appliquer à l’écran public"));
+        m_apply->setObjectName(QStringLiteral("applyGameflorrDisplay"));
+        auto* close = new QPushButton(text("Fermer"));
+        for (auto* button : {m_reload, m_apply, close}) {
+            actions->addWidget(button);
+        }
+        QObject::connect(close, &QPushButton::clicked, this, &QDialog::close);
+        QObject::connect(m_reload, &QPushButton::clicked, this, [this] {
+            send(QStringLiteral("display-refresh"));
+        });
+        QObject::connect(m_apply, &QPushButton::clicked, this, [this] {
+            send(QStringLiteral("display-set"),
+                    {{QStringLiteral("mode"), m_modes->currentData().toString()}});
+        });
+        refresh();
+        send(QStringLiteral("display-refresh"));
+    }
+
+  private:
+    void updateState() override {
+        const auto display = m_snapshot.value(QStringLiteral("display")).toObject();
+        if (!display.isEmpty()) {
+            const int index = m_modes->findData(display.value(QStringLiteral("mode")).toString());
+            const QString mode = index >= 0 ? m_modes->itemText(index)
+                                            : display.value(QStringLiteral("mode")).toString();
+            m_current->setText(text("%1 · Écran actuel : %2")
+                            .arg(display.value(QStringLiteral("eventName")).toString(), mode));
+            if (!m_initialized && index >= 0) {
+                m_modes->setCurrentIndex(index);
+                m_initialized = true;
+            }
+        }
+        const bool ready = available() && !display.isEmpty();
+        m_apply->setEnabled(ready);
+        m_modes->setEnabled(ready);
+        m_reload->setEnabled(available());
+    }
+    QLabel* m_current;
+    QComboBox* m_modes;
+    QPushButton *m_reload, *m_apply;
+    bool m_initialized = false;
+};
+} // namespace
+
+QDialog* createSettingsDialog(QWidget* parent,
+        UserSettingsPointer settings,
+        std::function<void(bool)> setScreenButtonVisible) {
+    return new SettingsDialog(parent, settings, std::move(setScreenButtonVisible));
+}
+
+QDialog* createDisplayDialog(QWidget* parent) {
+    return new DisplayDialog(parent);
+}
 
 QWizard* createSetupWizard(QWidget* parent,
         UserSettingsPointer settings,
