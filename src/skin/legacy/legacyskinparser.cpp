@@ -77,6 +77,7 @@
 #include "widget/wslidercomposed.h"
 #include "widget/wspinny.h"
 #include "widget/wspinnyglsl.h"
+#include "widget/wspinnyindicator.h"
 #include "widget/wsplitter.h"
 #include "widget/wstarrating.h"
 #include "widget/wstatuslight.h"
@@ -636,6 +637,16 @@ QList<QWidget*> LegacySkinParser::parseNode(const QDomElement& node) {
         result = wrapWidget(parseEffectButtonParameterName(node));
     } else if (nodeName == "Spinny") {
         result = wrapWidget(parseSpinny(node));
+    } else if (nodeName == "SpinnyIndicator") {
+        auto* pIndicator = new WSpinnyIndicator(m_pParent, lookupNodeGroup(node));
+        commonWidgetSetup(node, pIndicator);
+        pIndicator->setup(node, *m_pContext);
+        pIndicator->Init();
+        connect(WaveformWidgetFactory::instance(),
+                &WaveformWidgetFactory::renderSpinnies,
+                pIndicator,
+                &WSpinnyIndicator::render);
+        result = wrapWidget(pIndicator);
     } else if (nodeName == "Time") {
         result = wrapWidget(parseLabelWidget<WTime>(node));
     } else if (nodeName == "RecordingDuration") {

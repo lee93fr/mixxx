@@ -1839,6 +1839,7 @@ add_library(
   src/widget/wslidercomposed.cpp
   src/widget/wspinny.cpp
   src/widget/wspinnybase.cpp
+  src/widget/wspinnyindicator.cpp
   src/widget/wsplitter.cpp
   src/widget/wstarrating.cpp
   src/widget/wstatuslight.cpp
