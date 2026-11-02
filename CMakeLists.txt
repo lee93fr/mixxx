@@ -1278,6 +1278,8 @@ add_library(
   src/controllers/scripting/legacy/scriptconnection.cpp
   src/controllers/scripting/legacy/scriptconnectionjsproxy.cpp
   src/controllers/softtakeover.cpp
+  src/gameflorr/requestsnapshot.cpp
+  src/gameflorr/gameflorrpanel.cpp
   src/coreservices.cpp
   src/database/mixxxdb.cpp
   src/database/schemamanager.cpp
@@ -2945,6 +2947,7 @@ if(BUILD_TESTING)
     src/test/colormapperjsproxy_test.cpp
     src/test/colorpalette_test.cpp
     src/test/configobject_test.cpp
+    src/test/gameflorr_requests_test.cpp
     src/test/controller_mapping_validation_test.cpp
     src/test/controller_mapping_settings_test.cpp
     src/test/controllers/controller_columnid_regression_test.cpp

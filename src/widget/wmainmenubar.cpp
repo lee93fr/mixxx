@@ -556,6 +556,16 @@ void WMainMenuBar::initialize() {
 
     addMenu(pOptionsMenu);
 
+    auto* gameflorrMenu = new QMenu(QStringLiteral("&Gameflorr"), this);
+#ifndef __APPLE__
+    connectMenuToSlotShowMenuBar(gameflorrMenu);
+#endif
+    auto* setup = gameflorrMenu->addAction(tr("Assistant de configuration…"));
+    connect(setup, &QAction::triggered, this, &WMainMenuBar::showGameflorrSetup);
+    auto* requests = gameflorrMenu->addAction(tr("Demandes du public"));
+    connect(requests, &QAction::triggered, this, &WMainMenuBar::showGameflorrRequests);
+    addMenu(gameflorrMenu);
+
     // DEVELOPER MENU
     if (CmdlineArgs::Instance().getDeveloper()) {
         QMenu* pDeveloperMenu = new QMenu(tr("&Developer"), this);

@@ -324,6 +324,16 @@ void DlgPreferences::showSoundHardwarePage(
     }
 }
 
+void DlgPreferences::showControllersPage() {
+    for (const auto& page : std::as_const(m_allPages)) {
+        if (page.pDlg == m_pControllersDlg) {
+            switchToPage(page.pTreeItem->text(0), page.pDlg);
+            contentsTreeWidget->setCurrentItem(page.pTreeItem);
+            break;
+        }
+    }
+}
+
 void DlgPreferences::showSoundHardwareInputPage() {
     showSoundHardwarePage(mixxx::preferences::SoundHardwareTab::Input);
 }
