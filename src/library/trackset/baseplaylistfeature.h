@@ -38,6 +38,7 @@ class BasePlaylistFeature : public BaseTrackSetFeature {
     void bindSidebarWidget(WLibrarySidebar* pSidebarWidget) override;
     void selectPlaylistInSidebar(int playlistId, bool select = true);
     int getSiblingPlaylistIdOf(QModelIndex& start);
+    bool importPlaylistFile(const QString& playlistFile, const QString& playlistName = {});
 
   public slots:
     void activateChild(const QModelIndex& index) override;

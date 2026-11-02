@@ -612,6 +612,10 @@ void Library::slotCreatePlaylist() {
     m_pPlaylistFeature->slotCreatePlaylist();
 }
 
+bool Library::importPlaylistFile(const QString& playlistFile, const QString& playlistName) {
+    return m_pPlaylistFeature->importPlaylistFile(playlistFile, playlistName);
+}
+
 void Library::slotCreateCrate() {
     m_pCrateFeature->slotCreateCrate();
 }

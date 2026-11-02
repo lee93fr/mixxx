@@ -8,6 +8,7 @@
 #include <QLayout>
 #include <QOpenGLContext>
 #include <QScreen>
+#include <QTabWidget>
 #include <QUrl>
 #include <QWizard>
 
@@ -1173,13 +1174,19 @@ void MixxxMainWindow::slotGameflorrSetup() {
 void MixxxMainWindow::slotGameflorrRequests() {
     const QSize previousSize = size();
     if (!m_pGameflorrRequests) {
-        m_pGameflorrRequests = new QDockWidget(tr("Demandes Gameflorr"), this);
+        m_pGameflorrRequests = new QDockWidget(tr("Gameflorr · Demandes et MusicDL"), this);
         m_pGameflorrRequests->setObjectName(QStringLiteral("GameflorrRequestsDock"));
         m_pGameflorrRequests->setStyleSheet(
-                QStringLiteral("QDockWidget { color: #ededed; }"));
-        m_pGameflorrRequests->setWidget(new gameflorr::RequestsPanel(
-                m_pGameflorrRequests, m_pCoreServices->getLibrary().get()));
+                QStringLiteral("QDockWidget { color: #ededed; }"
+                               "QTabBar::tab { background: #30343b; color: #ededed; padding: 6px 12px; }"
+                               "QTabBar::tab:selected { background: #13658b; }"
+                               "QTabWidget::pane { border: 0; }"));
+        auto* tabs = new QTabWidget(m_pGameflorrRequests);
+        tabs->addTab(new gameflorr::RequestsPanel(tabs, m_pCoreServices->getLibrary().get()), tr("Demandes du public"));
+        tabs->addTab(new gameflorr::MusicdlPanel(tabs, m_pCoreServices->getLibrary().get()), tr("Playlists MusicDL"));
+        m_pGameflorrRequests->setWidget(tabs);
         addDockWidget(Qt::BottomDockWidgetArea, m_pGameflorrRequests);
+        resizeDocks({m_pGameflorrRequests}, {340}, Qt::Vertical);
     }
     m_pGameflorrRequests->show();
     if (!m_pGameflorrRequests->isFloating() &&
