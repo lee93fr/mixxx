@@ -11,7 +11,9 @@ vide conserve la clé existante. Les secrets ne sont pas enregistrés dans les p
 Le bouton **Écran Gameflorr…** du panneau Demandes/MusicDL ouvre le choix du contenu public.
 La case correspondante dans les paramètres le masque ou le rétablit immédiatement et mémorise
 le choix. Le menu **Gameflorr → Écran public Gameflorr…** reste disponible.
-Un changement de sélection ne diffuse rien avant le clic explicite sur **Appliquer à l’écran public**.
+Les modes sont présentés dans une grille de boutons exclusifs. Le bouton sélectionné est surligné
+et le mode réellement diffusé porte la mention **À l’écran**. Un changement de sélection ne diffuse
+rien avant le clic explicite sur **Appliquer à l’écran public**.
 La rotation réutilise sa configuration Gameflorr existante ; les jeux restent lancés depuis leur console.
 
 Le pont local de paramètres est fourni par la version Electron de Gameflorr Agent et nécessite sa

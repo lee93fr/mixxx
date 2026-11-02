@@ -1,14 +1,15 @@
 #include "gameflorr/gameflorrpanel.h"
 
+#include <QButtonGroup>
 #include <QCheckBox>
 #include <QCoreApplication>
-#include <QComboBox>
-#include <QDialog>
-#include <QFormLayout>
 #include <QDateTime>
+#include <QDialog>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QFormLayout>
+#include <QGridLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QJsonArray>
@@ -344,10 +345,19 @@ class DisplayDialog : public BridgeDialog {
             : BridgeDialog(parent) {
         setWindowTitle(text("Écran public Gameflorr"));
         setObjectName(QStringLiteral("GameflorrDisplay"));
-        setMinimumWidth(540);
+        setMinimumWidth(640);
         m_current = label(text("Actualisez pour consulter l’écran de l’événement."), m_layout);
-        m_modes = new QComboBox;
-        m_modes->setObjectName(QStringLiteral("gameflorrDisplayMode"));
+        m_modes = new QButtonGroup(this);
+        m_modes->setExclusive(true);
+        auto* choices = new QWidget(this);
+        choices->setObjectName(QStringLiteral("gameflorrDisplayModes"));
+        choices->setStyleSheet(QStringLiteral(
+                "QPushButton { min-height: 48px; font-weight: 600; }"
+                "QPushButton:checked { background: #13658b; border: 2px solid #59c9f5; }"
+                "QPushButton:focus { border: 2px solid #ededed; }"));
+        auto* grid = new QGridLayout(choices);
+        grid->setContentsMargins(0, 0, 0, 0);
+        grid->setSpacing(8);
         const QList<QPair<const char*, const char*>> modes{{"NOW_PLAYING", "Titre en cours"},
                 {"VOTE", "Votes musicaux"},
                 {"REACTIONS", "Réactions"},
@@ -358,12 +368,22 @@ class DisplayDialog : public BridgeDialog {
                 {"LEADERBOARD", "Classement"},
                 {"SUMMARY", "Résumé"},
                 {"PROGRAM", "Programme"},
-                {"ROTATE", "Rotation configurée dans Gameflorr"}};
-        for (const auto& mode : modes) {
-            m_modes->addItem(text(mode.second), QString::fromLatin1(mode.first));
+                {"ROTATE", "Rotation automatique"}};
+        for (int index = 0; index < modes.size(); ++index) {
+            const auto& mode = modes.at(index);
+            auto* button = new QPushButton(text(mode.second), choices);
+            button->setObjectName(QStringLiteral("gameflorrDisplay_%1")
+                            .arg(QString::fromLatin1(mode.first)));
+            button->setProperty("displayMode", QString::fromLatin1(mode.first));
+            button->setProperty("modeTitle", text(mode.second));
+            button->setCheckable(true);
+            button->setAutoDefault(false);
+            button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+            m_modes->addButton(button);
+            grid->addWidget(button, index / 3, index % 3, 1, index == modes.size() - 1 ? 2 : 1);
         }
-        m_layout->addWidget(m_modes);
-        label(text("Appliquer change immédiatement le contenu de l’écran public. "
+        m_layout->addWidget(choices);
+        label(text("Sélectionnez un bouton, puis appliquez pour changer l’écran public. "
                    "La rotation reprend la sélection configurée dans Gameflorr."),
                 m_layout);
         auto* actions = new QHBoxLayout;
@@ -380,9 +400,12 @@ class DisplayDialog : public BridgeDialog {
             send(QStringLiteral("display-refresh"));
         });
         QObject::connect(m_apply, &QPushButton::clicked, this, [this] {
-            send(QStringLiteral("display-set"),
-                    {{QStringLiteral("mode"), m_modes->currentData().toString()}});
+            if (const auto* selected = m_modes->checkedButton()) {
+                send(QStringLiteral("display-set"),
+                        {{QStringLiteral("mode"), selected->property("displayMode").toString()}});
+            }
         });
+        QObject::connect(m_modes, &QButtonGroup::buttonToggled, this, [this] { updateState(); });
         refresh();
         send(QStringLiteral("display-refresh"));
     }
@@ -390,24 +413,34 @@ class DisplayDialog : public BridgeDialog {
   private:
     void updateState() override {
         const auto display = m_snapshot.value(QStringLiteral("display")).toObject();
-        if (!display.isEmpty()) {
-            const int index = m_modes->findData(display.value(QStringLiteral("mode")).toString());
-            const QString mode = index >= 0 ? m_modes->itemText(index)
-                                            : display.value(QStringLiteral("mode")).toString();
-            m_current->setText(text("%1 · Écran actuel : %2")
-                            .arg(display.value(QStringLiteral("eventName")).toString(), mode));
-            if (!m_initialized && index >= 0) {
-                m_modes->setCurrentIndex(index);
-                m_initialized = true;
+        const QString currentMode = display.value(QStringLiteral("mode")).toString();
+        QString currentTitle = currentMode;
+        const bool ready = available() && !display.isEmpty();
+        for (auto* button : m_modes->buttons()) {
+            const QString title = button->property("modeTitle").toString();
+            const bool active = !display.isEmpty() &&
+                    button->property("displayMode").toString() == currentMode;
+            button->setText(active ? text("%1\n● À l’écran").arg(title) : title);
+            button->setAccessibleName(active ? text("%1, à l’écran").arg(title) : title);
+            button->setEnabled(ready);
+            if (active) {
+                currentTitle = title;
+                if (!m_initialized) {
+                    m_initialized = true;
+                    const QSignalBlocker blocker(m_modes);
+                    button->setChecked(true);
+                }
             }
         }
-        const bool ready = available() && !display.isEmpty();
-        m_apply->setEnabled(ready);
-        m_modes->setEnabled(ready);
+        if (!display.isEmpty()) {
+            m_current->setText(text("%1 · Écran actuel : %2")
+                            .arg(display.value(QStringLiteral("eventName")).toString(), currentTitle));
+        }
+        m_apply->setEnabled(ready && m_modes->checkedButton());
         m_reload->setEnabled(available());
     }
     QLabel* m_current;
-    QComboBox* m_modes;
+    QButtonGroup* m_modes;
     QPushButton *m_reload, *m_apply;
     bool m_initialized = false;
 };
