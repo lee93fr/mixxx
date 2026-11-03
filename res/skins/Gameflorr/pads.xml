@@ -1,0 +1,545 @@
+<!DOCTYPE template>
+<!-- AI-generated text begins. Gameflorr performance controls. AI-generated text ends. -->
+<Template>
+  <WidgetGroup>
+    <Layout>vertical</Layout>
+    <SizePolicy>me,min</SizePolicy>
+    <Children>
+      <WidgetGroup>
+        <Layout>vertical</Layout>
+        <SizePolicy>me,min</SizePolicy>
+        <Connection>
+          <ConfigKey><Variable name="group"/>,pad_mode</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>0</IsEqual>
+          </Transform>
+        </Connection>
+        <Children>
+          <WidgetGroup>
+            <ObjectName>GameflorrPads</ObjectName>
+            <Layout>horizontal</Layout>
+            <Children>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">1</SetVariable>
+                <SetVariable name="mode">0</SetVariable>
+                <SetVariable name="text">1</SetVariable>
+                <SetVariable name="tip">Points de repère ; clic droit pour effacer.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">2</SetVariable>
+                <SetVariable name="mode">0</SetVariable>
+                <SetVariable name="text">2</SetVariable>
+                <SetVariable name="tip">Points de repère ; clic droit pour effacer.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">3</SetVariable>
+                <SetVariable name="mode">0</SetVariable>
+                <SetVariable name="text">3</SetVariable>
+                <SetVariable name="tip">Points de repère ; clic droit pour effacer.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">4</SetVariable>
+                <SetVariable name="mode">0</SetVariable>
+                <SetVariable name="text">4</SetVariable>
+                <SetVariable name="tip">Points de repère ; clic droit pour effacer.</SetVariable>
+              </Template>
+            </Children>
+          </WidgetGroup>
+          <WidgetGroup>
+            <ObjectName>GameflorrPads</ObjectName>
+            <Layout>horizontal</Layout>
+            <Children>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">5</SetVariable>
+                <SetVariable name="mode">0</SetVariable>
+                <SetVariable name="text">5</SetVariable>
+                <SetVariable name="tip">Points de repère ; clic droit pour effacer.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">6</SetVariable>
+                <SetVariable name="mode">0</SetVariable>
+                <SetVariable name="text">6</SetVariable>
+                <SetVariable name="tip">Points de repère ; clic droit pour effacer.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">7</SetVariable>
+                <SetVariable name="mode">0</SetVariable>
+                <SetVariable name="text">7</SetVariable>
+                <SetVariable name="tip">Points de repère ; clic droit pour effacer.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">8</SetVariable>
+                <SetVariable name="mode">0</SetVariable>
+                <SetVariable name="text">8</SetVariable>
+                <SetVariable name="tip">Points de repère ; clic droit pour effacer.</SetVariable>
+              </Template>
+            </Children>
+          </WidgetGroup>
+        </Children>
+      </WidgetGroup>
+      <WidgetGroup>
+        <Layout>vertical</Layout>
+        <SizePolicy>me,min</SizePolicy>
+        <Connection>
+          <ConfigKey><Variable name="group"/>,pad_mode</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>1</IsEqual>
+          </Transform>
+        </Connection>
+        <Children>
+          <WidgetGroup>
+            <ObjectName>GameflorrPads</ObjectName>
+            <Layout>horizontal</Layout>
+            <Children>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">1</SetVariable>
+                <SetVariable name="mode">1</SetVariable>
+                <SetVariable name="text">⅛</SetVariable>
+                <SetVariable name="tip">Maintenir une boucle momentanée ; relâcher pour reprendre le fil.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">2</SetVariable>
+                <SetVariable name="mode">1</SetVariable>
+                <SetVariable name="text">¼</SetVariable>
+                <SetVariable name="tip">Maintenir une boucle momentanée ; relâcher pour reprendre le fil.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">3</SetVariable>
+                <SetVariable name="mode">1</SetVariable>
+                <SetVariable name="text">½</SetVariable>
+                <SetVariable name="tip">Maintenir une boucle momentanée ; relâcher pour reprendre le fil.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">4</SetVariable>
+                <SetVariable name="mode">1</SetVariable>
+                <SetVariable name="text">1</SetVariable>
+                <SetVariable name="tip">Maintenir une boucle momentanée ; relâcher pour reprendre le fil.</SetVariable>
+              </Template>
+            </Children>
+          </WidgetGroup>
+          <WidgetGroup>
+            <ObjectName>GameflorrPads</ObjectName>
+            <Layout>horizontal</Layout>
+            <Children>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">5</SetVariable>
+                <SetVariable name="mode">1</SetVariable>
+                <SetVariable name="text">2</SetVariable>
+                <SetVariable name="tip">Maintenir une boucle momentanée ; relâcher pour reprendre le fil.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">6</SetVariable>
+                <SetVariable name="mode">1</SetVariable>
+                <SetVariable name="text">4</SetVariable>
+                <SetVariable name="tip">Maintenir une boucle momentanée ; relâcher pour reprendre le fil.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">7</SetVariable>
+                <SetVariable name="mode">1</SetVariable>
+                <SetVariable name="text">8</SetVariable>
+                <SetVariable name="tip">Maintenir une boucle momentanée ; relâcher pour reprendre le fil.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">8</SetVariable>
+                <SetVariable name="mode">1</SetVariable>
+                <SetVariable name="text">16</SetVariable>
+                <SetVariable name="tip">Maintenir une boucle momentanée ; relâcher pour reprendre le fil.</SetVariable>
+              </Template>
+            </Children>
+          </WidgetGroup>
+        </Children>
+      </WidgetGroup>
+      <WidgetGroup>
+        <Layout>vertical</Layout>
+        <SizePolicy>me,min</SizePolicy>
+        <Connection>
+          <ConfigKey><Variable name="group"/>,pad_mode</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>2</IsEqual>
+          </Transform>
+        </Connection>
+        <Children>
+          <WidgetGroup>
+            <ObjectName>GameflorrPads</ObjectName>
+            <Layout>horizontal</Layout>
+            <Children>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">1</SetVariable>
+                <SetVariable name="mode">2</SetVariable>
+                <SetVariable name="text">1</SetVariable>
+                <SetVariable name="tip">Huit tranches d’un temps ; maintien pour répéter, relâchement pour reprendre.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">2</SetVariable>
+                <SetVariable name="mode">2</SetVariable>
+                <SetVariable name="text">2</SetVariable>
+                <SetVariable name="tip">Huit tranches d’un temps ; maintien pour répéter, relâchement pour reprendre.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">3</SetVariable>
+                <SetVariable name="mode">2</SetVariable>
+                <SetVariable name="text">3</SetVariable>
+                <SetVariable name="tip">Huit tranches d’un temps ; maintien pour répéter, relâchement pour reprendre.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">4</SetVariable>
+                <SetVariable name="mode">2</SetVariable>
+                <SetVariable name="text">4</SetVariable>
+                <SetVariable name="tip">Huit tranches d’un temps ; maintien pour répéter, relâchement pour reprendre.</SetVariable>
+              </Template>
+            </Children>
+          </WidgetGroup>
+          <WidgetGroup>
+            <ObjectName>GameflorrPads</ObjectName>
+            <Layout>horizontal</Layout>
+            <Children>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">5</SetVariable>
+                <SetVariable name="mode">2</SetVariable>
+                <SetVariable name="text">5</SetVariable>
+                <SetVariable name="tip">Huit tranches d’un temps ; maintien pour répéter, relâchement pour reprendre.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">6</SetVariable>
+                <SetVariable name="mode">2</SetVariable>
+                <SetVariable name="text">6</SetVariable>
+                <SetVariable name="tip">Huit tranches d’un temps ; maintien pour répéter, relâchement pour reprendre.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">7</SetVariable>
+                <SetVariable name="mode">2</SetVariable>
+                <SetVariable name="text">7</SetVariable>
+                <SetVariable name="tip">Huit tranches d’un temps ; maintien pour répéter, relâchement pour reprendre.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">8</SetVariable>
+                <SetVariable name="mode">2</SetVariable>
+                <SetVariable name="text">8</SetVariable>
+                <SetVariable name="tip">Huit tranches d’un temps ; maintien pour répéter, relâchement pour reprendre.</SetVariable>
+              </Template>
+            </Children>
+          </WidgetGroup>
+          <Label>
+            <ObjectName>GameflorrPadHint</ObjectName>
+            <Size>-1me,16f</Size>
+            <Text>Vérifier la grille et la position</Text>
+            <Connection>
+              <ConfigKey><Variable name="group"/>,slicer_ready</ConfigKey>
+              <BindProperty>visible</BindProperty>
+              <Transform>
+                <Not/>
+              </Transform>
+            </Connection>
+          </Label>
+        </Children>
+      </WidgetGroup>
+      <WidgetGroup>
+        <Layout>vertical</Layout>
+        <SizePolicy>me,min</SizePolicy>
+        <Connection>
+          <ConfigKey><Variable name="group"/>,pad_mode</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>3</IsEqual>
+          </Transform>
+        </Connection>
+        <Children>
+          <WidgetGroup>
+            <ObjectName>GameflorrPads</ObjectName>
+            <Layout>horizontal</Layout>
+            <Children>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">1</SetVariable>
+                <SetVariable name="mode">3</SetVariable>
+                <SetVariable name="text">S1</SetVariable>
+                <SetVariable name="tip">Déclencher les samples 1–8 ; clic droit pour arrêter.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">2</SetVariable>
+                <SetVariable name="mode">3</SetVariable>
+                <SetVariable name="text">S2</SetVariable>
+                <SetVariable name="tip">Déclencher les samples 1–8 ; clic droit pour arrêter.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">3</SetVariable>
+                <SetVariable name="mode">3</SetVariable>
+                <SetVariable name="text">S3</SetVariable>
+                <SetVariable name="tip">Déclencher les samples 1–8 ; clic droit pour arrêter.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">4</SetVariable>
+                <SetVariable name="mode">3</SetVariable>
+                <SetVariable name="text">S4</SetVariable>
+                <SetVariable name="tip">Déclencher les samples 1–8 ; clic droit pour arrêter.</SetVariable>
+              </Template>
+            </Children>
+          </WidgetGroup>
+          <WidgetGroup>
+            <ObjectName>GameflorrPads</ObjectName>
+            <Layout>horizontal</Layout>
+            <Children>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">5</SetVariable>
+                <SetVariable name="mode">3</SetVariable>
+                <SetVariable name="text">S5</SetVariable>
+                <SetVariable name="tip">Déclencher les samples 1–8 ; clic droit pour arrêter.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">6</SetVariable>
+                <SetVariable name="mode">3</SetVariable>
+                <SetVariable name="text">S6</SetVariable>
+                <SetVariable name="tip">Déclencher les samples 1–8 ; clic droit pour arrêter.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">7</SetVariable>
+                <SetVariable name="mode">3</SetVariable>
+                <SetVariable name="text">S7</SetVariable>
+                <SetVariable name="tip">Déclencher les samples 1–8 ; clic droit pour arrêter.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">8</SetVariable>
+                <SetVariable name="mode">3</SetVariable>
+                <SetVariable name="text">S8</SetVariable>
+                <SetVariable name="tip">Déclencher les samples 1–8 ; clic droit pour arrêter.</SetVariable>
+              </Template>
+            </Children>
+          </WidgetGroup>
+        </Children>
+      </WidgetGroup>
+      <WidgetGroup>
+        <Layout>vertical</Layout>
+        <SizePolicy>me,min</SizePolicy>
+        <Connection>
+          <ConfigKey><Variable name="group"/>,pad_mode</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>4</IsEqual>
+          </Transform>
+        </Connection>
+        <Children>
+          <WidgetGroup>
+            <ObjectName>GameflorrPads</ObjectName>
+            <Layout>horizontal</Layout>
+            <Children>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">1</SetVariable>
+                <SetVariable name="mode">4</SetVariable>
+                <SetVariable name="text">¼</SetVariable>
+                <SetVariable name="tip">Activer ou quitter les boucles quantifiées.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">2</SetVariable>
+                <SetVariable name="mode">4</SetVariable>
+                <SetVariable name="text">½</SetVariable>
+                <SetVariable name="tip">Activer ou quitter les boucles quantifiées.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">3</SetVariable>
+                <SetVariable name="mode">4</SetVariable>
+                <SetVariable name="text">1</SetVariable>
+                <SetVariable name="tip">Activer ou quitter les boucles quantifiées.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">4</SetVariable>
+                <SetVariable name="mode">4</SetVariable>
+                <SetVariable name="text">2</SetVariable>
+                <SetVariable name="tip">Activer ou quitter les boucles quantifiées.</SetVariable>
+              </Template>
+            </Children>
+          </WidgetGroup>
+          <WidgetGroup>
+            <ObjectName>GameflorrPads</ObjectName>
+            <Layout>horizontal</Layout>
+            <Children>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">5</SetVariable>
+                <SetVariable name="mode">4</SetVariable>
+                <SetVariable name="text">4</SetVariable>
+                <SetVariable name="tip">Activer ou quitter les boucles quantifiées.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">6</SetVariable>
+                <SetVariable name="mode">4</SetVariable>
+                <SetVariable name="text">8</SetVariable>
+                <SetVariable name="tip">Activer ou quitter les boucles quantifiées.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">7</SetVariable>
+                <SetVariable name="mode">4</SetVariable>
+                <SetVariable name="text">16</SetVariable>
+                <SetVariable name="tip">Activer ou quitter les boucles quantifiées.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">8</SetVariable>
+                <SetVariable name="mode">4</SetVariable>
+                <SetVariable name="text">32</SetVariable>
+                <SetVariable name="tip">Activer ou quitter les boucles quantifiées.</SetVariable>
+              </Template>
+            </Children>
+          </WidgetGroup>
+        </Children>
+      </WidgetGroup>
+      <WidgetGroup>
+        <Layout>vertical</Layout>
+        <SizePolicy>me,min</SizePolicy>
+        <Connection>
+          <ConfigKey><Variable name="group"/>,pad_mode</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>5</IsEqual>
+          </Transform>
+        </Connection>
+        <Children>
+          <WidgetGroup>
+            <ObjectName>GameflorrPads</ObjectName>
+            <Layout>horizontal</Layout>
+            <Children>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">1</SetVariable>
+                <SetVariable name="mode">5</SetVariable>
+                <SetVariable name="text">−1</SetVariable>
+                <SetVariable name="tip">Sauter en arrière ou en avant, de 1 à 8 temps.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">2</SetVariable>
+                <SetVariable name="mode">5</SetVariable>
+                <SetVariable name="text">+1</SetVariable>
+                <SetVariable name="tip">Sauter en arrière ou en avant, de 1 à 8 temps.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">3</SetVariable>
+                <SetVariable name="mode">5</SetVariable>
+                <SetVariable name="text">−2</SetVariable>
+                <SetVariable name="tip">Sauter en arrière ou en avant, de 1 à 8 temps.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">4</SetVariable>
+                <SetVariable name="mode">5</SetVariable>
+                <SetVariable name="text">+2</SetVariable>
+                <SetVariable name="tip">Sauter en arrière ou en avant, de 1 à 8 temps.</SetVariable>
+              </Template>
+            </Children>
+          </WidgetGroup>
+          <WidgetGroup>
+            <ObjectName>GameflorrPads</ObjectName>
+            <Layout>horizontal</Layout>
+            <Children>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">5</SetVariable>
+                <SetVariable name="mode">5</SetVariable>
+                <SetVariable name="text">−4</SetVariable>
+                <SetVariable name="tip">Sauter en arrière ou en avant, de 1 à 8 temps.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">6</SetVariable>
+                <SetVariable name="mode">5</SetVariable>
+                <SetVariable name="text">+4</SetVariable>
+                <SetVariable name="tip">Sauter en arrière ou en avant, de 1 à 8 temps.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">7</SetVariable>
+                <SetVariable name="mode">5</SetVariable>
+                <SetVariable name="text">−8</SetVariable>
+                <SetVariable name="tip">Sauter en arrière ou en avant, de 1 à 8 temps.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">8</SetVariable>
+                <SetVariable name="mode">5</SetVariable>
+                <SetVariable name="text">+8</SetVariable>
+                <SetVariable name="tip">Sauter en arrière ou en avant, de 1 à 8 temps.</SetVariable>
+              </Template>
+            </Children>
+          </WidgetGroup>
+        </Children>
+      </WidgetGroup>
+      <WidgetGroup>
+        <Layout>vertical</Layout>
+        <SizePolicy>me,min</SizePolicy>
+        <Connection>
+          <ConfigKey><Variable name="group"/>,pad_mode</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>6</IsEqual>
+          </Transform>
+        </Connection>
+        <Children>
+          <WidgetGroup>
+            <ObjectName>GameflorrPads</ObjectName>
+            <Layout>horizontal</Layout>
+            <Children>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">1</SetVariable>
+                <SetVariable name="mode">6</SetVariable>
+                <SetVariable name="text">1</SetVariable>
+                <SetVariable name="tip">Conserver la même zone de huit temps et jouer ses tranches.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">2</SetVariable>
+                <SetVariable name="mode">6</SetVariable>
+                <SetVariable name="text">2</SetVariable>
+                <SetVariable name="tip">Conserver la même zone de huit temps et jouer ses tranches.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">3</SetVariable>
+                <SetVariable name="mode">6</SetVariable>
+                <SetVariable name="text">3</SetVariable>
+                <SetVariable name="tip">Conserver la même zone de huit temps et jouer ses tranches.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">4</SetVariable>
+                <SetVariable name="mode">6</SetVariable>
+                <SetVariable name="text">4</SetVariable>
+                <SetVariable name="tip">Conserver la même zone de huit temps et jouer ses tranches.</SetVariable>
+              </Template>
+            </Children>
+          </WidgetGroup>
+          <WidgetGroup>
+            <ObjectName>GameflorrPads</ObjectName>
+            <Layout>horizontal</Layout>
+            <Children>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">5</SetVariable>
+                <SetVariable name="mode">6</SetVariable>
+                <SetVariable name="text">5</SetVariable>
+                <SetVariable name="tip">Conserver la même zone de huit temps et jouer ses tranches.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">6</SetVariable>
+                <SetVariable name="mode">6</SetVariable>
+                <SetVariable name="text">6</SetVariable>
+                <SetVariable name="tip">Conserver la même zone de huit temps et jouer ses tranches.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">7</SetVariable>
+                <SetVariable name="mode">6</SetVariable>
+                <SetVariable name="text">7</SetVariable>
+                <SetVariable name="tip">Conserver la même zone de huit temps et jouer ses tranches.</SetVariable>
+              </Template>
+              <Template src="skins:Gameflorr/performance_pad.xml">
+                <SetVariable name="pad">8</SetVariable>
+                <SetVariable name="mode">6</SetVariable>
+                <SetVariable name="text">8</SetVariable>
+                <SetVariable name="tip">Conserver la même zone de huit temps et jouer ses tranches.</SetVariable>
+              </Template>
+            </Children>
+          </WidgetGroup>
+          <Label>
+            <ObjectName>GameflorrPadHint</ObjectName>
+            <Size>-1me,16f</Size>
+            <Text>Vérifier la grille et la position</Text>
+            <Connection>
+              <ConfigKey><Variable name="group"/>,slicer_ready</ConfigKey>
+              <BindProperty>visible</BindProperty>
+              <Transform>
+                <Not/>
+              </Transform>
+            </Connection>
+          </Label>
+        </Children>
+      </WidgetGroup>
+    </Children>
+  </WidgetGroup>
+</Template>

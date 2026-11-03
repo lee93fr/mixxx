@@ -58,6 +58,10 @@ Ces fichiers restent sur le compte utilisateur et ne contiennent pas les clés d
 
 L’indexation de la bibliothèque vers l’agent, les commandes de transport à distance et l’installation automatique sur Windows/macOS restent à développer. L’assistant ne valide pas automatiquement le son ou le matériel réellement branché. Le mapping RANE ONE reste expérimental, sans pilotage des moteurs ni scratch. Les tests automatisés ne remplacent pas un essai sur une installation DJ réelle, prévu après la fusion par le propriétaire du fork.
 
+<!-- AI-generated documentation begins. -->
+Le mapping [Pioneer DDJ-1000](../res/controllers/Pioneer-DDJ-1000.md) est disponible en version expérimentale : quatre platines, jogs, mixage et pads. Il cible le modèle original, sans intégration des écrans de jog ni des effets matériels. Le son et le comportement physique restent à vérifier sur le contrôleur.
+<!-- AI-generated documentation ends. -->
+
 ## Playlists MusicDL
 
 Dans **Gameflorr → Demandes du public et playlists MusicDL**, l’onglet **Playlists MusicDL** affiche les playlists personnelles et leurs dossiers. Renseignez l’URL MusicDL et un jeton lié au compte propriétaire dans les réglages de l’agent, avec la source Mixxx et le mode DJ. Le serveur doit disposer de l’API `/api/integrations/playlists`.

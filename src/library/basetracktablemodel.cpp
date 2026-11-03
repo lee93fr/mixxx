@@ -359,6 +359,10 @@ bool BaseTrackTableModel::isColumnHiddenByDefault(
             column == fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_BPM_LOCK) ||
             column == fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_BITRATE) ||
             column == fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_CHANNELS) ||
+            column == fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_LABEL) ||
+            column == fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_REMIXER) ||
+            column == fieldIndex(ColumnCache::COLUMN_TRACKLOCATIONSTABLE_FILENAME) ||
+            column == fieldIndex(ColumnCache::COLUMN_TRACKLOCATIONSTABLE_FILESIZE) ||
             column == fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_COMPOSER) ||
             column == fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_FILETYPE) ||
             column == fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_GROUPING) ||
@@ -661,6 +665,11 @@ QVariant BaseTrackTableModel::roleValue(
     // will be empty
     case Qt::DisplayRole:
         switch (field) {
+        case ColumnCache::COLUMN_TRACKLOCATIONSTABLE_FILESIZE:
+            if (rawValue.isNull()) {
+                return QVariant();
+            }
+            return QLocale().formattedDataSize(rawValue.toLongLong(), 1, QLocale::DataSizeSIFormat);
         case ColumnCache::COLUMN_LIBRARYTABLE_DURATION: {
             if (rawValue.isNull()) {
                 return QVariant();
@@ -1065,6 +1074,8 @@ Qt::ItemFlags BaseTrackTableModel::readWriteFlags(
             column == fieldIndex(ColumnCache::COLUMN_TRACKLOCATIONSTABLE_LOCATION) ||
             column == fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_REPLAYGAIN) ||
             column == fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_SAMPLERATE) ||
+            column == fieldIndex(ColumnCache::COLUMN_TRACKLOCATIONSTABLE_FILENAME) ||
+            column == fieldIndex(ColumnCache::COLUMN_TRACKLOCATIONSTABLE_FILESIZE) ||
             column == fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_WAVESUMMARYHEX)) {
         return readOnlyFlags(index);
     }

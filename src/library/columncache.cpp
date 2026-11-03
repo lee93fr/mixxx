@@ -58,6 +58,12 @@ constexpr ColumnProperties kColumnPropertiesByEnum[] = {
         DI(ColumnCache::COLUMN_LIBRARYTABLE_GENRE){&LIBRARYTABLE_GENRE,
                 QT_TRANSLATE_NOOP("BaseTrackTableModel", "Genre"),
                 kDefaultColumnWidth * 4},
+        DI(ColumnCache::COLUMN_LIBRARYTABLE_LABEL){&LIBRARYTABLE_LABEL,
+                QT_TRANSLATE_NOOP("BaseTrackTableModel", "Label"),
+                kDefaultColumnWidth * 4},
+        DI(ColumnCache::COLUMN_LIBRARYTABLE_REMIXER){&LIBRARYTABLE_REMIXER,
+                QT_TRANSLATE_NOOP("BaseTrackTableModel", "Remixer"),
+                kDefaultColumnWidth * 4},
         DI(ColumnCache::COLUMN_LIBRARYTABLE_COMPOSER){&LIBRARYTABLE_COMPOSER,
                 QT_TRANSLATE_NOOP("BaseTrackTableModel", "Composer"),
                 kDefaultColumnWidth * 4},
@@ -164,6 +170,12 @@ constexpr ColumnProperties kColumnPropertiesByEnum[] = {
         DI(ColumnCache::COLUMN_LIBRARYTABLE_LAST_PLAYED_AT){&LIBRARYTABLE_LAST_PLAYED_AT,
                 QT_TRANSLATE_NOOP("BaseTrackTableModel", "Last Played"),
                 kDefaultColumnWidth * 3},
+        DI(ColumnCache::COLUMN_TRACKLOCATIONSTABLE_FILENAME){&TRACKLOCATIONSTABLE_FILENAME,
+                QT_TRANSLATE_NOOP("BaseTrackTableModel", "Filename"),
+                kDefaultColumnWidth * 6},
+        DI(ColumnCache::COLUMN_TRACKLOCATIONSTABLE_FILESIZE){&TRACKLOCATIONSTABLE_FILESIZE,
+                QT_TRANSLATE_NOOP("BaseTrackTableModel", "Size"),
+                kDefaultColumnWidth * 2},
         DI(ColumnCache::COLUMN_TRACKLOCATIONSTABLE_LOCATION){&TRACKLOCATIONSTABLE_LOCATION,
                 QT_TRANSLATE_NOOP("BaseTrackTableModel", "Location"),
                 kDefaultColumnWidth * 6},
@@ -236,6 +248,8 @@ void ColumnCache::setColumns(QStringList columns) {
     insertColumnSortByEnum(COLUMN_LIBRARYTABLE_ALBUMARTIST, kSortNoCaseLex);
     insertColumnSortByEnum(COLUMN_LIBRARYTABLE_YEAR, kSortNoCase);
     insertColumnSortByEnum(COLUMN_LIBRARYTABLE_GENRE, kSortNoCaseLex);
+    insertColumnSortByEnum(COLUMN_LIBRARYTABLE_LABEL, kSortNoCaseLex);
+    insertColumnSortByEnum(COLUMN_LIBRARYTABLE_REMIXER, kSortNoCaseLex);
     insertColumnSortByEnum(COLUMN_LIBRARYTABLE_COMPOSER, kSortNoCaseLex);
     insertColumnSortByEnum(COLUMN_LIBRARYTABLE_GROUPING, kSortNoCaseLex);
     insertColumnSortByEnum(COLUMN_LIBRARYTABLE_TRACKNUMBER, kSortInt);
@@ -245,6 +259,8 @@ void ColumnCache::setColumns(QStringList columns) {
     insertColumnSortByEnum(COLUMN_LIBRARYTABLE_SAMPLERATE, kSortInt);
     insertColumnSortByEnum(COLUMN_LIBRARYTABLE_TIMESPLAYED, kSortInt);
 
+    insertColumnSortByEnum(COLUMN_TRACKLOCATIONSTABLE_FILENAME, kSortNoCaseLex);
+    insertColumnSortByEnum(COLUMN_TRACKLOCATIONSTABLE_FILESIZE, kSortInt);
     insertColumnSortByEnum(COLUMN_TRACKLOCATIONSTABLE_LOCATION, kSortNoCase);
 
     slotSetKeySortOrder(m_pKeyNotationCP->get());

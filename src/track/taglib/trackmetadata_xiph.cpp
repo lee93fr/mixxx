@@ -390,6 +390,14 @@ void importTrackMetadataFromTag(
         parseTrackPeak(pTrackMetadata, trackPeak, resetMissingTagMetadata);
     }
 
+    QString recordLabel;
+    if (readCommentField(tag, "LABEL", &recordLabel) || resetMissingTagMetadata) {
+        pTrackMetadata->refAlbumInfo().setRecordLabel(recordLabel);
+    }
+    QString remixer;
+    if (readCommentField(tag, "REMIXER", &remixer) || resetMissingTagMetadata) {
+        pTrackMetadata->refTrackInfo().setRemixer(remixer);
+    }
 #if defined(__EXTRA_METADATA__)
     QString albumGain;
     if (readCommentField(tag, "REPLAYGAIN_ALBUM_GAIN", &albumGain) || resetMissingTagMetadata) {
@@ -461,14 +469,6 @@ void importTrackMetadataFromTag(
     QString license;
     if (readCommentField(tag, "LICENSE", &license) || resetMissingTagMetadata) {
         pTrackMetadata->refAlbumInfo().setLicense(license);
-    }
-    QString recordLabel;
-    if (readCommentField(tag, "LABEL", &recordLabel) || resetMissingTagMetadata) {
-        pTrackMetadata->refAlbumInfo().setRecordLabel(recordLabel);
-    }
-    QString remixer;
-    if (readCommentField(tag, "REMIXER", &remixer) || resetMissingTagMetadata) {
-        pTrackMetadata->refTrackInfo().setRemixer(remixer);
     }
     QString subtitle;
     if (readCommentField(tag, "SUBTITLE", &subtitle) || resetMissingTagMetadata) {
@@ -584,6 +584,8 @@ bool exportTrackMetadataIntoTag(
     // be deleted.
     writeCommentField(pTag, "REPLAYGAIN_TRACK_PEAK", toTString(formatTrackPeak(trackMetadata)));
 
+    writeCommentField(pTag, "LABEL", toTString(trackMetadata.getAlbumInfo().getRecordLabel()));
+    writeCommentField(pTag, "REMIXER", toTString(trackMetadata.getTrackInfo().getRemixer()));
 #if defined(__EXTRA_METADATA__)
     // According to https://wiki.xiph.org/Field_names "DISCTOTAL" is
     // the proposed field name, but some applications use "TOTALDISCS".
@@ -609,8 +611,6 @@ bool exportTrackMetadataIntoTag(
     writeCommentField(pTag, "MOOD", toTString(trackMetadata.getTrackInfo().getMood()));
     writeCommentField(pTag, "COPYRIGHT", toTString(trackMetadata.getAlbumInfo().getCopyright()));
     writeCommentField(pTag, "LICENSE", toTString(trackMetadata.getAlbumInfo().getLicense()));
-    writeCommentField(pTag, "LABEL", toTString(trackMetadata.getAlbumInfo().getRecordLabel()));
-    writeCommentField(pTag, "REMIXER", toTString(trackMetadata.getTrackInfo().getRemixer()));
     writeCommentField(pTag, "SUBTITLE", toTString(trackMetadata.getTrackInfo().getSubtitle()));
     writeCommentField(pTag, "ENCODEDBY", toTString(trackMetadata.getTrackInfo().getEncoder()));
     writeCommentField(pTag, "ENCODERSETTINGS", toTString(trackMetadata.getTrackInfo().getEncoderSettings()));

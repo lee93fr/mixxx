@@ -4,10 +4,12 @@
 #include <QContextMenuEvent>
 #include <QLabel>
 #include <QPainter>
+#include <QSignalBlocker>
 #include <QStyleOptionHeader>
 #include <QTextOption>
 #include <QWidgetAction>
 
+#include "library/dao/trackschema.h"
 #include "library/trackmodel.h"
 #include "moc_wtracktableviewheader.cpp"
 #include "util/math.h"
@@ -258,8 +260,13 @@ void WTrackTableViewHeader::setModel(QAbstractItemModel* pModel) {
                     pCheckBox->toggle();
                 });
         m_menu.addAction(pAction);
-
     }
+
+    auto* firstColumnAction = m_menu.actions().value(0);
+    auto seratoAction = make_parented<QAction>(tr("Serato library columns"), &m_menu);
+    m_menu.insertAction(firstColumnAction, seratoAction);
+    m_menu.insertSeparator(firstColumnAction);
+    connect(seratoAction, &QAction::triggered, this, &WTrackTableViewHeader::applySeratoLayout);
 
     m_menu.addSeparator();
 
@@ -291,7 +298,7 @@ void WTrackTableViewHeader::saveHeaderState() {
     // Convert the QByteArray to a Base64 string and save it.
     HeaderViewState view_state(*this);
     pTrackModel->setModelSetting("header_state_pb", view_state.saveState());
-    //qDebug() << "Saving old header state:" << result << headerState;
+    // qDebug() << "Saving old header state:" << result << headerState;
 }
 
 void WTrackTableViewHeader::restoreHeaderState() {
@@ -307,7 +314,7 @@ void WTrackTableViewHeader::restoreHeaderState() {
     } else {
         // Load the previous header state (stored as serialized protobuf).
         // Decode it and restore it.
-        //qDebug() << "Restoring header state from proto" << headerStateString;
+        // qDebug() << "Restoring header state from proto" << headerStateString;
         HeaderViewState view_state(headerStateString);
         if (!view_state.healthy()) {
             loadDefaultHeaderState();
@@ -337,6 +344,87 @@ bool WTrackTableViewHeader::hasPersistedHeaderState() {
     }
     const QString headerStateString = pTrackModel->getModelSetting("header_state_pb");
     return !headerStateString.isNull();
+}
+
+void WTrackTableViewHeader::enablePerformanceLayout() {
+    if (!hasPersistedHeaderState()) {
+        applyPerformanceLayout();
+    }
+    auto* firstColumnAction = m_menu.actions().value(0);
+    auto action = make_parented<QAction>(tr("Colonnes DJ : titre, artiste, BPM, tonalité"), &m_menu);
+    m_menu.insertAction(firstColumnAction, action);
+    m_menu.insertSeparator(firstColumnAction);
+    connect(action, &QAction::triggered, this, &WTrackTableViewHeader::applyPerformanceLayout);
+}
+
+void WTrackTableViewHeader::applyPerformanceLayout() {
+    applyColumnLayout({{PLAYLISTTRACKSTABLE_POSITION, 45},
+            {LIBRARYTABLE_PREVIEW, 42},
+            {LIBRARYTABLE_TITLE, 280},
+            {LIBRARYTABLE_ARTIST, 200},
+            {LIBRARYTABLE_BPM, 75},
+            {LIBRARYTABLE_KEY, 75},
+            {LIBRARYTABLE_DURATION, 75},
+            {LIBRARYTABLE_RATING, 90},
+            {LIBRARYTABLE_GENRE, 140}});
+}
+
+void WTrackTableViewHeader::applySeratoLayout() {
+    applyColumnLayout({{PLAYLISTTRACKSTABLE_POSITION, 45},
+            {LIBRARYTABLE_PREVIEW, 42},
+            {LIBRARYTABLE_COLOR, 30},
+            {LIBRARYTABLE_TITLE, 250},
+            {LIBRARYTABLE_ARTIST, 180},
+            {LIBRARYTABLE_BPM, 70},
+            {LIBRARYTABLE_KEY, 65},
+            {LIBRARYTABLE_DURATION, 70},
+            {LIBRARYTABLE_COMMENT, 200},
+            {LIBRARYTABLE_GROUPING, 140},
+            {LIBRARYTABLE_GENRE, 120},
+            {LIBRARYTABLE_ALBUM, 180},
+            {LIBRARYTABLE_LABEL, 150},
+            {LIBRARYTABLE_REMIXER, 150},
+            {LIBRARYTABLE_COMPOSER, 150},
+            {LIBRARYTABLE_YEAR, 65},
+            {LIBRARYTABLE_TRACKNUMBER, 55},
+            {LIBRARYTABLE_RATING, 90},
+            {LIBRARYTABLE_TIMESPLAYED, 65},
+            {LIBRARYTABLE_DATETIMEADDED, 140},
+            {LIBRARYTABLE_BITRATE, 65},
+            {LIBRARYTABLE_SAMPLERATE, 85},
+            {LIBRARYTABLE_FILETYPE, 65},
+            {TRACKLOCATIONSTABLE_FILENAME, 250},
+            {TRACKLOCATIONSTABLE_FILESIZE, 90},
+            {TRACKLOCATIONSTABLE_LOCATION, 300}});
+}
+
+void WTrackTableViewHeader::applyColumnLayout(const QList<QPair<QString, int>>& columns) {
+    auto* trackModel = getTrackModel();
+    if (!trackModel || trackModel->fieldIndex(LIBRARYTABLE_TITLE) < 0) {
+        return;
+    }
+    for (int column = 0; column < count(); ++column) {
+        if (!isSectionHidden(column)) {
+            m_hiddenColumnSizes.insert(column, sectionSize(column));
+        }
+        hideSection(column);
+    }
+    int position = 0;
+    for (const auto& [field, width] : columns) {
+        const int column = trackModel->fieldIndex(field);
+        if (column < 0 || trackModel->isColumnInternal(column)) {
+            continue;
+        }
+        showSection(column);
+        m_hiddenColumnSizes.remove(column);
+        moveSection(visualIndex(column), position++);
+        resizeSection(column, width);
+    }
+    for (auto it = m_columnCheckBoxes.cbegin(); it != m_columnCheckBoxes.cend(); ++it) {
+        const QSignalBlocker blocker(it.value());
+        it.value()->setChecked(!isSectionHidden(it.key()));
+    }
+    saveHeaderState();
 }
 
 void WTrackTableViewHeader::clearActions() {

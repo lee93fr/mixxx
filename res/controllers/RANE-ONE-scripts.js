@@ -39,6 +39,10 @@ RaneOne.pot = function(status, control, group, key, invert) {
 RaneOne.init = function() {
     RaneOne.bindings = {};
     RaneOne.held = {};
+    RaneOne.modeConnections = [];
+    RaneOne.bind(0x9F, 0x32, {
+        input: function() { RaneOne.release(() => true); }
+    });
     for (let deck = 0; deck < 2; deck++) {
         const group = `[Channel${  deck + 1  }]`;
         const note = 0x90 + deck;
@@ -110,16 +114,27 @@ RaneOne.init = function() {
         RaneOne.button(pads, 0x41, group, "reloop_toggle");
         const colors = [112, 76, 67, 124, 79, 120, 123, 99];
         for (let pad = 0; pad < 8; pad++) {
-            const hotcue = new components.HotcueButton({
-                number: pad + 1,
-                group: group,
-                midi: [pads, 0x14 + pad],
-                on: colors[pad],
-                off: 0
+            const button = new components.Button({
+                group: group, inKey: `performance_pad_${pad + 1}`,
+                outKey: `performance_pad_${pad + 1}_active`,
+                midi: [pads, 0x14 + pad], on: colors[pad], off: 0
             });
-            RaneOne.bind(pads, 0x14 + pad, hotcue, true);
-            RaneOne.button(pads, 0x1C + pad, group, `hotcue_${  pad + 1  }_clear`);
+            RaneOne.bind(pads, 0x14 + pad, button, true);
+            RaneOne.button(pads, 0x1C + pad, group, `performance_pad_${pad + 1}_clear`);
         }
+        for (const entry of [[0x28, -1], [0x29, 1]]) {
+            RaneOne.bind(pads, entry[0], {
+                input: function(_channel, _control, value) {
+                    if (value) {
+                        RaneOne.release(held => held.status === pads);
+                        engine.setValue(group, "pad_mode", (engine.getValue(group, "pad_mode") + entry[1] + 7) % 7);
+                    }
+                }
+            });
+        }
+        RaneOne.modeConnections.push(engine.makeConnection(group, "pad_mode", () => {
+            RaneOne.release(held => held.status === pads);
+        }));
     }
     RaneOne.pot(0xBF, 0x08, "[Master]", "crossfader");
     RaneOne.bind(0xBF, 0x04, {
@@ -150,11 +165,19 @@ RaneOne.input = function(channel, control, value, status) {
     }
 };
 
-RaneOne.shutdown = function() {
+RaneOne.release = function(predicate) {
     Object.keys(RaneOne.held).forEach(id => {
         const held = RaneOne.held[id];
-        held.binding.component.input(held.channel, held.control, 0, held.status);
+        if (predicate(held)) {
+            delete RaneOne.held[id];
+            held.binding.component.input(held.channel, held.control, 0, held.status);
+        }
     });
+};
+
+RaneOne.shutdown = function() {
+    RaneOne.release(() => true);
+    RaneOne.modeConnections.forEach(connection => connection.disconnect());
     Object.keys(RaneOne.bindings).forEach(id => {
         const component = RaneOne.bindings[id].component;
         if (component.disconnect) {

@@ -177,6 +177,19 @@ void importTrackMetadataFromTag(
         parseTrackPeak(pTrackMetadata, trackPeak, resetMissingTagMetadata);
     }
 
+    QString recordLabel;
+    if (readItem(tag, "Label", &recordLabel) ||
+            readItem(tag, "LABEL", &recordLabel) ||
+            resetMissingTagMetadata) {
+        pTrackMetadata->refAlbumInfo().setRecordLabel(recordLabel);
+    }
+    QString remixer;
+    if (readItem(tag, "MixArtist", &remixer) ||
+            readItem(tag, "MIXARTIST", &remixer) ||
+            readItem(tag, "REMIXER", &remixer) ||
+            resetMissingTagMetadata) {
+        pTrackMetadata->refTrackInfo().setRemixer(remixer);
+    }
 #if defined(__EXTRA_METADATA__)
     QString albumGain;
     if (readItem(tag, "REPLAYGAIN_ALBUM_GAIN", &albumGain) || resetMissingTagMetadata) {
@@ -245,13 +258,6 @@ void importTrackMetadataFromTag(
             resetMissingTagMetadata) {
         pTrackMetadata->refTrackInfo().setMood(mood);
     }
-    QString remixer;
-    if (readItem(tag, "MixArtist", &remixer) ||
-            readItem(tag, "MIXARTIST", &remixer) ||
-            readItem(tag, "REMIXER", &remixer) ||
-            resetMissingTagMetadata) {
-        pTrackMetadata->refTrackInfo().setRemixer(remixer);
-    }
     QString copyright;
     if (readItem(tag, "Copyright", &copyright) ||
             readItem(tag, "COPYRIGHT", &copyright) ||
@@ -263,12 +269,6 @@ void importTrackMetadataFromTag(
             readItem(tag, "LICENSE", &license) ||
             resetMissingTagMetadata) {
         pTrackMetadata->refAlbumInfo().setLicense(license);
-    }
-    QString recordLabel;
-    if (readItem(tag, "Label", &recordLabel) ||
-            readItem(tag, "LABEL", &recordLabel) ||
-            resetMissingTagMetadata) {
-        pTrackMetadata->refAlbumInfo().setRecordLabel(recordLabel);
     }
     QString subtitle;
     if (readItem(tag, "Subtitle", &subtitle) ||
@@ -319,6 +319,8 @@ bool exportTrackMetadataIntoTag(TagLib::APE::Tag* pTag, const TrackMetadata& tra
     writeItem(pTag, "REPLAYGAIN_TRACK_GAIN", toTString(formatTrackGain(trackMetadata)));
     writeItem(pTag, "REPLAYGAIN_TRACK_PEAK", toTString(formatTrackPeak(trackMetadata)));
 
+    writeItem(pTag, "Label", toTString(trackMetadata.getAlbumInfo().getRecordLabel()));
+    writeItem(pTag, "MixArtist", toTString(trackMetadata.getTrackInfo().getRemixer()));
 #if defined(__EXTRA_METADATA__)
     auto discNumbers = TrackNumbers::joinAsString(
             trackMetadata.getTrackInfo().getDiscNumber(),
@@ -343,8 +345,6 @@ bool exportTrackMetadataIntoTag(TagLib::APE::Tag* pTag, const TrackMetadata& tra
     writeItem(pTag, "Mood", toTString(trackMetadata.getTrackInfo().getMood()));
     writeItem(pTag, "Copyright", toTString(trackMetadata.getAlbumInfo().getCopyright()));
     writeItem(pTag, "LICENSE", toTString(trackMetadata.getAlbumInfo().getLicense()));
-    writeItem(pTag, "Label", toTString(trackMetadata.getAlbumInfo().getRecordLabel()));
-    writeItem(pTag, "MixArtist", toTString(trackMetadata.getTrackInfo().getRemixer()));
     writeItem(pTag, "Subtitle", toTString(trackMetadata.getTrackInfo().getSubtitle()));
     writeItem(pTag, "EncodedBy", toTString(trackMetadata.getTrackInfo().getEncoder()));
     writeItem(pTag, "EncoderSettings", toTString(trackMetadata.getTrackInfo().getEncoderSettings()));

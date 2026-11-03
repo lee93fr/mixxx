@@ -3,7 +3,9 @@
 namespace mixxx {
 namespace trackschema {
 QString tableForColumn(const QString& columnName) {
-    if (columnName == TRACKLOCATIONSTABLE_FSDELETED ||
+    if (columnName == TRACKLOCATIONSTABLE_FILENAME ||
+            columnName == TRACKLOCATIONSTABLE_FILESIZE ||
+            columnName == TRACKLOCATIONSTABLE_FSDELETED ||
             columnName == TRACKLOCATIONSTABLE_LOCATION ||
             columnName == TRACKLOCATIONSTABLE_DIRECTORY) {
         return QStringLiteral(TRACKLOCATIONS_TABLE);

@@ -62,6 +62,8 @@ class Track : public QObject {
 #if defined(__EXTRA_METADATA__)
     Q_PROPERTY(QString mood READ getMood STORED false NOTIFY moodChanged)
 #endif // __EXTRA_METADATA__
+    Q_PROPERTY(QString label READ getLabel WRITE setLabel NOTIFY labelChanged)
+    Q_PROPERTY(QString remixer READ getRemixer WRITE setRemixer NOTIFY remixerChanged)
     Q_PROPERTY(QString composer READ getComposer WRITE setComposer NOTIFY composerChanged)
     Q_PROPERTY(QString grouping READ getGrouping WRITE setGrouping NOTIFY groupingChanged)
     Q_PROPERTY(QString year READ getYear WRITE setYear NOTIFY yearChanged)
@@ -207,6 +209,10 @@ class Track : public QObject {
     void clearComment() {
         setComment(QString());
     }
+    QString getLabel() const;
+    void setLabel(const QString& s);
+    QString getRemixer() const;
+    void setRemixer(const QString& s);
     QString getComposer() const;
     void setComposer(const QString&);
     QString getGrouping() const;
@@ -471,6 +477,8 @@ class Track : public QObject {
 #if defined(__EXTRA_METADATA__)
     void moodChanged(const QString&);
 #endif // __EXTRA_METADATA__
+    void labelChanged(const QString& label);
+    void remixerChanged(const QString& remixer);
     void composerChanged(const QString&);
     void groupingChanged(const QString&);
     void yearChanged(const QString&);

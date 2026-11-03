@@ -1,0 +1,31 @@
+<!DOCTYPE template>
+<!-- AI-generated text begins. Gameflorr performance controls. AI-generated text ends. -->
+<Template>
+  <PushButton>
+    <ObjectName>GameflorrPadMode</ObjectName>
+    <Size>30me,22f</Size>
+    <NumberStates>2</NumberStates>
+    <LeftClickIsPushButton>true</LeftClickIsPushButton>
+    <Tooltip><Variable name="tip"/></Tooltip>
+    <State>
+      <Number>0</Number>
+      <Text><Variable name="text"/></Text>
+    </State>
+    <State>
+      <Number>1</Number>
+      <Text><Variable name="text"/></Text>
+    </State>
+    <Connection>
+      <ConfigKey><Variable name="group"/>,pad_mode_<Variable name="mode"/></ConfigKey>
+      <ConnectValueToWidget>false</ConnectValueToWidget>
+      <EmitOnPressAndRelease>true</EmitOnPressAndRelease>
+    </Connection>
+    <Connection>
+      <ConfigKey><Variable name="group"/>,pad_mode</ConfigKey>
+      <ConnectValueFromWidget>false</ConnectValueFromWidget>
+      <Transform>
+        <IsEqual><Variable name="mode"/></IsEqual>
+      </Transform>
+    </Connection>
+  </PushButton>
+</Template>

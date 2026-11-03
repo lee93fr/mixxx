@@ -1,0 +1,35 @@
+<!DOCTYPE template>
+<!-- AI-generated text begins. Gameflorr performance controls. AI-generated text ends. -->
+<Template>
+  <WidgetGroup>
+    <ObjectName>GameflorrSamplerPanel</ObjectName>
+    <Layout>horizontal</Layout>
+    <SizePolicy>me,min</SizePolicy>
+    <Children>
+      <Template src="skins:Gameflorr/sampler_slot.xml">
+        <SetVariable name="slot">1</SetVariable>
+      </Template>
+      <Template src="skins:Gameflorr/sampler_slot.xml">
+        <SetVariable name="slot">2</SetVariable>
+      </Template>
+      <Template src="skins:Gameflorr/sampler_slot.xml">
+        <SetVariable name="slot">3</SetVariable>
+      </Template>
+      <Template src="skins:Gameflorr/sampler_slot.xml">
+        <SetVariable name="slot">4</SetVariable>
+      </Template>
+      <Template src="skins:Gameflorr/sampler_slot.xml">
+        <SetVariable name="slot">5</SetVariable>
+      </Template>
+      <Template src="skins:Gameflorr/sampler_slot.xml">
+        <SetVariable name="slot">6</SetVariable>
+      </Template>
+      <Template src="skins:Gameflorr/sampler_slot.xml">
+        <SetVariable name="slot">7</SetVariable>
+      </Template>
+      <Template src="skins:Gameflorr/sampler_slot.xml">
+        <SetVariable name="slot">8</SetVariable>
+      </Template>
+    </Children>
+  </WidgetGroup>
+</Template>

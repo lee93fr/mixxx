@@ -1,0 +1,36 @@
+<!DOCTYPE template>
+<!-- AI-generated text begins. Gameflorr performance controls. AI-generated text ends. -->
+<Template>
+  <PushButton>
+    <ObjectName>GameflorrPad<Variable name="mode"/></ObjectName>
+    <Size>30me,28f</Size>
+    <NumberStates>2</NumberStates>
+    <LeftClickIsPushButton>true</LeftClickIsPushButton>
+    <RightClickIsPushButton>true</RightClickIsPushButton>
+    <Tooltip><Variable name="tip"/> Pad <Variable name="pad"/>.</Tooltip>
+    <State>
+      <Number>0</Number>
+      <Text><Variable name="text"/></Text>
+    </State>
+    <State>
+      <Number>1</Number>
+      <Text><Variable name="text"/></Text>
+    </State>
+    <Connection>
+      <ConfigKey><Variable name="group"/>,performance_pad_<Variable name="pad"/></ConfigKey>
+      <ConnectValueToWidget>false</ConnectValueToWidget>
+      <EmitOnPressAndRelease>true</EmitOnPressAndRelease>
+      <ButtonState>LeftButton</ButtonState>
+    </Connection>
+    <Connection>
+      <ConfigKey><Variable name="group"/>,performance_pad_<Variable name="pad"/>_clear</ConfigKey>
+      <ConnectValueToWidget>false</ConnectValueToWidget>
+      <EmitOnPressAndRelease>true</EmitOnPressAndRelease>
+      <ButtonState>RightButton</ButtonState>
+    </Connection>
+    <Connection>
+      <ConfigKey><Variable name="group"/>,performance_pad_<Variable name="pad"/>_active</ConfigKey>
+      <ConnectValueFromWidget>false</ConnectValueFromWidget>
+    </Connection>
+  </PushButton>
+</Template>

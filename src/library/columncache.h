@@ -1,11 +1,11 @@
 #pragma once
 
-#include <QObject>
 #include <QMap>
+#include <QObject>
 #include <QStringList>
 
-#include "track/keyutils.h"
 #include "control/controlproxy.h"
+#include "track/keyutils.h"
 
 // Caches the index of frequently used columns and provides a lookup-table of
 // column name to index.
@@ -23,6 +23,8 @@ class ColumnCache : public QObject {
         COLUMN_LIBRARYTABLE_ALBUMARTIST,
         COLUMN_LIBRARYTABLE_YEAR,
         COLUMN_LIBRARYTABLE_GENRE,
+        COLUMN_LIBRARYTABLE_LABEL,
+        COLUMN_LIBRARYTABLE_REMIXER,
         COLUMN_LIBRARYTABLE_COMPOSER,
         COLUMN_LIBRARYTABLE_GROUPING,
         COLUMN_LIBRARYTABLE_TRACKNUMBER,
@@ -59,6 +61,8 @@ class ColumnCache : public QObject {
         COLUMN_LIBRARYTABLE_COVERART_HASH,
         COLUMN_LIBRARYTABLE_LAST_PLAYED_AT,
 
+        COLUMN_TRACKLOCATIONSTABLE_FILENAME,
+        COLUMN_TRACKLOCATIONSTABLE_FILESIZE,
         COLUMN_TRACKLOCATIONSTABLE_LOCATION,
         COLUMN_TRACKLOCATIONSTABLE_DIRECTORY,
         COLUMN_TRACKLOCATIONSTABLE_FSDELETED,

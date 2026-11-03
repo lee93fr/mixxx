@@ -131,19 +131,19 @@ for (const deck of [0, 1]) {
         assert.equal(h.get(group, "LoadSelectedTrack"), 1);
     });
 
-    test(`deck ${deck + 1}: all hotcues, clear notes and LED feedback`, () => {
+    test(`deck ${deck + 1}: all performance pads, clear notes and LED feedback`, () => {
         const h = setup();
         for (let pad = 0; pad < 8; pad++) {
-            const key = `hotcue_${pad + 1}`;
+            const key = `performance_pad_${pad + 1}`;
             h.send(0x94 + deck, 20 + pad, 127);
-            assert.equal(h.get(group, key + "_activate"), 1);
+            assert.equal(h.get(group, key), 1);
             h.send(0x84 + deck, 20 + pad, 70);
-            assert.equal(h.get(group, key + "_activate"), 0);
+            assert.equal(h.get(group, key), 0);
             h.send(0x94 + deck, 28 + pad, 127);
             assert.equal(h.get(group, key + "_clear"), 1);
             h.send(0x84 + deck, 28 + pad, 64);
             assert.equal(h.get(group, key + "_clear"), 0);
-            h.set(group, key + "_status", 1);
+            h.set(group, key + "_active", 1);
             assert.ok(h.sent.some(b => b[0] === 0x94 + deck && b[1] === 20 + pad && b[2] > 0));
         }
     });
@@ -223,7 +223,7 @@ test("shutdown releases held controls and disconnects feedback without stopping 
     }
     h.mapping.shutdown();
     for (const group of ["[Channel1]", "[Channel2]"]) {
-        for (const key of ["cue_default", "rate_temp_up", "reverseroll", "hotcue_1_activate"])
+        for (const key of ["cue_default", "rate_temp_up", "reverseroll", "performance_pad_1"])
             assert.equal(h.get(group, key), 0);
     }
     assert.equal(h.get("[Channel1]", "play"), 1);
@@ -236,3 +236,26 @@ test("shutdown releases held controls and disconnects feedback without stopping 
     h.send(0x91, 0, 1);
     assert.equal(h.get("[Channel2]", "play"), 1);
 });
+
+for (const deck of [0, 1]) {
+    test(`deck ${deck + 1}: parameter buttons cycle all modes and screen changes release pads`, () => {
+        const h = setup();
+        const group = `[Channel${deck + 1}]`;
+        for (const mode of [1, 2, 3, 4, 5, 6, 0]) {
+            h.send(0x94 + deck, 20, 127);
+            assert.equal(h.get(group, "performance_pad_1"), 1);
+            h.send(0x94 + deck, 0x29, 127);
+            h.send(0x84 + deck, 0x29, 90);
+            assert.equal(h.get(group, "pad_mode"), mode);
+            assert.equal(h.get(group, "performance_pad_1"), 0);
+        }
+        h.send(0x94 + deck, 0x28, 127);
+        assert.equal(h.get(group, "pad_mode"), 6);
+        h.send(0x94 + deck, 21, 127);
+        h.set(group, "pad_mode", 0);
+        assert.equal(h.get(group, "performance_pad_2"), 0);
+        h.send(0x94 + deck, 22, 127);
+        h.send(0x9f, 0x32, 127);
+        assert.equal(h.get(group, "performance_pad_3"), 0);
+    });
+}

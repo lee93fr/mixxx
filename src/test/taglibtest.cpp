@@ -134,3 +134,37 @@ TEST_F(TagLibTest, WriteID3v2TagViaLink) {
     EXPECT_TRUE(linkFileInfoAfter.isSymLink());
 }
 #endif
+
+TEST_F(TagLibTest, LabelAndRemixerRoundTrip) {
+    QTemporaryDir tempDir;
+    ASSERT_TRUE(tempDir.isValid());
+    const QList<QPair<QString, QString>> fixtures{
+            {QStringLiteral("cover-test-øé~ł€˚-jpg.mp3"), QStringLiteral("mp3")},
+            {QStringLiteral("cover-test-øé~ł€˚.flac"), QStringLiteral("flac")},
+            {QStringLiteral("cover-test-øé~ł€˚-itunes-12.7.0-aac.m4a"), QStringLiteral("m4a")},
+            {QStringLiteral("cover-test-øé~ł€˚.wv"), QStringLiteral("wv")}};
+    for (const auto& [fixture, type] : fixtures) {
+        SCOPED_TRACE(fixture.toStdString());
+        const auto path = tempDir.filePath(fixture);
+        mixxxtest::copyFile(MixxxTest::getOrInitTestDir().filePath(QStringLiteral("id3-test-data/") + fixture), path);
+        mixxx::MetadataSourceTagLib source(path, type);
+        mixxx::TrackMetadata metadata;
+        ASSERT_EQ(mixxx::MetadataSource::ImportResult::Succeeded,
+                source.importTrackMetadataAndCoverImage(&metadata, nullptr, true).first);
+        metadata.refAlbumInfo().setRecordLabel(QStringLiteral("Électrique Records"));
+        metadata.refTrackInfo().setRemixer(QStringLiteral("DJ Example Remix"));
+        ASSERT_EQ(mixxx::MetadataSource::ExportResult::Succeeded, source.exportTrackMetadata(metadata).first);
+        mixxx::TrackMetadata reloaded;
+        ASSERT_EQ(mixxx::MetadataSource::ImportResult::Succeeded,
+                source.importTrackMetadataAndCoverImage(&reloaded, nullptr, true).first);
+        EXPECT_EQ(metadata.getAlbumInfo().getRecordLabel(), reloaded.getAlbumInfo().getRecordLabel());
+        EXPECT_EQ(metadata.getTrackInfo().getRemixer(), reloaded.getTrackInfo().getRemixer());
+        metadata.refAlbumInfo().setRecordLabel(QStringLiteral(""));
+        metadata.refTrackInfo().setRemixer(QStringLiteral(""));
+        ASSERT_EQ(mixxx::MetadataSource::ExportResult::Succeeded, source.exportTrackMetadata(metadata).first);
+        ASSERT_EQ(mixxx::MetadataSource::ImportResult::Succeeded,
+                source.importTrackMetadataAndCoverImage(&reloaded, nullptr, true).first);
+        EXPECT_TRUE(reloaded.getAlbumInfo().getRecordLabel().isEmpty());
+        EXPECT_TRUE(reloaded.getTrackInfo().getRemixer().isEmpty());
+    }
+}

@@ -71,6 +71,12 @@ TrackPointer BaseExternalTrackModel::getTrack(const QModelIndex& index) const {
         // Mixxx library then we do not touch it so that we do not over-write the
         // user's metadata.
         if (!track_already_in_library) {
+            if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_LABEL) >= 0) {
+                const auto label = getFieldString(index, ColumnCache::COLUMN_LIBRARYTABLE_LABEL);
+                if (!label.isEmpty()) {
+                    pTrack->setLabel(label);
+                }
+            }
             pTrack->setArtist(artist);
             pTrack->setTitle(title);
             pTrack->setAlbum(album);

@@ -16,11 +16,12 @@
         <SignalHighColor></SignalHighColor>
         <SignalMidColor></SignalMidColor>
         <SignalLowColor></SignalLowColor>
-        <SignalRGBHighColor></SignalRGBHighColor>
-        <SignalRGBMidColor></SignalRGBMidColor>
-        <SignalRGBLowColor></SignalRGBLowColor>
+        <SignalRGBHighColor>#428dff</SignalRGBHighColor>
+        <SignalRGBMidColor>#33cf78</SignalRGBMidColor>
+        <SignalRGBLowColor>#f04444</SignalRGBLowColor>
         <SignalColor><Variable name="DeckSignalColor"/></SignalColor>
-        <BeatColor>#808080</BeatColor>
+        <ShowPreroll>false</ShowPreroll>
+        <BeatColor>#5c6670</BeatColor>
         <PlayPosColor>#eeeeee</PlayPosColor>
         <EndOfTrackColor>#EA0000</EndOfTrackColor>
         <SlipBorderOutlineColor>#f08c00</SlipBorderOutlineColor>

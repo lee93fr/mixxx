@@ -1535,6 +1535,7 @@ add_library(
   src/mixer/baseplayer.cpp
   src/mixer/basetrackplayer.cpp
   src/mixer/deck.cpp
+  src/mixer/performancepadcontrol.cpp
   src/mixer/microphone.cpp
   src/mixer/playerinfo.cpp
   src/mixer/playermanager.cpp
@@ -2980,6 +2981,7 @@ if(BUILD_TESTING)
     src/test/frametest.cpp
     src/test/globaltrackcache_test.cpp
     src/test/hotcuecontrol_test.cpp
+    src/test/performancepadcontrol_test.cpp
     src/test/hotcueorderbyposition_test.cpp
     src/test/imageutils_test.cpp
     src/test/indexrange_test.cpp

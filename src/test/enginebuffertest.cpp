@@ -187,6 +187,7 @@ TEST_F(EngineBufferTest, SlowRubberBand) {
 #endif
 
 TEST_F(EngineBufferTest, ScalerNoTransport) {
+    ControlObject::set(ConfigKey(m_sGroup1, "keylock"), 0.0);
     // normally use the Vinyl scaler
     ControlObject::set(ConfigKey(m_sGroup1, "play"), 1.0);
     ProcessBuffer();
@@ -227,6 +228,7 @@ TEST_F(EngineBufferTest, VinylScalerRampZero) {
 }
 
 TEST_F(EngineBufferTest, ReadFadeOut) {
+    ControlObject::set(ConfigKey(m_sGroup1, "keylock"), 0.0);
     // Start playing
     ControlObject::set(ConfigKey(m_sGroup1, "play"), 1.0);
 
@@ -245,6 +247,7 @@ TEST_F(EngineBufferTest, ReadFadeOut) {
 }
 
 TEST_F(EngineBufferTest, ResetPitchAdjustUsesLinear) {
+    ControlObject::set(ConfigKey(m_sGroup1, "keylock"), 0.0);
     // If the key was adjusted, but keylock is off, and then the key is
     // reset, then the engine should be using the linear scaler.
 

@@ -446,6 +446,8 @@ void TrackDAO::addTracksPrepare() {
             "genre,"
             "tracknumber,"
             "tracktotal,"
+            "label,"
+            "remixer,"
             "composer,"
             "grouping,"
             "filetype,"
@@ -495,6 +497,8 @@ void TrackDAO::addTracksPrepare() {
             ":genre,"
             ":tracknumber,"
             ":tracktotal,"
+            ":label,"
+            ":remixer,"
             ":composer,"
             ":grouping,"
             ":filetype,"
@@ -599,6 +603,8 @@ void bindTrackLibraryValues(
     pTrackLibraryQuery->bindValue(":album_artist", albumInfo.getArtist());
     pTrackLibraryQuery->bindValue(":year", trackInfo.getYear());
     pTrackLibraryQuery->bindValue(":genre", trackInfo.getGenre());
+    pTrackLibraryQuery->bindValue(":label", albumInfo.getRecordLabel());
+    pTrackLibraryQuery->bindValue(":remixer", trackInfo.getRemixer());
     pTrackLibraryQuery->bindValue(":composer", trackInfo.getComposer());
     pTrackLibraryQuery->bindValue(":grouping", trackInfo.getGrouping());
     pTrackLibraryQuery->bindValue(":tracknumber", trackInfo.getTrackNumber());
@@ -1182,6 +1188,14 @@ void setTrackGenre(const QSqlRecord& record, const int column, Track* pTrack) {
     TrackDAO::setTrackGenreInternal(pTrack, record.value(column).toString());
 }
 
+void setTrackLabel(const QSqlRecord& record, const int column, Track* pTrack) {
+    pTrack->setLabel(record.value(column).toString());
+}
+
+void setTrackRemixer(const QSqlRecord& record, const int column, Track* pTrack) {
+    pTrack->setRemixer(record.value(column).toString());
+}
+
 void setTrackComposer(const QSqlRecord& record, const int column, Track* pTrack) {
     pTrack->setComposer(record.value(column).toString());
 }
@@ -1393,6 +1407,8 @@ TrackPointer TrackDAO::getTrackById(TrackId trackId) const {
             {"album_artist", setTrackAlbumArtist},
             {"year", setTrackYear},
             {"genre", setTrackGenre},
+            {"label", setTrackLabel},
+            {"remixer", setTrackRemixer},
             {"composer", setTrackComposer},
             {"grouping", setTrackGrouping},
             {"tracknumber", setTrackNumber},
@@ -1701,6 +1717,8 @@ bool TrackDAO::updateTrack(const Track& track) const {
             "album_artist=:album_artist,"
             "year=:year,"
             "genre=:genre,"
+            "label=:label,"
+            "remixer=:remixer,"
             "composer=:composer,"
             "grouping=:grouping,"
             "filetype=:filetype,"

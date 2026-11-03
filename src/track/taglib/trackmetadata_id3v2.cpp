@@ -921,6 +921,16 @@ void importTrackMetadataFromTag(
         parseTrackPeak(pTrackMetadata, trackPeak, resetMissingTagMetadata);
     }
 
+    const TagLib::ID3v2::FrameList recordLabelFrames(tag.frameListMap()["TPUB"]);
+    if (!recordLabelFrames.isEmpty() || resetMissingTagMetadata) {
+        pTrackMetadata->refAlbumInfo().setRecordLabel(
+                firstNonEmptyFrameToQString(recordLabelFrames));
+    }
+    const TagLib::ID3v2::FrameList remixerFrames(tag.frameListMap()["TPE4"]);
+    if (!remixerFrames.isEmpty() || resetMissingTagMetadata) {
+        pTrackMetadata->refTrackInfo().setRemixer(
+                firstNonEmptyFrameToQString(remixerFrames));
+    }
 #if defined(__EXTRA_METADATA__)
     QString albumGain =
             readFirstUserTextIdentificationFrame(
@@ -1023,16 +1033,6 @@ void importTrackMetadataFromTag(
     if (!licenseFrames.isEmpty() || resetMissingTagMetadata) {
         pTrackMetadata->refAlbumInfo().setLicense(
                 firstNonEmptyFrameToQString(licenseFrames));
-    }
-    const TagLib::ID3v2::FrameList recordLabelFrames(tag.frameListMap()["TPUB"]);
-    if (!recordLabelFrames.isEmpty() || resetMissingTagMetadata) {
-        pTrackMetadata->refAlbumInfo().setRecordLabel(
-                firstNonEmptyFrameToQString(recordLabelFrames));
-    }
-    const TagLib::ID3v2::FrameList remixerFrames(tag.frameListMap()["TPE4"]);
-    if (!remixerFrames.isEmpty() || resetMissingTagMetadata) {
-        pTrackMetadata->refTrackInfo().setRemixer(
-                firstNonEmptyFrameToQString(remixerFrames));
     }
     const TagLib::ID3v2::FrameList subtitleFrames(tag.frameListMap()["TIT3"]);
     if (!subtitleFrames.isEmpty() || resetMissingTagMetadata) {
@@ -1227,6 +1227,14 @@ bool exportTrackMetadataIntoTag(TagLib::ID3v2::Tag* pTag,
             formatTrackPeak(trackMetadata),
             true);
 
+    writeTextIdentificationFrame(
+            pTag,
+            "TPUB",
+            trackMetadata.getAlbumInfo().getRecordLabel());
+    writeTextIdentificationFrame(
+            pTag,
+            "TPE4",
+            trackMetadata.getTrackInfo().getRemixer());
 #if defined(__EXTRA_METADATA__)
     writeTextIdentificationFrame(
             pTag,
@@ -1313,14 +1321,6 @@ bool exportTrackMetadataIntoTag(TagLib::ID3v2::Tag* pTag,
             pTag,
             "WCOP",
             trackMetadata.getAlbumInfo().getLicense());
-    writeTextIdentificationFrame(
-            pTag,
-            "TPUB",
-            trackMetadata.getAlbumInfo().getRecordLabel());
-    writeTextIdentificationFrame(
-            pTag,
-            "TPE4",
-            trackMetadata.getTrackInfo().getRemixer());
     writeTextIdentificationFrame(
             pTag,
             "TIT3",

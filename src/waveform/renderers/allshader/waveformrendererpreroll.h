@@ -40,6 +40,7 @@ class allshader::WaveformRendererPreroll final
 
   private:
     QColor m_color;
+    bool m_showPreroll{true};
     float m_markerBreadth{};
     float m_markerLength{};
     bool m_isSlipRenderer;

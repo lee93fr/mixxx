@@ -1,0 +1,56 @@
+<!DOCTYPE template>
+<!-- AI-generated text begins. Gameflorr performance controls. AI-generated text ends. -->
+<Template>
+  <SetVariable name="sampleGroup">[Sampler<Variable name="slot"/>]</SetVariable>
+  <WidgetGroup>
+    <ObjectName>GameflorrSamplerSlot</ObjectName>
+    <Layout>vertical</Layout>
+    <SizePolicy>me,min</SizePolicy>
+    <Children>
+      <Label>
+        <ObjectName>GameflorrSectionLabel</ObjectName>
+        <Text>SAMPLE <Variable name="slot"/></Text>
+        <Size>-1me,15f</Size>
+      </Label>
+      <TrackProperty>
+        <Property>titleInfo</Property>
+        <Group><Variable name="sampleGroup"/></Group>
+        <Size>90me,23f</Size>
+        <Elide>right</Elide>
+        <Tooltip>Glisser un morceau ici pour charger ce sample.</Tooltip>
+      </TrackProperty>
+      <WidgetGroup>
+        <Layout>horizontal</Layout>
+        <Children>
+          <Template src="skins:Gameflorr/sampler_button.xml">
+            <SetVariable name="text">▶</SetVariable>
+            <SetVariable name="key">cue_gotoandplay</SetVariable>
+            <SetVariable name="out">play</SetVariable>
+          </Template>
+          <Template src="skins:Gameflorr/sampler_button.xml">
+            <SetVariable name="text">■</SetVariable>
+            <SetVariable name="key">stop</SetVariable>
+            <SetVariable name="out">stop</SetVariable>
+          </Template>
+          <Template src="skins:Gameflorr/button.xml">
+            <SetVariable name="name">GameflorrNav</SetVariable>
+            <SetVariable name="size">32me,22f</SetVariable>
+            <SetVariable name="text">Loop</SetVariable>
+            <SetVariable name="control"><Variable name="sampleGroup"/>,repeat</SetVariable>
+            <SetVariable name="tip">Lecture ponctuelle ou répétée.</SetVariable>
+          </Template>
+        </Children>
+      </WidgetGroup>
+      <SliderComposed>
+        <Tooltip>Volume du sample</Tooltip>
+        <Horizontal>true</Horizontal>
+        <Size>-1me,16f</Size>
+        <Slider scalemode="STRETCH">skins:Deere/slider-crossfader.svg</Slider>
+        <Handle scalemode="STRETCH_ASPECT">skins:Deere/handle-crossfader-grey.svg</Handle>
+        <Connection>
+          <ConfigKey><Variable name="sampleGroup"/>,volume</ConfigKey>
+        </Connection>
+      </SliderComposed>
+    </Children>
+  </WidgetGroup>
+</Template>
