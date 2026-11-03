@@ -21,9 +21,6 @@
 
 namespace {
 
-// TODO(rryan) make configurable
-constexpr int kScannerThreadPoolSize = 1;
-
 mixxx::Logger kLogger("LibraryScanner");
 
 QAtomicInt s_instanceCounter(0);
@@ -116,11 +113,14 @@ LibraryScanner::LibraryScanner(
     const int instanceId = s_instanceCounter.fetchAndAddAcquire(1) + 1;
     setObjectName(QString("LibraryScanner %1").arg(instanceId));
 
-    m_pool.setMaxThreadCount(kScannerThreadPoolSize);
+    m_pool.setMaxThreadCount(qMax(1, QThread::idealThreadCount()));
+    kLogger.info() << "Scanning with" << m_pool.maxThreadCount() << "worker threads";
 
     // Listen to signals from our public methods (invoked by other threads) and
     // connect them to our slots to run the command on the scanner thread.
     connect(this, &LibraryScanner::startScan, this, &LibraryScanner::slotStartScan);
+    connect(this, &LibraryScanner::tasksQueued,
+            m_pProgressDlg.get(), &LibraryScannerDlg::addQueuedTasks);
 
 #ifdef MIXXX_USE_QML
     if (!CmdlineArgs::Instance().isQml())
@@ -149,21 +149,27 @@ LibraryScanner::LibraryScanner(
                 Qt::DirectConnection);
         connect(&m_trackDao,
                 &TrackDAO::progressVerifyTracksOutside,
-                m_pProgressDlg.get(),
-                &LibraryScannerDlg::slotUpdate);
+                this,
+                &LibraryScanner::progressLoading);
         connect(&m_trackDao,
                 &TrackDAO::progressCoverArt,
-                m_pProgressDlg.get(),
-                &LibraryScannerDlg::slotUpdateCover);
+                this,
+                &LibraryScanner::progressCoverArt);
+        connect(this, &LibraryScanner::progressCoverArt,
+                m_pProgressDlg.get(), &LibraryScannerDlg::slotUpdateCover);
         connect(&m_trackDao,
                 &TrackDAO::progressLookingForSubstituteTracks,
-                m_pProgressDlg.get(),
-                &LibraryScannerDlg::slotUpdateSubstitute);
+                this,
+                &LibraryScanner::progressHashing);
     }
 }
 
 LibraryScanner::~LibraryScanner() {
     cancelAndQuit();
+}
+
+void LibraryScanner::setEmbeddedProgress(bool embedded) {
+    m_pProgressDlg->setEmbeddedProgress(embedded);
 }
 
 void LibraryScanner::run() {
@@ -514,6 +520,8 @@ void LibraryScanner::slotFinishUnhashedScan() {
     result.tracksTotal = tracksTotal;
     result.autoscan = m_manualScan;
 
+    result.cancelled = m_scannerGlobal->shouldCancel();
+    result.success = bScanFinishedCleanly && !result.cancelled;
     m_scannerGlobal.clear();
     changeScannerState(FINISHED);
     // now we may accept new scan commands
@@ -586,10 +594,10 @@ void LibraryScanner::queueTask(ScannerTask* pTask) {
     if (pFileTask) {
         // Track and cover files
         int numFiles = pFileTask->numFilesToImport();
-        m_pProgressDlg->addQueuedTasks(numFiles);
+        emit tasksQueued(numFiles);
     } else {
         // RecursiveScanDirectoryTask, queues exactly one directory
-        m_pProgressDlg->addQueuedTasks(1);
+        emit tasksQueued(1);
     }
 
     m_scannerGlobal->getTaskWatcher().watchTask();

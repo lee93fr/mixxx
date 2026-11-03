@@ -35,6 +35,7 @@ class AnalysisFeature : public LibraryFeature {
   signals:
     void analysisActive(bool bActive);
     void trackProgress(TrackId trackId, AnalyzerProgress progress);
+    void analysisProgress(AnalyzerProgress progress, int current, int total);
 
   public slots:
     void activate() override;

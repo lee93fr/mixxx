@@ -11,6 +11,15 @@
   </SingletonDefinition>
 
   <SingletonDefinition>
+    <ObjectName>DeckVerticalWaveform<Variable name="i"/></ObjectName>
+    <Children>
+      <Template src="skins:Gameflorr/waveform.xml">
+        <SetVariable name="WaveformOrientation">vertical</SetVariable>
+      </Template>
+    </Children>
+  </SingletonDefinition>
+
+  <SingletonDefinition>
     <ObjectName>DeckCoverArt<Variable name="i"/></ObjectName>
     <Children>
       <Template src="skins:Deere/deck_coverart.xml"/>

@@ -11,6 +11,7 @@ class SkinContext;
 
 namespace allshader {
 class WaveformRenderBeat;
+class DigitsRenderNode;
 } // namespace allshader
 
 class allshader::WaveformRenderBeat final
@@ -39,6 +40,8 @@ class allshader::WaveformRenderBeat final
   private:
     QColor m_color;
     bool m_isSlipRenderer;
+    bool m_showBarNumbers = false;
+    DigitsRenderNode* m_barNumbers;
 
     bool preprocessInner();
 

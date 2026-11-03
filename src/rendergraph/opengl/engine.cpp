@@ -77,14 +77,13 @@ void Engine::preprocess() {
 }
 
 void Engine::resize(int w, int h) {
-    m_matrix.setToIdentity();
-    m_matrix.ortho(QRectF(0.0f, 0.0f, w, h));
-    // TODO
-    // if (waveformRenderer->getOrientation() == Qt::Vertical) {
-    //    matrix.rotate(90.f, 0.0f, 0.0f, 1.0f);
-    //    matrix.translate(0.f, -waveformRenderer->getWidth() * ratio, 0.f);
-    //}
+    QMatrix4x4 matrix;
+    matrix.ortho(QRectF(0.0f, 0.0f, w, h));
+    resize(w, h, matrix);
+}
 
+void Engine::resize(int w, int h, const QMatrix4x4& matrix) {
+    m_matrix = matrix;
     if (m_pRootNode) {
         resize(m_pRootNode.get(), w, h);
     }

@@ -17,6 +17,7 @@
 #include "library/dao/trackschema.h"
 #include "library/library.h"
 #include "library/queryutil.h"
+#include "library/serato/seratocratetree.h"
 #include "library/serato/seratoplaylistmodel.h"
 #include "library/trackcollection.h"
 #include "library/trackcollectionmanager.h"
@@ -340,7 +341,7 @@ QString parseCrate(
         const QString& databasePath,
         const QString& crateFilePath,
         const QMap<QString, int>& trackIdMap) {
-    QString crateName = QFileInfo(crateFilePath).baseName();
+    QString crateName = QFileInfo(crateFilePath).completeBaseName();
     qDebug() << "Parsing crate"
              << crateName
              << "at" << crateFilePath;
@@ -646,19 +647,27 @@ QString parseDatabase(mixxx::DbConnectionPoolPtr dbConnectionPool, TreeItem* dat
     if (crateDir.cd(kCrateDirectory)) {
         QStringList filters;
         filters << kCrateFilter;
-        const auto entryList = crateDir.entryList(filters);
+        QString orderText;
+        QFile orderFile(databaseDir.filePath(QStringLiteral("neworder.pref")));
+        if (orderFile.open(QIODevice::ReadOnly)) {
+            const auto data = orderFile.readAll();
+            orderText = utf16beToQString(data, data.size());
+        }
+        const auto entryList = mixxx::serato::orderedCrateFiles(
+                crateDir.entryList(filters, QDir::Files, QDir::Name), orderText);
+        QHash<QString, TreeItem*> crateNodes;
         for (const QString& entry : entryList) {
             QString crateFilePath = crateDir.filePath(entry);
+            if (mixxx::serato::cratePathComponents(crateFilePath).isEmpty()) {
+                continue;
+            }
             QString crateName = parseCrate(
                     database,
                     databaseDir.path(),
                     crateFilePath,
                     trackIdMap);
             if (!crateName.isEmpty()) {
-                TreeItem* crateItem = databaseItem->appendChild(crateName,
-                        QList<QVariant>{
-                                QVariant(crateFilePath), QVariant(true)});
-                crateItem->setIcon(QIcon(":/images/library/ic_library_crates.svg"));
+                mixxx::serato::appendCrate(databaseItem, crateFilePath, &crateNodes);
             }
         }
     } else {

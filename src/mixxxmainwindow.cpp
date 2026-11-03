@@ -44,6 +44,7 @@
 #endif
 #include "control/controlindicatortimer.h"
 #include "library/library.h"
+#include "library/libraryscancontroller.h"
 #include "library/library_decl.h"
 #include "library/library_prefs.h"
 #ifdef __ENGINEPRIME__
@@ -1371,6 +1372,9 @@ void MixxxMainWindow::slotHelpAbout() {
 }
 
 void MixxxMainWindow::slotLibraryScanSummaryDlg(const LibraryScanResultSummary& result) {
+    if (m_pCoreServices->getLibrary()->scanController()->viewCount() > 0) {
+        return;
+    }
     if (!m_pCoreServices->getSettings()->getValue<bool>(
                 mixxx::library::prefs::kShowScanSummaryConfigKey, true)) {
         return;

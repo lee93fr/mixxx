@@ -13,6 +13,8 @@ Cette évolution permet d'utiliser les mêmes fichiers audio dans Mixxx et Serat
 
 Le préréglage affiche les colonnes disponibles dans chaque source : titre, artiste, BPM, tonalité, durée, commentaire, regroupement, genre, album, label, remixeur, compositeur, année, numéro de piste, notation, compteur de lectures, date d'ajout, débit, fréquence d'échantillonnage, format, nom de fichier, taille et emplacement. Les sources externes peuvent exposer moins de colonnes que la bibliothèque Mixxx.
 
+Les noms de crates conservent leurs points et leurs accents. Les sous-crates sont regroupées sous leur dossier parent et reprennent l’ordre de `neworder.pref` lorsqu’il est disponible. Un dossier réellement nommé `[HIDDEN]` reste accessible une seule fois avec ses sous-crates ; aucun de ses morceaux n’est supprimé.
+
 ## Métadonnées et migration
 
 Les champs label et remixeur sont désormais enregistrés dans la base Mixxx, y compris dans une compilation standard. Les bibliothèques existantes passent du schéma 40 au schéma 41 sans déplacer les fichiers audio. Les champs initialement absents sont complétés à la lecture des tags ; les valeurs déjà présentes et les champs explicitement vidés après édition sont conservés.

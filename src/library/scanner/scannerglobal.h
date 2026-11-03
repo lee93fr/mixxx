@@ -7,6 +7,7 @@
 #include <QSet>
 #include <QSharedPointer>
 #include <QStringList>
+#include <atomic>
 
 #include "util/cache.h"
 #include "util/compatibility/qmutex.h"
@@ -199,7 +200,7 @@ class ScannerGlobal {
     // The list of tracks added by the scan.
     QStringList m_addedTracks;
 
-    volatile bool m_scanFinishedCleanly;
+    std::atomic_bool m_scanFinishedCleanly;
     volatile bool m_shouldCancel;
 
     // Stats tracking.

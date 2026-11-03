@@ -58,6 +58,7 @@
 #include "widget/wknobcomposed.h"
 #include "widget/wlabel.h"
 #include "widget/wlibrary.h"
+#include "widget/wlibraryscanstatus.h"
 #include "widget/wlibrarysidebar.h"
 #include "widget/wnumber.h"
 #include "widget/wnumberdb.h"
@@ -657,6 +658,11 @@ QList<QWidget*> LegacySkinParser::parseNode(const QDomElement& node) {
         result = wrapWidget(parseLibrarySidebar(node));
     } else if (nodeName == "Library") {
         result = wrapWidget(parseLibrary(node));
+    } else if (nodeName == "LibraryScanStatus") {
+        auto* status = new WLibraryScanStatus(m_pParent, m_pLibrary->scanController());
+        commonWidgetSetup(node, status);
+        status->Init();
+        result = wrapWidget(status);
     } else if (nodeName == "Key") {
         result = wrapWidget(parseEngineKey(node));
     } else if (nodeName == "Battery") {

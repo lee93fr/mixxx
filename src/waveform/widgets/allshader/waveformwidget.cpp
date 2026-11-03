@@ -6,6 +6,7 @@
 
 #include "rendergraph/engine.h"
 #include "rendergraph/opacitynode.h"
+#include "waveform/renderers/allshader/matrixforwidgetgeometry.h"
 #include "waveform/renderers/allshader/waveformrenderbackground.h"
 #include "waveform/renderers/allshader/waveformrenderbeat.h"
 #include "waveform/renderers/allshader/waveformrendererendoftrack.h"
@@ -185,7 +186,7 @@ void WaveformWidget::resizeGL(int w, int h) {
     // WaveformWidgetRenderer::getHeight to update their rendering stack, so we
     // must resize the renderer first, before updating the rendergraph
     WaveformWidgetRenderer::resizeRenderer(w, h, static_cast<float>(devicePixelRatio()));
-    m_pEngine->resize(w, h);
+    m_pEngine->resize(w, h, matrixForWidgetGeometry(this, false));
 }
 
 void WaveformWidget::paintEvent(QPaintEvent* event) {

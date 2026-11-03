@@ -1469,6 +1469,7 @@ add_library(
   src/library/library_prefs.cpp
   src/library/library.cpp
   src/library/librarycontrol.cpp
+  src/library/libraryscancontroller.cpp
   src/library/libraryfeature.cpp
   src/library/librarytablemodel.cpp
   src/library/missing_hidden/dlghidden.cpp
@@ -1497,6 +1498,7 @@ add_library(
   src/library/scanner/scannertask.cpp
   src/library/searchquery.cpp
   src/library/searchqueryparser.cpp
+  src/library/serato/seratocratetree.cpp
   src/library/serato/seratofeature.cpp
   src/library/serato/seratoplaylistmodel.cpp
   src/library/sidebarmodel.cpp
@@ -1816,6 +1818,7 @@ add_library(
   src/widget/wknobcomposed.cpp
   src/widget/wlabel.cpp
   src/widget/wlibrary.cpp
+  src/widget/wlibraryscanstatus.cpp
   src/widget/wlibrarysidebar.cpp
   src/widget/wlibrarytableview.cpp
   src/widget/wlibrarytextbrowser.cpp
@@ -2991,6 +2994,7 @@ if(BUILD_TESTING)
     src/test/lcstest.cpp
     src/test/learningutilstest.cpp
     src/test/libraryscannertest.cpp
+    src/test/libraryscancontroller_test.cpp
     src/test/librarytest.cpp
     src/test/looping_control_test.cpp
     src/test/main.cpp
@@ -3021,6 +3025,7 @@ if(BUILD_TESTING)
     src/test/schemamanager_test.cpp
     src/test/searchqueryparsertest.cpp
     src/test/seratobeatgridtest.cpp
+    src/test/seratocratetree_test.cpp
     src/test/seratomarkerstest.cpp
     src/test/seratomarkers2test.cpp
     src/test/seratotagstest.cpp

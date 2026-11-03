@@ -21,6 +21,7 @@ class BrowseFeature;
 class ControlObject;
 class CrateFeature;
 class LibraryControl;
+class LibraryScanController;
 class LibraryFeature;
 class LibraryTableModel;
 class KeyboardEventFilter;
@@ -62,6 +63,7 @@ class Library: public QObject {
     }
 
     TrackCollectionManager* trackCollectionManager() const;
+    LibraryScanController* scanController() const;
 
     TrackAnalysisScheduler::Pointer createTrackAnalysisScheduler(
             int numWorkerThreads,
@@ -185,6 +187,7 @@ class Library: public QObject {
       void onPlayerManagerTrackAnalyzerIdle();
 
   private:
+    void analyzeMissingLibraryTracks();
     const UserSettingsPointer m_pConfig;
 
     // The Mixxx database connection pool
@@ -204,6 +207,7 @@ class Library: public QObject {
     parented_ptr<CrateFeature> m_pCrateFeature;
     parented_ptr<BrowseFeature> m_pBrowseFeature;
     parented_ptr<AnalysisFeature> m_pAnalysisFeature;
+    parented_ptr<LibraryScanController> m_pScanController;
     QFont m_trackTableFont;
     int m_iTrackTableRowHeight;
     bool m_editMetadataSelectedClick;

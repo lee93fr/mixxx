@@ -15,6 +15,7 @@
 #include "rendergraph/vertexupdaters/texturedvertexupdater.h"
 #include "util/assert.h"
 #include "util/roundtopixel.h"
+#include "waveform/renderers/barnumber.h"
 
 // Render digits using a texture (generated) with digits with blurred dark outline
 
@@ -246,6 +247,48 @@ void allshader::DigitsRenderNode::update(
 
 void allshader::DigitsRenderNode::clear() {
     geometry().allocate(0);
+    markDirtyGeometry();
+}
+
+float allshader::DigitsRenderNode::textWidth(const QString& text) const {
+    float width = 0.f;
+    for (QChar c : text) {
+        width += m_width[charToIndex(c)];
+    }
+    return width - std::max(0, static_cast<int>(text.size()) - 1) * m_penWidth / 2.f;
+}
+
+void allshader::DigitsRenderNode::updateLabels(
+        const QVector<Label>& labels, Qt::Orientation orientation) {
+    int characters = 0;
+    for (const auto& label : labels) {
+        characters += label.text.size();
+    }
+    geometry().allocate(characters * 6);
+    TexturedVertexUpdater updater{geometry().vertexDataAs<Geometry::TexturedPoint2D>()};
+    for (const auto& label : labels) {
+        float x = static_cast<float>(label.position.x());
+        float y = static_cast<float>(label.position.y());
+        if (orientation == Qt::Horizontal) {
+            addVertices(updater, x, y, label.text);
+            continue;
+        }
+        for (QChar c : label.text) {
+            const int i = charToIndex(c);
+            const float w = m_width[i];
+            const float h = height();
+            const QVector2D origin(x, y);
+            const auto topLeft = uprightBarLabelVertex(origin, {0.f, 0.f}, orientation);
+            const auto topRight = uprightBarLabelVertex(origin, {w, 0.f}, orientation);
+            const auto bottomLeft = uprightBarLabelVertex(origin, {0.f, h}, orientation);
+            const auto bottomRight = uprightBarLabelVertex(origin, {w, h}, orientation);
+            updater.addTriangle(topLeft, topRight, bottomLeft,
+                    {m_offset[i], 0.f}, {m_offset[i + 1], 0.f}, {m_offset[i], 1.f});
+            updater.addTriangle(bottomLeft, topRight, bottomRight,
+                    {m_offset[i], 1.f}, {m_offset[i + 1], 0.f}, {m_offset[i + 1], 1.f});
+            y -= w - m_penWidth / 2.f;
+        }
+    }
     markDirtyGeometry();
 }
 

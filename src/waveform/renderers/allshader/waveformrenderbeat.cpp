@@ -8,6 +8,8 @@
 #include "rendergraph/material/unicolormaterial.h"
 #include "rendergraph/vertexupdaters/vertexupdater.h"
 #include "skin/legacy/skincontext.h"
+#include "waveform/renderers/allshader/digitsrenderer.h"
+#include "waveform/renderers/barnumber.h"
 #include "track/track.h"
 #include "waveform/renderers/waveformwidgetrenderer.h"
 #include "waveform/waveform.h"
@@ -23,12 +25,15 @@ WaveformRenderBeat::WaveformRenderBeat(WaveformWidgetRenderer* waveformWidget,
         : ::WaveformRendererAbstract(waveformWidget),
           m_isSlipRenderer(type == ::WaveformRendererAbstract::Slip) {
     initForRectangles<UniColorMaterial>(0);
+    m_barNumbers = appendChildNode(std::make_unique<DigitsRenderNode>());
     setUsePreprocess(true);
 }
 
 void WaveformRenderBeat::setup(const QDomNode& node, const SkinContext& skinContext) {
     m_color = QColor(skinContext.selectString(node, QStringLiteral("BeatColor")));
     m_color = WSkinColor::getCorrectColor(m_color).toRgb();
+    m_showBarNumbers = !m_isSlipRenderer &&
+            skinContext.selectBool(node, QStringLiteral("ShowBarNumbers"), false);
 }
 
 void WaveformRenderBeat::draw(QPainter* painter, QPaintEvent* event) {
@@ -39,6 +44,7 @@ void WaveformRenderBeat::draw(QPainter* painter, QPaintEvent* event) {
 
 void WaveformRenderBeat::preprocess() {
     if (!preprocessInner()) {
+        m_barNumbers->clear();
         geometry().allocate(0);
         markDirtyGeometry();
     }
@@ -99,6 +105,15 @@ bool WaveformRenderBeat::preprocessInner() {
     }
 
     const float rendererBreadth = m_waveformRenderer->getBreadth();
+    const auto orientation = m_waveformRenderer->getOrientation();
+    QVector<DigitsRenderNode::Label> labels;
+    float lastLabelEnd = -100.f;
+    if (m_showBarNumbers) {
+        m_barNumbers->updateTexture(m_waveformRenderer->getContext(),
+                8.f * scaleFactor(), 16.f * scaleFactor(), devicePixelRatio);
+        m_barNumbers->material().setUniform(1, 0.6f);
+        m_barNumbers->markDirtyMaterial();
+    }
 
     const int numVerticesPerLine = 6; // 2 triangles
 
@@ -125,9 +140,10 @@ bool WaveformRenderBeat::preprocessInner() {
             ? rendererBreadth / static_cast<float>(mixxx::kMaxSupportedStems)
             : rendererBreadth;
 
+    int beatIndex = trackBeats->iteratorFrom(startPosition) - trackBeats->cfirstmarker();
     for (auto it = trackBeats->iteratorFrom(startPosition);
             it != trackBeats->cend() && *it <= endPosition;
-            ++it) {
+            ++it, ++beatIndex) {
         double beatPosition = it->toEngineSamplePos();
         double xBeatPoint =
                 m_waveformRenderer->transformSamplePositionInRendererWorld(
@@ -137,6 +153,21 @@ bool WaveformRenderBeat::preprocessInner() {
 
         const float x1 = static_cast<float>(xBeatPoint);
         const float x2 = x1 + 1.f;
+        if (m_showBarNumbers && beatPosition >= 0 && beatPosition <= trackSamples) {
+            if (const auto number = barNumberForBeat(beatIndex)) {
+                const auto text = QString::number(*number);
+                const float labelStart = x1 + 3.f;
+                const float extent = orientation == Qt::Horizontal
+                        ? m_barNumbers->textWidth(text) : m_barNumbers->height();
+                if (labelStart >= lastLabelEnd + 6.f &&
+                        labelStart + extent < m_waveformRenderer->getLength() - 2.f) {
+                    labels.append({QPointF(labelStart,
+                                           orientation == Qt::Horizontal
+                                                   ? 2.f : rendererBreadth - 3.f), text});
+                    lastLabelEnd = labelStart + extent;
+                }
+            }
+        }
 
         if (m_isSlipRenderer && splitStemTracks) {
             for (int stemIdx = 0; stemIdx < mixxx::kMaxSupportedStems; ++stemIdx) {
@@ -154,6 +185,7 @@ bool WaveformRenderBeat::preprocessInner() {
     DEBUG_ASSERT(reserved == vertexUpdater.index());
 
     material().setUniform(1, m_color);
+    m_barNumbers->updateLabels(labels, orientation);
     markDirtyMaterial();
 
     return true;

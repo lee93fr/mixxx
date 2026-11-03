@@ -14,6 +14,12 @@ class LibraryScannerDlg : public QDialog {
 
     void resetTaskCount();
     void addQueuedTasks(int num);
+    void setEmbeddedProgress(bool embedded) {
+        m_embeddedProgress = embedded;
+        if (embedded) {
+            hide();
+        }
+    }
 
   public slots:
     void slotUpdate(const QString& path);
@@ -38,4 +44,5 @@ class LibraryScannerDlg : public QDialog {
     int m_tasksDone;
     int m_tasksTotal;
     bool m_showNoTasksQueuedWarning;
+    bool m_embeddedProgress = false;
 };

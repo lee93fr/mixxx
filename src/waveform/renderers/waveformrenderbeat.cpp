@@ -1,10 +1,12 @@
 #include "waveform/renderers/waveformrenderbeat.h"
 
 #include <QPainter>
+#include <QFontMetricsF>
 
 #include "track/track.h"
 #include "util/painterscope.h"
 #include "waveform/renderers/waveformwidgetrenderer.h"
+#include "waveform/renderers/barnumber.h"
 #include "widget/wskincolor.h"
 
 class QPaintEvent;
@@ -20,6 +22,7 @@ WaveformRenderBeat::~WaveformRenderBeat() {
 void WaveformRenderBeat::setup(const QDomNode& node, const SkinContext& context) {
     m_beatColor = QColor(context.selectString(node, "BeatColor"));
     m_beatColor = WSkinColor::getCorrectColor(m_beatColor).toRgb();
+    m_showBarNumbers = context.selectBool(node, QStringLiteral("ShowBarNumbers"), false);
 }
 
 void WaveformRenderBeat::draw(QPainter* painter, QPaintEvent* /*event*/) {
@@ -109,4 +112,36 @@ void WaveformRenderBeat::draw(QPainter* painter, QPaintEvent* /*event*/) {
 
     // Make sure to use constData to prevent detaches!
     painter->drawLines(m_beats.constData(), beatCount);
+    if (!m_showBarNumbers) {
+        return;
+    }
+    auto font = painter->font();
+    font.setPointSizeF(8.f * scaleFactor());
+    painter->setFont(font);
+    painter->setPen(QColor(160, 160, 160));
+    const QFontMetricsF metrics(font);
+    float lastLabelEnd = -100.f;
+    int beatIndex = trackBeats->iteratorFrom(startPosition) - trackBeats->cfirstmarker();
+    for (auto beat = trackBeats->iteratorFrom(startPosition);
+            beat != trackBeats->cend() && *beat <= endPosition;
+            ++beat, ++beatIndex) {
+        const auto number = barNumberForBeat(beatIndex);
+        const double position = beat->toEngineSamplePos();
+        if (!number || position < 0 || position > trackSamples) {
+            continue;
+        }
+        const auto text = QString::number(*number);
+        const float labelStart = static_cast<float>(
+                m_waveformRenderer->transformSamplePositionInRendererWorld(position)) + 3.f;
+        const float extent = orientation == Qt::Horizontal
+                ? metrics.horizontalAdvance(text) : metrics.height();
+        if (labelStart < lastLabelEnd + 6.f ||
+                labelStart + extent >= m_waveformRenderer->getLength() - 2.f) {
+            continue;
+        }
+        painter->drawText(orientation == Qt::Horizontal
+                        ? QPointF(labelStart, metrics.ascent() + 2.f)
+                        : QPointF(3.f, labelStart + metrics.ascent()), text);
+        lastLabelEnd = labelStart + extent;
+    }
 }

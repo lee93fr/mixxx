@@ -108,7 +108,7 @@ void LibraryScannerDlg::updateProgressBar() {
 void LibraryScannerDlg::slotUpdate(const QString& path) {
     // qDebug() << "LibraryScannerDlg slotUpdate" <<
     // m_timer.elapsed().formatMillisWithUnit() << path;
-    if (!m_bCancelled && m_timer.elapsed() > mixxx::Duration::fromSeconds(2)) {
+    if (!m_embeddedProgress && !m_bCancelled && m_timer.elapsed() > mixxx::Duration::fromSeconds(2)) {
        setVisible(true);
     }
 
@@ -122,7 +122,7 @@ void LibraryScannerDlg::slotUpdate(const QString& path) {
 
 void LibraryScannerDlg::slotUpdateCover(const QString& path) {
     // qDebug() << "LibraryScannerDlg slotUpdate" << m_timer.elapsed() << path;
-    if (!m_bCancelled && m_timer.elapsed() > mixxx::Duration::fromSeconds(2)) {
+    if (!m_embeddedProgress && !m_bCancelled && m_timer.elapsed() > mixxx::Duration::fromSeconds(2)) {
         setVisible(true);
     }
 
@@ -137,7 +137,7 @@ void LibraryScannerDlg::slotUpdateCover(const QString& path) {
 
 void LibraryScannerDlg::slotUpdateSubstitute(const QString& path) {
     // qDebug() << "LibraryScannerDlg slotUpdateSubstitute" << m_timer.elapsed() << path;
-    if (!m_bCancelled && m_timer.elapsed() > mixxx::Duration::fromSeconds(2)) {
+    if (!m_embeddedProgress && !m_bCancelled && m_timer.elapsed() > mixxx::Duration::fromSeconds(2)) {
         setVisible(true);
     }
 

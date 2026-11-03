@@ -52,6 +52,19 @@ Sur une nouvelle bibliothèque, les colonnes sont : préécoute, titre, artiste,
 
 La recherche occupe la largeur disponible. Les boutons **Charger 1** et **Charger 2** au-dessus de la table chargent le morceau sélectionné sur la platine correspondante, en respectant la protection de chargement native de Mixxx.
 
+## Scanner et analyser la bibliothèque
+
+Le bouton **Scanner la bibliothèque**, au-dessus des morceaux, recherche les changements dans les dossiers musicaux configurés, puis analyse les titres dont le BPM ou la tonalité manque. Les dossiers se choisissent dans **Préférences → Bibliothèque**.
+
+La même barre affiche les éléments traités pendant la recherche, puis le nombre de titres et le pourcentage pendant l’analyse BPM/tonalité. **Annuler** arrête le travail ; les états terminé, annulé ou interrompu restent affichés dans la bibliothèque. Le fichier en cours est indiqué au survol du statut. Le scan et l’analyse par lots utilisent tous les cœurs détectés ; l’analyse au chargement d’un morceau utilise également cette capacité.
+
+## Dispositions locales conservées
+
+- **Vertical** : deux formes d’onde verticales côte à côte avec leurs vumètres. Les faders, le crossfader et le bouton Mixeur sont masqués dans cette vue.
+- **Compacte** : masque les cadrans, conserve BPM, temps, pitch et PFL et réduit les formes d’onde horizontales à 64 pixels de hauteur. Les modes de pads et les transports restent disponibles.
+
+De petits numéros gris indiquent les débuts de mesure, par groupes de quatre temps, selon la grille rythmique. Ils restent droits en vue verticale et sont espacés pour éviter les chevauchements. Sans grille, aucun numéro ne s’affiche.
+
 ## Afficher davantage de commandes
 
 - **Détails** : grille rythmique, réglages de boucles et sauts.

@@ -209,7 +209,7 @@ void AnalysisFeature::stopAnalysis() {
 }
 
 void AnalysisFeature::onTrackAnalysisSchedulerProgress(
-        AnalyzerProgress /*currentTrackProgress*/,
+        AnalyzerProgress currentTrackProgress,
         int currentTrackNumber,
         int totalTracksCount) {
     // Ignore any delayed progress updates after the analysis
@@ -222,6 +222,7 @@ void AnalysisFeature::onTrackAnalysisSchedulerProgress(
     } else {
         resetTitle();
     }
+    emit analysisProgress(currentTrackProgress, currentTrackNumber, totalTracksCount);
 }
 
 void AnalysisFeature::onTrackAnalysisSchedulerFinished() {

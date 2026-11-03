@@ -16,6 +16,7 @@ class rendergraph::Engine {
 
     void render();
     void resize(int w, int h);
+    void resize(int w, int h, const QMatrix4x4& matrix);
     void preprocess();
     void add(BaseNode* pNode);
     void remove(BaseNode* pNode);

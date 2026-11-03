@@ -3,6 +3,8 @@
 #include "rendergraph/context.h"
 #include "rendergraph/geometrynode.h"
 #include "util/class.h"
+#include <QPointF>
+#include <QVector>
 
 namespace rendergraph {
 class TexturedVertexUpdater;
@@ -30,6 +32,13 @@ class allshader::DigitsRenderNode : public rendergraph::GeometryNode {
             const QString& s2);
 
     void clear();
+
+    struct Label {
+        QPointF position;
+        QString text;
+    };
+    void updateLabels(const QVector<Label>& labels, Qt::Orientation orientation);
+    float textWidth(const QString& text) const;
 
     float height() const;
 

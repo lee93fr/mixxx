@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QMessageBox>
+#include <QSqlQuery>
 
 #include "control/controlobject.h"
 #include "controllers/keyboard/keyboardeventfilter.h"
@@ -19,11 +20,13 @@
 #include "library/library_prefs.h"
 #include "library/librarycontrol.h"
 #include "library/libraryfeature.h"
+#include "library/libraryscancontroller.h"
 #include "library/mixxxlibraryfeature.h"
 #include "library/recording/recordingfeature.h"
 #include "library/rekordbox/rekordboxfeature.h"
 #include "library/rhythmbox/rhythmboxfeature.h"
 #include "library/serato/seratofeature.h"
+#include "library/scanner/libraryscanner.h"
 #include "library/sidebarmodel.h"
 #include "library/trackcollection.h"
 #include "library/trackcollectionmanager.h"
@@ -165,6 +168,33 @@ Library::Library(
             m_pAnalysisFeature,
             &AnalysisFeature::analyzeTracks);
     addFeature(m_pAnalysisFeature);
+    m_pScanController = make_parented<LibraryScanController>(this);
+    connect(m_pScanController, &LibraryScanController::scanRequested,
+            m_pTrackCollectionManager, &TrackCollectionManager::startLibraryScan);
+    connect(m_pScanController, &LibraryScanController::cancelScanRequested,
+            m_pTrackCollectionManager, &TrackCollectionManager::stopLibraryScan);
+    connect(m_pScanController, &LibraryScanController::analysisRequested,
+            this, &Library::analyzeMissingLibraryTracks);
+    connect(m_pScanController, &LibraryScanController::cancelAnalysisRequested,
+            m_pAnalysisFeature, &AnalysisFeature::stopAnalysis);
+    connect(m_pTrackCollectionManager, &TrackCollectionManager::libraryScanStarted,
+            m_pScanController, &LibraryScanController::onScanStarted);
+    connect(m_pTrackCollectionManager, &TrackCollectionManager::libraryScanSummary,
+            m_pScanController, &LibraryScanController::onScanSummary);
+    connect(m_pAnalysisFeature, &AnalysisFeature::analysisActive,
+            m_pScanController, &LibraryScanController::onAnalysisActive);
+    connect(m_pAnalysisFeature, &AnalysisFeature::analysisProgress,
+            m_pScanController, &LibraryScanController::onAnalysisProgress);
+    if (auto* scanner = m_pTrackCollectionManager->scanner()) {
+        connect(m_pScanController, &LibraryScanController::embeddedChanged,
+                scanner, &LibraryScanner::setEmbeddedProgress, Qt::DirectConnection);
+        connect(scanner, &LibraryScanner::progressHashing,
+                m_pScanController, &LibraryScanController::onScanProgress);
+        connect(scanner, &LibraryScanner::progressLoading,
+                m_pScanController, &LibraryScanController::onScanProgress);
+        connect(scanner, &LibraryScanner::progressCoverArt,
+                m_pScanController, &LibraryScanController::onScanProgress);
+    }
     // Suspend a batch analysis while an ad-hoc analysis of
     // loaded tracks is in progress and resume it afterwards.
     connect(pPlayerManager,
@@ -279,6 +309,31 @@ Library::~Library() {
 TrackCollectionManager* Library::trackCollectionManager() const {
     // Cannot be implemented inline due to forward declarations
     return m_pTrackCollectionManager;
+}
+
+LibraryScanController* Library::scanController() const {
+    return m_pScanController;
+}
+
+void Library::analyzeMissingLibraryTracks() {
+    QSqlQuery query(m_pTrackCollectionManager->internalCollection()->database());
+    if (!query.exec(QStringLiteral(
+                "SELECT library.id FROM library "
+                "JOIN track_locations ON library.location = track_locations.id "
+                "WHERE library.mixxx_deleted = 0 AND track_locations.fs_deleted = 0 "
+                "AND (COALESCE(library.bpm, 0) <= 0 OR COALESCE(library.key_id, 0) <= 0)"))) {
+        m_pScanController->onError(tr("Impossible de préparer l’analyse de la bibliothèque"));
+        return;
+    }
+    QList<AnalyzerScheduledTrack> tracks;
+    while (query.next()) {
+        tracks.append(AnalyzerScheduledTrack(TrackId(query.value(0))));
+    }
+    if (tracks.isEmpty()) {
+        m_pScanController->onNoAnalysisNeeded();
+    } else {
+        m_pAnalysisFeature->analyzeTracks(tracks);
+    }
 }
 
 namespace {

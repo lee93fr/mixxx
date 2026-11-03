@@ -3,6 +3,7 @@
 <Template>
   <WidgetGroup>
     <ObjectName>GameflorrPlatterColumn</ObjectName><Layout>vertical</Layout><Size>128f,-1min</Size>
+    <Connection><ConfigKey>[GameflorrSkin],compact</ConfigKey><BindProperty>visible</BindProperty><Transform><Not/></Transform></Connection>
     <Children>
       <WidgetGroup>
         <ObjectName>GameflorrPlatterFace</ObjectName><Size>126f,126f</Size>

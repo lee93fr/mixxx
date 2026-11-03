@@ -31,6 +31,7 @@ class LibraryScanner : public QThread {
             mixxx::DbConnectionPoolPtr pDbConnectionPool,
             const UserSettingsPointer& pConfig);
     ~LibraryScanner() override;
+    void setEmbeddedProgress(bool embedded);
 
   public slots:
     // Call from any thread to start a scan. Does nothing if a scan is already
@@ -50,6 +51,7 @@ class LibraryScanner : public QThread {
     void progressHashing(const QString&);
     void progressLoading(const QString& path);
     void progressCoverArt(const QString& file);
+    void tasksQueued(int count);
     void trackAdded(TrackPointer pTrack);
     void tracksChanged(const QSet<TrackId>& changedTrackIds);
     void tracksRelocated(const QList<RelocatedTrack>& relocatedTracks);

@@ -7,6 +7,7 @@
 
       <WidgetGroup><Layout>horizontal</Layout><Size>-1me,32f</Size><Children><SearchBox/></Children></WidgetGroup><PushButton><ObjectName>GameflorrLibraryLoad</ObjectName><Size>96f,28f</Size><Tooltip>Charger le titre sélectionné sur la platine 1.</Tooltip><NumberStates>1</NumberStates><State><Number>0</Number><Text>Charger 1</Text></State><Connection><ConfigKey>[Channel1],LoadSelectedTrack</ConfigKey><EmitOnPressAndRelease>true</EmitOnPressAndRelease></Connection></PushButton><PushButton><ObjectName>GameflorrLibraryLoad</ObjectName><Size>96f,28f</Size><Tooltip>Charger le titre sélectionné sur la platine 2.</Tooltip><NumberStates>1</NumberStates><State><Number>0</Number><Text>Charger 2</Text></State><Connection><ConfigKey>[Channel2],LoadSelectedTrack</ConfigKey><EmitOnPressAndRelease>true</EmitOnPressAndRelease></Connection></PushButton>
     </Children></WidgetGroup>
+    <LibraryScanStatus><Size>-1me,32min</Size></LibraryScanStatus>
     <Splitter><ObjectName>GameflorrCollectionSplit</ObjectName><Orientation>horizontal</Orientation><SizePolicy>me,me</SizePolicy><SplitSizesConfigKey>[GameflorrSkin],collection_split</SplitSizesConfigKey><SplitSizes>180,1100</SplitSizes><Collapsible>0,0</Collapsible><Children>
       <LibrarySidebar><Style src="skins:Gameflorr/library.qss"/><MinimumSize>150,80</MinimumSize></LibrarySidebar>
       <Library><Style src="skins:Gameflorr/library.qss"/><ShowButtonText>true</ShowButtonText><TrackTableBackgroundColorOpacity>0.175</TrackTableBackgroundColorOpacity><SignalColor><Variable name="SignalColor"/></SignalColor></Library>
