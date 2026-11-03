@@ -77,6 +77,8 @@ SearchQueryParser::SearchQueryParser(TrackCollection* pTrackCollection, QStringL
                   << "al" << "album"
                   << "t" << "title"
                   << "g" << "genre"
+                  << "label"
+                  << "remixer"
                   << "cp" << "composer"
                   << "gr" << "grouping"
                   << "cm" << "comment"
@@ -109,6 +111,8 @@ SearchQueryParser::SearchQueryParser(TrackCollection* pTrackCollection, QStringL
     m_fieldToSqlColumns["g"] << "genre";
     m_fieldToSqlColumns["genre"] << "genre";
     m_fieldToSqlColumns["cp"] << "composer";
+    m_fieldToSqlColumns["label"] << "label";
+    m_fieldToSqlColumns["remixer"] << "remixer";
     m_fieldToSqlColumns["composer"] << "composer";
     m_fieldToSqlColumns["gr"] << "grouping";
     m_fieldToSqlColumns["grouping"] << "grouping";

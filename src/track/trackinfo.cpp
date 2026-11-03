@@ -62,6 +62,7 @@ bool TrackInfo::compareEq(
             (getISRC() == trackInfo.getISRC()) &&
 #endif // __EXTRA_METADATA__
             (getKeyText() == trackInfo.getKeyText()) &&
+            (getRemixer() == trackInfo.getRemixer()) &&
 #if defined(__EXTRA_METADATA__)
             (getLanguage() == trackInfo.getLanguage()) &&
             (getLyricist() == trackInfo.getLyricist()) &&
@@ -71,7 +72,6 @@ bool TrackInfo::compareEq(
             (getMusicBrainzRecordingId() == trackInfo.getMusicBrainzRecordingId()) &&
             (getMusicBrainzReleaseId() == trackInfo.getMusicBrainzReleaseId()) &&
             (getMusicBrainzWorkId() == trackInfo.getMusicBrainzWorkId()) &&
-            (getRemixer() == trackInfo.getRemixer()) &&
 #endif // __EXTRA_METADATA__
             (getReplayGain() == trackInfo.getReplayGain()) &&
             (getSeratoTags() == trackInfo.getSeratoTags()) &&
@@ -106,6 +106,7 @@ QDebug operator<<(QDebug dbg, const TrackInfo& arg) {
     arg.dbgISRC(dbg);
 #endif // __EXTRA_METADATA__
     arg.dbgKeyText(dbg);
+    arg.dbgRemixer(dbg);
 #if defined(__EXTRA_METADATA__)
     arg.dbgLanguage(dbg);
     arg.dbgLyricist(dbg);
@@ -115,7 +116,6 @@ QDebug operator<<(QDebug dbg, const TrackInfo& arg) {
     arg.dbgMusicBrainzRecordingId(dbg);
     arg.dbgMusicBrainzReleaseId(dbg);
     arg.dbgMusicBrainzWorkId(dbg);
-    arg.dbgRemixer(dbg);
 #endif // __EXTRA_METADATA__
     arg.dbgReplayGain(dbg);
     arg.dbgSeratoTags(dbg);

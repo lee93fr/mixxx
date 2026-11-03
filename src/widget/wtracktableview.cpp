@@ -300,6 +300,11 @@ void WTrackTableView::loadTrackModel(QAbstractItemModel* pNewModel, bool restore
         }
     }
 
+    if (m_pConfig->getValueString(ConfigKey("[Config]", "ResizableSkin")) ==
+            QStringLiteral("Gameflorr")) {
+        pHeader->enablePerformanceLayout();
+    }
+
     if (m_sorting) {
         // NOTE: Should be a UniqueConnection but that requires Qt 4.6
         // But Qt::UniqueConnections do not work for lambdas, non-member functions

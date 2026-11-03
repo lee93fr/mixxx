@@ -121,6 +121,7 @@ TEST_F(TrackMetadataTest, mergeExtraMetadataFromSource) {
     pNewTrackInfo->setISRC("isrc");
 #endif // __EXTRA_METADATA__
     pNewTrackInfo->setKeyText("1A");
+    pNewTrackInfo->setRemixer("remixer");
 #if defined(__EXTRA_METADATA__)
     pNewTrackInfo->setLanguage("language");
     pNewTrackInfo->setLyricist("lyricist");
@@ -130,7 +131,6 @@ TEST_F(TrackMetadataTest, mergeExtraMetadataFromSource) {
     pNewTrackInfo->setMusicBrainzRecordingId(QUuid("22222222-2222-2222-2222-222222222222"));
     pNewTrackInfo->setMusicBrainzReleaseId(QUuid("33333333-3333-3333-3333-333333333333"));
     pNewTrackInfo->setMusicBrainzWorkId(QUuid("44444444-4444-4444-4444-444444444444"));
-    pNewTrackInfo->setRemixer("remixer");
 #endif // __EXTRA_METADATA__
     pNewTrackInfo->setReplayGain(mixxx::ReplayGain(0.2, 2));
     pNewTrackInfo->setTitle("new title");
@@ -142,13 +142,13 @@ TEST_F(TrackMetadataTest, mergeExtraMetadataFromSource) {
     pNewTrackInfo->setYear("2002-02-02");
     mixxx::AlbumInfo* pNewAlbumInfo = newTrackMetadata.ptrAlbumInfo();
     pNewAlbumInfo->setArtist("new album artist");
+    pNewAlbumInfo->setRecordLabel("copyright");
 #if defined(__EXTRA_METADATA__)
     pNewAlbumInfo->setCopyright("copyright");
     pNewAlbumInfo->setLicense("license");
     pNewAlbumInfo->setMusicBrainzArtistId(QUuid("55555555-5555-5555-5555-555555555555"));
     pNewAlbumInfo->setMusicBrainzReleaseGroupId(QUuid("66666666-6666-6666-6666-666666666666"));
     pNewAlbumInfo->setMusicBrainzReleaseId(QUuid("77777777-7777-7777-7777-777777777777"));
-    pNewAlbumInfo->setRecordLabel("copyright");
     pNewAlbumInfo->setReplayGain(mixxx::ReplayGain(0.3, 3));
 #endif // __EXTRA_METADATA__
     pNewAlbumInfo->setTitle("new album title");
@@ -178,6 +178,7 @@ TEST_F(TrackMetadataTest, mergeExtraMetadataFromSource) {
     EXPECT_EQ(pNewTrackInfo->getISRC(), pMergedTrackInfo->getISRC());
 #endif // __EXTRA_METADATA__
     EXPECT_EQ(pOldTrackInfo->getKeyText(), pMergedTrackInfo->getKeyText());
+    EXPECT_EQ(pNewTrackInfo->getRemixer(), pMergedTrackInfo->getRemixer());
 #if defined(__EXTRA_METADATA__)
     EXPECT_EQ(pNewTrackInfo->getLanguage(), pMergedTrackInfo->getLanguage());
     EXPECT_EQ(pNewTrackInfo->getLyricist(), pMergedTrackInfo->getLyricist());
@@ -190,7 +191,6 @@ TEST_F(TrackMetadataTest, mergeExtraMetadataFromSource) {
             pMergedTrackInfo->getMusicBrainzReleaseId());
     EXPECT_EQ(pNewTrackInfo->getMusicBrainzWorkId(),
             pMergedTrackInfo->getMusicBrainzWorkId());
-    EXPECT_EQ(pNewTrackInfo->getRemixer(), pMergedTrackInfo->getRemixer());
 #endif // __EXTRA_METADATA__
     EXPECT_EQ(
             pOldTrackInfo->getReplayGain(), pMergedTrackInfo->getReplayGain());
@@ -206,6 +206,7 @@ TEST_F(TrackMetadataTest, mergeExtraMetadataFromSource) {
     mixxx::AlbumInfo* pMergedAlbumInfo =
             pMergedTrackMetadata->ptrAlbumInfo();
     EXPECT_EQ(pOldAlbumInfo->getArtist(), pMergedAlbumInfo->getArtist());
+    EXPECT_EQ(pNewAlbumInfo->getRecordLabel(), pMergedAlbumInfo->getRecordLabel());
 #if defined(__EXTRA_METADATA__)
     EXPECT_EQ(pNewAlbumInfo->getCopyright(), pMergedAlbumInfo->getCopyright());
     EXPECT_EQ(pNewAlbumInfo->getLicense(), pMergedAlbumInfo->getLicense());
@@ -215,7 +216,6 @@ TEST_F(TrackMetadataTest, mergeExtraMetadataFromSource) {
             pMergedAlbumInfo->getMusicBrainzReleaseGroupId());
     EXPECT_EQ(pNewAlbumInfo->getMusicBrainzReleaseId(),
             pMergedAlbumInfo->getMusicBrainzReleaseId());
-    EXPECT_EQ(pNewAlbumInfo->getRecordLabel(), pMergedAlbumInfo->getRecordLabel());
     EXPECT_EQ(pNewAlbumInfo->getReplayGain(), pMergedAlbumInfo->getReplayGain());
 #endif // __EXTRA_METADATA__
     EXPECT_EQ(pOldAlbumInfo->getTitle(), pMergedAlbumInfo->getTitle());
@@ -241,4 +241,19 @@ TEST_F(TrackMetadataTest, mergeExtraMetadataFromSource) {
     pMergedTrackInfo->setTrackTotal(QString());
     mergedTrackRecord.mergeExtraMetadataFromSource(newTrackMetadata);
     EXPECT_EQ(QString(), pMergedTrackInfo->getTrackTotal());
+}
+
+TEST_F(TrackMetadataTest, LabelAndRemixerBackfillPreservesUserEdits) {
+    mixxx::TrackMetadata imported;
+    imported.refAlbumInfo().setRecordLabel(QStringLiteral("Électrique"));
+    imported.refTrackInfo().setRemixer(QStringLiteral("DJ Remix"));
+    mixxx::TrackRecord record;
+    EXPECT_TRUE(record.mergeExtraMetadataFromSource(imported));
+    EXPECT_EQ(imported.getAlbumInfo().getRecordLabel(), record.getMetadata().getAlbumInfo().getRecordLabel());
+    EXPECT_EQ(imported.getTrackInfo().getRemixer(), record.getMetadata().getTrackInfo().getRemixer());
+    record.refMetadata().refAlbumInfo().setRecordLabel(QStringLiteral("Edited label"));
+    record.refMetadata().refTrackInfo().setRemixer(QStringLiteral(""));
+    EXPECT_FALSE(record.mergeExtraMetadataFromSource(imported));
+    EXPECT_EQ(QStringLiteral("Edited label"), record.getMetadata().getAlbumInfo().getRecordLabel());
+    EXPECT_EQ(QStringLiteral(""), record.getMetadata().getTrackInfo().getRemixer());
 }

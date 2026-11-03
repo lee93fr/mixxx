@@ -42,6 +42,7 @@ class SeratoFeature : public BaseExternalLibraryFeature {
 
   private slots:
     void htmlLinkClicked(const QUrl& link);
+    void chooseLibraryDirectory();
 
   private:
     QString formatRootViewHtml() const;

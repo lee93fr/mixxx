@@ -1,0 +1,45 @@
+<!DOCTYPE template>
+<!-- AI-generated text begins. Gameflorr performance controls. AI-generated text ends. -->
+<Template>
+  <WidgetGroup>
+    <Layout>horizontal</Layout>
+    <SizePolicy>me,min</SizePolicy>
+    <Children>
+      <Template src="skins:Gameflorr/pad_mode.xml">
+        <SetVariable name="mode">0</SetVariable>
+        <SetVariable name="text">Hot Cue</SetVariable>
+        <SetVariable name="tip">Points de repère ; clic droit pour effacer.</SetVariable>
+      </Template>
+      <Template src="skins:Gameflorr/pad_mode.xml">
+        <SetVariable name="mode">1</SetVariable>
+        <SetVariable name="text">Roll</SetVariable>
+        <SetVariable name="tip">Maintenir une boucle momentanée ; relâcher pour reprendre le fil.</SetVariable>
+      </Template>
+      <Template src="skins:Gameflorr/pad_mode.xml">
+        <SetVariable name="mode">2</SetVariable>
+        <SetVariable name="text">Slicer</SetVariable>
+        <SetVariable name="tip">Huit tranches d’un temps ; maintien pour répéter, relâchement pour reprendre.</SetVariable>
+      </Template>
+      <Template src="skins:Gameflorr/pad_mode.xml">
+        <SetVariable name="mode">3</SetVariable>
+        <SetVariable name="text">Sampler</SetVariable>
+        <SetVariable name="tip">Déclencher les samples 1–8 ; clic droit pour arrêter.</SetVariable>
+      </Template>
+      <Template src="skins:Gameflorr/pad_mode.xml">
+        <SetVariable name="mode">4</SetVariable>
+        <SetVariable name="text">Loop</SetVariable>
+        <SetVariable name="tip">Activer ou quitter les boucles quantifiées.</SetVariable>
+      </Template>
+      <Template src="skins:Gameflorr/pad_mode.xml">
+        <SetVariable name="mode">5</SetVariable>
+        <SetVariable name="text">Jump</SetVariable>
+        <SetVariable name="tip">Sauter en arrière ou en avant, de 1 à 8 temps.</SetVariable>
+      </Template>
+      <Template src="skins:Gameflorr/pad_mode.xml">
+        <SetVariable name="mode">6</SetVariable>
+        <SetVariable name="text">S. Loop</SetVariable>
+        <SetVariable name="tip">Conserver la même zone de huit temps et jouer ses tranches.</SetVariable>
+      </Template>
+    </Children>
+  </WidgetGroup>
+</Template>

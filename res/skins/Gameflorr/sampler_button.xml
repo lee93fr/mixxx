@@ -1,0 +1,28 @@
+<!DOCTYPE template>
+<!-- AI-generated text begins. Gameflorr performance controls. AI-generated text ends. -->
+<Template>
+  <PushButton>
+    <ObjectName>GameflorrNav</ObjectName>
+    <Size>25me,22f</Size>
+    <NumberStates>2</NumberStates>
+    <LeftClickIsPushButton>true</LeftClickIsPushButton>
+    <Tooltip>Lecture ou arrêt du sample.</Tooltip>
+    <State>
+      <Number>0</Number>
+      <Text><Variable name="text"/></Text>
+    </State>
+    <State>
+      <Number>1</Number>
+      <Text><Variable name="text"/></Text>
+    </State>
+    <Connection>
+      <ConfigKey><Variable name="sampleGroup"/>,<Variable name="key"/></ConfigKey>
+      <EmitOnPressAndRelease>true</EmitOnPressAndRelease>
+      <ConnectValueToWidget>false</ConnectValueToWidget>
+    </Connection>
+    <Connection>
+      <ConfigKey><Variable name="sampleGroup"/>,<Variable name="out"/></ConfigKey>
+      <ConnectValueFromWidget>false</ConnectValueFromWidget>
+    </Connection>
+  </PushButton>
+</Template>

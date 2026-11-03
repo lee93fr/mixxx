@@ -1421,3 +1421,14 @@ TEST_F(SearchQueryParserTest, QuotedOrOperator) {
     pTrackI->setComment("house");
     EXPECT_TRUE(pQuery->match(pTrackI));
 }
+
+TEST_F(SearchQueryParserTest, LabelAndRemixerFilters) {
+    auto track = Track::newTemporary();
+    track->setLabel(QStringLiteral("Night Records"));
+    track->setRemixer(QStringLiteral("DJ Example"));
+    EXPECT_TRUE(m_parser.parseQuery("label:night remixer:example", QString())->match(track));
+    EXPECT_FALSE(m_parser.parseQuery("label:other", QString())->match(track));
+    EXPECT_FALSE(m_parser.parseQuery("remixer:other", QString())->match(track));
+    EXPECT_TRUE(m_parser.parseQuery("label:night", QString())->toSql().contains("label"));
+    EXPECT_TRUE(m_parser.parseQuery("remixer:example", QString())->toSql().contains("remixer"));
+}

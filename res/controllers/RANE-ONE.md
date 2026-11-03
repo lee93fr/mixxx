@@ -14,7 +14,8 @@ Do not use this mapping for a performance until you have checked your controller
 ## Installation
 
 The mapping is included in this fork's controller resources. With the existing local
-Gameflorr launcher, no application rebuild is needed. For another Mixxx installation,
+Gameflorr launcher, use the rebuilt binary of this fork: performance pad controls
+are not present in stock Mixxx. For another installation of this fork,
 copy `RANE ONE.midi.xml` and `RANE-ONE-scripts.js` into its user controller directory
 (Preferences → Controllers → Open User Mapping Folder), then restart Mixxx.
 Mixxx supplies `midi-components-0.0.js`.
@@ -43,14 +44,19 @@ Mixxx supplies `midi-components-0.0.js`.
 | Slip | Toggle slip mode |
 | Channel Level, EQ, Filter, faders | Gain, three-band EQ, quick effect, volume, crossfader |
 | Headphone Cue | Toggle Mixxx PFL; hardware headphone controls still require audio setup |
-| Pads 1–8 | Fixed hotcues 1–8; Shift+pad clears the corresponding cue |
+| Pads 1–8 | Follow the deck pad mode selected on screen: Hotcue, Roll, Slicer, Sampler, Loop, Jump, Slicer Loop |
+| Shift+pad | Clear a hotcue, stop a sampler, or exit a loop, according to the active mode |
+| Parameter −/+ | Cycle the seven pad modes; changing mode releases held pads |
 | Loop On/Off, Reloop | Toggle beat loop, reloop |
 | Loop ½/×2, In/Out | Resize or set the loop |
 | FX Depth | Wet/dry of effect units 1 and 2; enable effects in the Mixxx interface |
 
 Hotcue LED colors use the observed RANE palette. Transport and cue feedback follow
-Mixxx state. Motor commands, platter LEDs, touch strip, stop-time knob, pad mode
-selection, sampler/slicer modes, FX selection/paddles and meters are not implemented.
+Mixxx state. Slicer requires a valid beat grid and a complete eight-beat region;
+Sampler targets the shared slots 1–8. See the [pad guide](../../docs/gameflorr-interface.md).
+The hardware pad-mode selection buttons are not decoded: use Parameter or the UI.
+Motor commands, platter LEDs, touch strip, stop-time knob, FX selection/paddles and
+meters are not implemented.
 Master, booth, microphone and headphone level controls are left to the hardware.
 Sliders and pots use Components JS soft takeover after the first received position.
 

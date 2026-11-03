@@ -159,3 +159,36 @@ TEST_F(TrackDAOTest, markTrackLocationsAsVerifiedRecoversPresentFilesOnly) {
     EXPECT_EQ(1, readQuery.value(1).toInt())
             << "needs_verification must remain set so verifyRemainingTracks can confirm deletion";
 }
+
+TEST_F(TrackDAOTest, LabelAndRemixerPersistAcrossReloads) {
+    QTemporaryDir temporaryDirectory;
+    ASSERT_TRUE(temporaryDirectory.isValid());
+    const auto path = temporaryDirectory.filePath(QStringLiteral("label-remixer.mp3"));
+    mixxxtest::copyFile(
+            MixxxTest::getOrInitTestDir().filePath(QStringLiteral("id3-test-data/empty.mp3")), path);
+    auto track = getOrAddTrackByLocation(path);
+    ASSERT_TRUE(track);
+    const auto id = track->getId();
+    ASSERT_TRUE(id.isValid());
+    track->setLabel(QStringLiteral(" Électrique Records "));
+    track->setRemixer(QStringLiteral(" Club Remix "));
+    EXPECT_EQ(TrackCollectionManager::SaveTrackResult::Saved,
+            trackCollectionManager()->saveTrack(track));
+    track.reset();
+    ASSERT_TRUE(GlobalTrackCacheLocker().isEmpty());
+    track = trackCollectionManager()->getTrackById(id);
+    ASSERT_TRUE(track);
+    EXPECT_EQ(QStringLiteral("Électrique Records"), track->getLabel());
+    EXPECT_EQ(QStringLiteral("Club Remix"), track->getRemixer());
+    track->setLabel(QStringLiteral("Edited label"));
+    track->setRemixer(QStringLiteral(""));
+    EXPECT_EQ(TrackCollectionManager::SaveTrackResult::Saved,
+            trackCollectionManager()->saveTrack(track));
+    track.reset();
+    ASSERT_TRUE(GlobalTrackCacheLocker().isEmpty());
+    track = trackCollectionManager()->getTrackById(id);
+    ASSERT_TRUE(track);
+    EXPECT_EQ(QStringLiteral("Edited label"), track->getLabel());
+    EXPECT_EQ(QStringLiteral(""), track->getRemixer());
+    EXPECT_FALSE(track->getRemixer().isNull());
+}

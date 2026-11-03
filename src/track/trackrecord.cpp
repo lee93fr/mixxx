@@ -82,6 +82,8 @@ bool mergeReplayGainMetadataProperty(
     return modified;
 }
 
+#endif // __EXTRA_METADATA__
+
 // This conditional copy operation only works for nullable properties
 // like QString or QUuid.
 template<typename T>
@@ -96,6 +98,7 @@ bool copyIfNotNull(
     return false;
 }
 
+#if defined(__EXTRA_METADATA__)
 // This conditional copy operation only works for properties where
 // empty = missing.
 template<typename T>
@@ -220,6 +223,13 @@ bool TrackRecord::mergeExtraMetadataFromSource(
     bool modified = false;
     TrackInfo* pMergedTrackInfo = m_metadata.ptrTrackInfo();
     const TrackInfo& importedTrackInfo = importedMetadata.getTrackInfo();
+    if (pMergedTrackInfo->getRemixer().isNull()) {
+        modified |= copyIfNotNull(pMergedTrackInfo->ptrRemixer(), importedTrackInfo.getRemixer());
+    }
+    if (m_metadata.getAlbumInfo().getRecordLabel().isNull()) {
+        modified |= copyIfNotNull(m_metadata.refAlbumInfo().ptrRecordLabel(),
+                importedMetadata.getAlbumInfo().getRecordLabel());
+    }
     if (pMergedTrackInfo->getTrackTotal() == kTrackTotalPlaceholder) {
         pMergedTrackInfo->setTrackTotal(importedTrackInfo.getTrackTotal());
         // Also set the track number if it is still empty due
@@ -274,9 +284,6 @@ bool TrackRecord::mergeExtraMetadataFromSource(
     modified |= copyIfNotNull(
             pMergedTrackInfo->ptrMusicBrainzWorkId(),
             importedTrackInfo.getMusicBrainzWorkId());
-    modified |= copyIfNotNull(
-            pMergedTrackInfo->ptrRemixer(),
-            importedTrackInfo.getRemixer());
     modified |= copyIfNotEmpty(
             pMergedTrackInfo->ptrSeratoTags(),
             importedTrackInfo.getSeratoTags());
@@ -306,9 +313,6 @@ bool TrackRecord::mergeExtraMetadataFromSource(
     modified |= copyIfNotNull(
             pMergedAlbumInfo->ptrMusicBrainzReleaseId(),
             importedAlbumInfo.getMusicBrainzReleaseId());
-    modified |= copyIfNotNull(
-            pMergedAlbumInfo->ptrRecordLabel(),
-            importedAlbumInfo.getRecordLabel());
 #endif // __EXTRA_METADATA__
     return modified;
 }

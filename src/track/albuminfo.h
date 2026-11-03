@@ -19,7 +19,9 @@ class AlbumInfo final {
     MIXXX_DECL_PROPERTY(QUuid, musicBrainzArtistId, MusicBrainzArtistId)
     MIXXX_DECL_PROPERTY(QUuid, musicBrainzReleaseGroupId, MusicBrainzReleaseGroupId)
     MIXXX_DECL_PROPERTY(QUuid, musicBrainzReleaseId, MusicBrainzReleaseId)
+#endif // __EXTRA_METADATA__
     MIXXX_DECL_PROPERTY(QString, recordLabel, RecordLabel)
+#if defined(__EXTRA_METADATA__)
     MIXXX_DECL_PROPERTY(ReplayGain, replayGain, ReplayGain)
 #endif // __EXTRA_METADATA__
     MIXXX_DECL_PROPERTY(QString, title, Title)

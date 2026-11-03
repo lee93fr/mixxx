@@ -593,4 +593,11 @@ reapplying those migrations.
       ALTER TABLE library ADD COLUMN tuning_frequency_hz FLOAT DEFAULT 0.0;
     </sql>
   </revision>
+  <revision version="41" min_compatible="3">
+    <description>Label and remixer metadata</description>
+    <sql>
+      ALTER TABLE library ADD COLUMN label TEXT DEFAULT NULL;
+      ALTER TABLE library ADD COLUMN remixer TEXT DEFAULT NULL;
+    </sql>
+  </revision>
 </schema>

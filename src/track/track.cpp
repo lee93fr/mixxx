@@ -548,6 +548,8 @@ void Track::emitChangedSignalsForAllMetadata() {
     emit albumChanged(getAlbum());
     emit albumArtistChanged(getAlbumArtist());
     emit genreChanged(getGenre());
+    emit labelChanged(getLabel());
+    emit remixerChanged(getRemixer());
     emit composerChanged(getComposer());
     emit groupingChanged(getGrouping());
     emit yearChanged(getYear());
@@ -743,7 +745,39 @@ void Track::setComposer(const QString& s) {
     }
 }
 
-QString Track::getGrouping()  const {
+QString Track::getLabel() const {
+    const auto locked = lockMutex(&m_qMutex);
+    return m_record.getMetadata().getAlbumInfo().getRecordLabel();
+}
+
+void Track::setLabel(const QString& s) {
+    auto locked = lockMutex(&m_qMutex);
+    const QString value = s.trimmed();
+    const auto property = m_record.refMetadata().refAlbumInfo().ptrRecordLabel();
+    if (*property != value || property->isNull() != value.isNull()) {
+        *property = value;
+        markDirtyAndUnlock(&locked);
+        emit labelChanged(value);
+    }
+}
+
+QString Track::getRemixer() const {
+    const auto locked = lockMutex(&m_qMutex);
+    return m_record.getMetadata().getTrackInfo().getRemixer();
+}
+
+void Track::setRemixer(const QString& s) {
+    auto locked = lockMutex(&m_qMutex);
+    const QString value = s.trimmed();
+    const auto property = m_record.refMetadata().refTrackInfo().ptrRemixer();
+    if (*property != value || property->isNull() != value.isNull()) {
+        *property = value;
+        markDirtyAndUnlock(&locked);
+        emit remixerChanged(value);
+    }
+}
+
+QString Track::getGrouping() const {
     const auto locked = lockMutex(&m_qMutex);
     return m_record.getMetadata().getTrackInfo().getGrouping();
 }

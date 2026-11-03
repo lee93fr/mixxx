@@ -4,6 +4,8 @@
 
 #include "mixer/basetrackplayer.h"
 
+class PerformancePadControl;
+
 class Deck : public BaseTrackPlayerImpl {
     Q_OBJECT
   public:
@@ -13,5 +15,8 @@ class Deck : public BaseTrackPlayerImpl {
             EffectsManager* pEffectsManager,
             EngineChannel::ChannelOrientation defaultOrientation,
             const ChannelHandleAndGroup& handleGroup);
-    ~Deck() override = default;
+    ~Deck() override;
+
+  private:
+    std::unique_ptr<PerformancePadControl> m_performancePads;
 };

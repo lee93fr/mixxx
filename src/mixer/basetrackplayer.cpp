@@ -344,6 +344,8 @@ BaseTrackPlayerImpl::BaseTrackPlayerImpl(
         return;
     }
 
+    m_pKeylock->set(1.0);
+
 #ifdef __STEM__
     m_pStemColors.reserve(mixxx::kMaxSupportedStems);
     QString group = getGroup();

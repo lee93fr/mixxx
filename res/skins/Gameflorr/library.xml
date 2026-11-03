@@ -3,9 +3,9 @@
 <Template>
   <WidgetGroup><ObjectName>LibraryContainer</ObjectName><Layout>vertical</Layout><SizePolicy>me,i</SizePolicy><Children>
     <WidgetGroup><ObjectName>GameflorrSearch</ObjectName><Style src="skins:Gameflorr/library.qss"/><Layout>horizontal</Layout><SizePolicy>me,min</SizePolicy><Children>
-      <Label><ObjectName>GameflorrCollectionLabel</ObjectName><Text>BIBLIOTHÈQUE</Text><Size>180f,26f</Size></Label>
-      <WidgetGroup><Size>0me,0f</Size></WidgetGroup>
-      <WidgetGroup><Layout>horizontal</Layout><Size>360f,26f</Size><Children><SearchBox/></Children></WidgetGroup>
+      <Label><ObjectName>GameflorrCollectionLabel</ObjectName><Text>BIBLIOTHÈQUE</Text><Size>180f,32f</Size></Label>
+
+      <WidgetGroup><Layout>horizontal</Layout><Size>-1me,32f</Size><Children><SearchBox/></Children></WidgetGroup><PushButton><ObjectName>GameflorrLibraryLoad</ObjectName><Size>96f,28f</Size><Tooltip>Charger le titre sélectionné sur la platine 1.</Tooltip><NumberStates>1</NumberStates><State><Number>0</Number><Text>Charger 1</Text></State><Connection><ConfigKey>[Channel1],LoadSelectedTrack</ConfigKey><EmitOnPressAndRelease>true</EmitOnPressAndRelease></Connection></PushButton><PushButton><ObjectName>GameflorrLibraryLoad</ObjectName><Size>96f,28f</Size><Tooltip>Charger le titre sélectionné sur la platine 2.</Tooltip><NumberStates>1</NumberStates><State><Number>0</Number><Text>Charger 2</Text></State><Connection><ConfigKey>[Channel2],LoadSelectedTrack</ConfigKey><EmitOnPressAndRelease>true</EmitOnPressAndRelease></Connection></PushButton>
     </Children></WidgetGroup>
     <Splitter><ObjectName>GameflorrCollectionSplit</ObjectName><Orientation>horizontal</Orientation><SizePolicy>me,me</SizePolicy><SplitSizesConfigKey>[GameflorrSkin],collection_split</SplitSizesConfigKey><SplitSizes>180,1100</SplitSizes><Collapsible>0,0</Collapsible><Children>
       <LibrarySidebar><Style src="skins:Gameflorr/library.qss"/><MinimumSize>150,80</MinimumSize></LibrarySidebar>

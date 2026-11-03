@@ -1,7 +1,13 @@
 #include "library/serato/seratofeature.h"
 
 #include <QBuffer>
+#include <QDateTime>
+#include <QFileDialog>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include <QMap>
+#include <QMessageBox>
+#include <QSet>
 #include <QStandardPaths>
 #include <QTextCodec>
 #include <QtConcurrentRun>
@@ -594,7 +600,9 @@ QString parseDatabase(mixxx::DbConnectionPoolPtr dbConnectionPool, TreeItem* dat
                 query.bindValue(":key", track.key);
                 query.bindValue(":location", location);
                 query.bindValue(":bpm_lock", track.beatgridlocked);
-                query.bindValue(":datetime_added", track.datetimeadded);
+                query.bindValue(":datetime_added", track.datetimeadded > 0
+                        ? QDateTime::fromSecsSinceEpoch(track.datetimeadded, Qt::UTC)
+                        : QDateTime{});
                 query.bindValue(":label", track.label);
                 query.bindValue(":serato_db", databaseDir.path());
 
@@ -669,7 +677,7 @@ QString parseDatabase(mixxx::DbConnectionPoolPtr dbConnectionPool, TreeItem* dat
 // The returned list owns the pointers, but we can't use a unique_ptr because
 // the result is passed by a const reference inside QFuture and than copied
 // to the main thread requiring a copy-able object.
-QList<TreeItem*> findSeratoDatabases() {
+QList<TreeItem*> findSeratoDatabases(const QStringList& customLocations) {
     QThread* thisThread = QThread::currentThread();
     thisThread->setPriority(QThread::LowPriority);
 
@@ -717,6 +725,11 @@ QList<TreeItem*> findSeratoDatabases() {
             volumesDir.entryInfoList(QDir::AllDirs | QDir::NoDotAndDotDot));
 #endif
 
+    for (const auto& location : customLocations) {
+        databaseLocations.append(QFileInfo(location));
+    }
+
+    QSet<QString> seenDatabases;
     QList<TreeItem*> foundDatabases;
     for (const QFileInfo& databaseLocation : std::as_const(databaseLocations)) {
         QDir databaseDir = QDir(databaseLocation.filePath());
@@ -727,6 +740,12 @@ QList<TreeItem*> findSeratoDatabases() {
         if (!databaseDir.exists(kDatabaseFilename)) {
             continue;
         }
+
+        const auto databasePath = QFileInfo(databaseDir.filePath(kDatabaseFilename)).canonicalFilePath();
+        if (databasePath.isEmpty() || seenDatabases.contains(databasePath)) {
+            continue;
+        }
+        seenDatabases.insert(databasePath);
 
         QString displayPath = databaseLocation.filePath();
         if (displayPath.endsWith("/")) {
@@ -856,6 +875,8 @@ SeratoFeature::SeratoFeature(
             LIBRARYTABLE_GENRE,
             LIBRARYTABLE_COMMENT,
             LIBRARYTABLE_GROUPING,
+            LIBRARYTABLE_LABEL,
+            LIBRARYTABLE_DATETIMEADDED,
             LIBRARYTABLE_YEAR,
             LIBRARYTABLE_DURATION,
             LIBRARYTABLE_BITRATE,
@@ -872,7 +893,8 @@ SeratoFeature::SeratoFeature(
             LIBRARYTABLE_GENRE,
             TRACKLOCATIONSTABLE_LOCATION,
             LIBRARYTABLE_COMMENT,
-            LIBRARYTABLE_GROUPING};
+            LIBRARYTABLE_GROUPING,
+            LIBRARYTABLE_LABEL};
 
     m_trackSource = QSharedPointer<BaseTrackCache>::create(
             m_pTrackCollection,
@@ -940,6 +962,8 @@ void SeratoFeature::bindLibraryWidget(WLibrary* libraryWidget,
 void SeratoFeature::htmlLinkClicked(const QUrl& link) {
     if (QString(link.path()) == "refresh") {
         activate();
+    } else if (link.path() == QStringLiteral("choose")) {
+        chooseLibraryDirectory();
     } else {
         qDebug() << "Unknown link clicked" << link;
     }
@@ -972,6 +996,35 @@ TreeItemModel* SeratoFeature::sidebarModel() const {
     return m_pSidebarModel;
 }
 
+void SeratoFeature::chooseLibraryDirectory() {
+    const auto directory = QFileDialog::getExistingDirectory(nullptr,
+            tr("Choose a Serato library folder (containing _Serato_)"));
+    if (directory.isEmpty()) {
+        return;
+    }
+    QDir libraryDirectory(directory);
+    if (libraryDirectory.dirName() == kDatabaseDirectory) {
+        libraryDirectory.cdUp();
+    }
+    const QFileInfo database(libraryDirectory.filePath(
+            kDatabaseDirectory + QLatin1Char('/') + kDatabaseFilename));
+    if (!database.isFile() || !database.isReadable()) {
+        QMessageBox::warning(nullptr,
+                tr("Serato library"),
+                tr("This folder does not contain a readable _Serato_/database V2. "
+                   "Choose the _Serato_ folder or its parent folder."));
+        return;
+    }
+    const ConfigKey key(QStringLiteral("[Library]"), QStringLiteral("serato_library_directories"));
+    auto locations = QJsonDocument::fromJson(m_pConfig->getValueString(key).toUtf8()).array();
+    const auto path = libraryDirectory.canonicalPath();
+    if (!locations.contains(path)) {
+        locations.append(path);
+        m_pConfig->setValue(key, QString::fromUtf8(QJsonDocument(locations).toJson(QJsonDocument::Compact)));
+    }
+    activate();
+}
+
 QString SeratoFeature::formatRootViewHtml() const {
     QString title = tr("Serato");
     QString summary = tr("Reads the following from the Serato Music directory and removable devices:");
@@ -994,7 +1047,13 @@ QString SeratoFeature::formatRootViewHtml() const {
     //Links are still different from regular text, but readable on dark/light backgrounds.
     //https://github.com/mixxxdj/mixxx/issues/9103
     html.append(QString("<a style=\"color:#0496FF;\" href=\"refresh\">%1</a>")
-                        .arg(refreshLink));
+                    .arg(refreshLink));
+    html.append(QStringLiteral("<p><a style=\"color:#0496FF;\" href=\"choose\">%1</a></p>")
+                    .arg(tr("Add a Serato library folder").toHtmlEscaped()));
+    html.append(QStringLiteral("<p>%1</p>").arg(tr(
+            "Use the same audio files in Mixxx and Serato without copying them. "
+            "Serato databases and crates are opened for reading only.")
+                    .toHtmlEscaped()));
     return html;
 }
 
@@ -1005,7 +1064,16 @@ void SeratoFeature::activate() {
     qDebug() << "SeratoFeature::activate()";
 
     // Let a worker thread do the parsing
-    m_databasesFuture = QtConcurrent::run(findSeratoDatabases);
+    if (m_databasesFutureWatcher.isRunning() || m_tracksFutureWatcher.isRunning()) {
+        return;
+    }
+    const ConfigKey key(QStringLiteral("[Library]"), QStringLiteral("serato_library_directories"));
+    const auto locations = QJsonDocument::fromJson(m_pConfig->getValueString(key).toUtf8()).array();
+    QStringList customLocations;
+    for (const auto& location : locations) {
+        customLocations.append(location.toString());
+    }
+    m_databasesFuture = QtConcurrent::run(findSeratoDatabases, customLocations);
     m_databasesFutureWatcher.setFuture(m_databasesFuture);
     m_title = tr("(loading) Serato");
     //calls a slot in the sidebar model such that 'Serato (isLoading)' is displayed.

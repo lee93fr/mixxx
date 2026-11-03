@@ -1,6 +1,7 @@
 #include "mixer/deck.h"
 
 #include "moc_deck.cpp"
+#include "mixer/performancepadcontrol.h"
 
 Deck::Deck(PlayerManager* pParent,
         UserSettingsPointer pConfig,
@@ -17,4 +18,7 @@ Deck::Deck(PlayerManager* pParent,
                   /*defaultMainMix*/ true,
                   /*defaultHeadphones*/ false,
                   /*primaryDeck*/ true) {
+    m_performancePads = std::make_unique<PerformancePadControl>(handleGroup.name(), this);
 }
+
+Deck::~Deck() = default;

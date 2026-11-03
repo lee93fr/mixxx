@@ -235,6 +235,14 @@ void importTrackMetadataFromTag(
         parseTrackPeak(pTrackMetadata, trackPeak, resetMissingTagMetadata);
     }
 
+    QString recordLabel;
+    if (readAtom(tag, "----:com.apple.iTunes:LABEL", &recordLabel) || resetMissingTagMetadata) {
+        pTrackMetadata->refAlbumInfo().setRecordLabel(recordLabel);
+    }
+    QString remixer;
+    if (readAtom(tag, "----:com.apple.iTunes:REMIXER", &remixer) || resetMissingTagMetadata) {
+        pTrackMetadata->refTrackInfo().setRemixer(remixer);
+    }
 #if defined(__EXTRA_METADATA__)
     QString albumGain;
     if (readAtom(tag, kAtomKeyReplayGainAlbumGain, &albumGain) || resetMissingTagMetadata) {
@@ -322,14 +330,6 @@ void importTrackMetadataFromTag(
     QString license;
     if (readAtom(tag, "----:com.apple.iTunes:LICENSE", &license) || resetMissingTagMetadata) {
         pTrackMetadata->refAlbumInfo().setLicense(license);
-    }
-    QString recordLabel;
-    if (readAtom(tag, "----:com.apple.iTunes:LABEL", &recordLabel) || resetMissingTagMetadata) {
-        pTrackMetadata->refAlbumInfo().setRecordLabel(recordLabel);
-    }
-    QString remixer;
-    if (readAtom(tag, "----:com.apple.iTunes:REMIXER", &remixer) || resetMissingTagMetadata) {
-        pTrackMetadata->refTrackInfo().setRemixer(remixer);
     }
     QString subtitle;
     if (readAtom(tag, "----:com.apple.iTunes:SUBTITLE", &subtitle) || resetMissingTagMetadata) {
@@ -442,6 +442,8 @@ bool exportTrackMetadataIntoTag(
     writeAtom(pTag, kAtomKeyReplayGainTrackGain, toTString(formatTrackGain(trackMetadata)));
     writeAtom(pTag, kAtomKeyReplayGainTrackPeak, toTString(formatTrackPeak(trackMetadata)));
 
+    writeAtom(pTag, "----:com.apple.iTunes:LABEL", toTString(trackMetadata.getAlbumInfo().getRecordLabel()));
+    writeAtom(pTag, "----:com.apple.iTunes:REMIXER", toTString(trackMetadata.getTrackInfo().getRemixer()));
 #if defined(__EXTRA_METADATA__)
     // Write disc number/total pair
     QString discNumberText;
@@ -485,8 +487,6 @@ bool exportTrackMetadataIntoTag(
     writeAtom(pTag, "----:com.apple.iTunes:MOOD", toTString(trackMetadata.getTrackInfo().getMood()));
     writeAtom(pTag, "cprt", toTString(trackMetadata.getAlbumInfo().getCopyright()));
     writeAtom(pTag, "----:com.apple.iTunes:LICENSE", toTString(trackMetadata.getAlbumInfo().getLicense()));
-    writeAtom(pTag, "----:com.apple.iTunes:LABEL", toTString(trackMetadata.getAlbumInfo().getRecordLabel()));
-    writeAtom(pTag, "----:com.apple.iTunes:REMIXER", toTString(trackMetadata.getTrackInfo().getRemixer()));
     writeAtom(pTag, "----:com.apple.iTunes:SUBTITLE", toTString(trackMetadata.getTrackInfo().getSubtitle()));
     writeAtom(pTag, "\251too", toTString(trackMetadata.getTrackInfo().getEncoder()));
     writeAtom(pTag, "\251wrk", toTString(trackMetadata.getTrackInfo().getWork()));

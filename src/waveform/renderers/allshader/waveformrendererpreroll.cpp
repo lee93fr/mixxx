@@ -83,6 +83,7 @@ void WaveformRendererPreroll::setup(
         const QDomNode& node, const SkinContext& skinContext) {
     m_color = QColor(skinContext.selectString(node, QStringLiteral("SignalColor")));
     m_color = WSkinColor::getCorrectColor(m_color);
+    m_showPreroll = skinContext.selectBool(node, QStringLiteral("ShowPreroll"), true);
 }
 
 void WaveformRendererPreroll::draw(QPainter* painter, QPaintEvent* event) {
@@ -119,7 +120,7 @@ bool WaveformRendererPreroll::preprocessInner() {
 
     // Check if the pre- or post-roll is on screen. If so, draw little triangles
     // to indicate the respective zones.
-    const bool preRollVisible = firstDisplayedPosition < 0;
+    const bool preRollVisible = m_showPreroll && firstDisplayedPosition < 0;
     const bool postRollVisible = lastDisplayedPosition > 1;
     const int numVerticesPerRectangle = 6;
 

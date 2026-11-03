@@ -327,6 +327,12 @@ QVariant BaseTrackCache::getTrackValueForColumn(TrackPointer pTrack,
     if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_GENRE) == column) {
         return QVariant{pTrack->getGenre()};
     }
+    if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_LABEL) == column) {
+        return QVariant{pTrack->getLabel()};
+    }
+    if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_REMIXER) == column) {
+        return QVariant{pTrack->getRemixer()};
+    }
     if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_COMPOSER) == column) {
         return QVariant{pTrack->getComposer()};
     }
@@ -338,6 +344,12 @@ QVariant BaseTrackCache::getTrackValueForColumn(TrackPointer pTrack,
     }
     if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_TRACKNUMBER) == column) {
         return QVariant{pTrack->getTrackNumber()};
+    }
+    if (fieldIndex(ColumnCache::COLUMN_TRACKLOCATIONSTABLE_FILENAME) == column) {
+        return QVariant{pTrack->getFileInfo().fileName()};
+    }
+    if (fieldIndex(ColumnCache::COLUMN_TRACKLOCATIONSTABLE_FILESIZE) == column) {
+        return QVariant{pTrack->getFileInfo().sizeInBytes()};
     }
     if (fieldIndex(ColumnCache::COLUMN_TRACKLOCATIONSTABLE_LOCATION) == column) {
         return QVariant{QDir::toNativeSeparators(pTrack->getLocation())};

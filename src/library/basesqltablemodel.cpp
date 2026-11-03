@@ -75,6 +75,15 @@ void BaseSqlTableModel::initSortColumnMapping() {
             TrackModel::SortColumnId::Genre)] =
             fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_GENRE);
     m_columnIndexBySortColumnId[static_cast<int>(
+            TrackModel::SortColumnId::Label)] =
+            fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_LABEL);
+    m_columnIndexBySortColumnId[static_cast<int>(
+            TrackModel::SortColumnId::Remixer)] =
+            fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_REMIXER);
+    m_columnIndexBySortColumnId[static_cast<int>(
+            TrackModel::SortColumnId::Filename)] =
+            fieldIndex(ColumnCache::COLUMN_TRACKLOCATIONSTABLE_FILENAME);
+    m_columnIndexBySortColumnId[static_cast<int>(
             TrackModel::SortColumnId::Composer)] =
             fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_COMPOSER);
     m_columnIndexBySortColumnId[static_cast<int>(
@@ -726,6 +735,10 @@ bool BaseSqlTableModel::setTrackValueForColumn(
         pTrack->setYear(value.toString());
     } else if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_GENRE) == column) {
         updateTrackGenre(pTrack.get(), value.toString());
+    } else if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_LABEL) == column) {
+        pTrack->setLabel(value.toString());
+    } else if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_REMIXER) == column) {
+        pTrack->setRemixer(value.toString());
     } else if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_COMPOSER) == column) {
         pTrack->setComposer(value.toString());
     } else if (fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_GROUPING) == column) {

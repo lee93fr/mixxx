@@ -40,8 +40,8 @@ class TrackInfo final {
     MIXXX_DECL_PROPERTY(QUuid, musicBrainzRecordingId, MusicBrainzRecordingId)
     MIXXX_DECL_PROPERTY(QUuid, musicBrainzReleaseId, MusicBrainzReleaseId)
     MIXXX_DECL_PROPERTY(QUuid, musicBrainzWorkId, MusicBrainzWorkId)
-    MIXXX_DECL_PROPERTY(QString, remixer, Remixer)
 #endif // __EXTRA_METADATA__
+    MIXXX_DECL_PROPERTY(QString, remixer, Remixer)
     MIXXX_DECL_PROPERTY(ReplayGain, replayGain, ReplayGain)
     MIXXX_DECL_PROPERTY(SeratoTags, seratoTags, SeratoTags)
 #if defined(__EXTRA_METADATA__)

@@ -77,6 +77,8 @@ void DlgTrackInfo::init() {
     m_propertyWidgets.insert("titleInfo", txtTitle);
     m_propertyWidgets.insert("album", txtAlbum);
     m_propertyWidgets.insert("album_artist", txtAlbumArtist);
+    m_propertyWidgets.insert("label", txtLabel);
+    m_propertyWidgets.insert("remixer", txtRemixer);
     m_propertyWidgets.insert("composer", txtComposer);
     m_propertyWidgets.insert("genre", txtGenre);
     m_propertyWidgets.insert("year", txtYear);
@@ -235,6 +237,14 @@ void DlgTrackInfo::init() {
                 m_trackRecord.refMetadata().refTrackInfo().setGenre(
                         txtGenre->text());
             });
+    connect(txtLabel, &QLineEdit::editingFinished, this, [this]() {
+        txtLabel->setText(txtLabel->text().trimmed());
+        m_trackRecord.refMetadata().refAlbumInfo().setRecordLabel(txtLabel->text());
+    });
+    connect(txtRemixer, &QLineEdit::editingFinished, this, [this]() {
+        txtRemixer->setText(txtRemixer->text().trimmed());
+        m_trackRecord.refMetadata().refTrackInfo().setRemixer(txtRemixer->text());
+    });
     connect(txtComposer,
             &QLineEdit::editingFinished,
             this,
@@ -438,6 +448,8 @@ void DlgTrackInfo::updateTrackMetadataFields() {
     txtAlbum->setText(albumInfo.getTitle());
     txtAlbumArtist->setText(albumInfo.getArtist());
     txtGenre->setText(trackInfo.getGenre());
+    txtLabel->setText(albumInfo.getRecordLabel());
+    txtRemixer->setText(trackInfo.getRemixer());
     txtComposer->setText(trackInfo.getComposer());
     txtGrouping->setText(trackInfo.getGrouping());
     txtYear->setText(trackInfo.getYear());

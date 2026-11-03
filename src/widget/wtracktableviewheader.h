@@ -16,15 +16,17 @@ class WTrackTableViewHeader;
 // Thanks to StackOverflow http://stackoverflow.com/questions/1163030/qt-qtableview-and-horizontalheader-restorestate
 // answer with this code snippet: http://codepad.org/2gPIMPYU
 class HeaderViewState {
-public:
-    HeaderViewState() {}
+  public:
+    HeaderViewState() {
+    }
 
     // Populate the object based on the provided live view.
     explicit HeaderViewState(const WTrackTableViewHeader& headers);
 
     // Populate from an existing protobuf, mostly for testing.
     explicit HeaderViewState(const mixxx::library::HeaderViewState& pb)
-            : m_view_state(pb) { }
+            : m_view_state(pb) {
+    }
 
     // Populate the object with the serialized protobuf data provided.
     explicit HeaderViewState(const QString& base64serialized);
@@ -48,10 +50,9 @@ public:
         return false;
     }
 
-private:
+  private:
     mixxx::library::HeaderViewState m_view_state;
 };
-
 
 class WTrackTableViewHeader : public QHeaderView {
     Q_OBJECT
@@ -66,6 +67,8 @@ class WTrackTableViewHeader : public QHeaderView {
     void loadDefaultHeaderState();
     // Returns false if the header state is not stored in the database (on first time usage)
     bool hasPersistedHeaderState();
+
+    void enablePerformanceLayout();
 
     int getWidthOfHiddenColumn(int column) const;
 
@@ -94,6 +97,9 @@ class WTrackTableViewHeader : public QHeaderView {
     void showOrHideColumn(int);
 
   private:
+    void applyPerformanceLayout();
+    void applySeratoLayout();
+    void applyColumnLayout(const QList<QPair<QString, int>>& columns);
     int hiddenCount();
     void clearActions();
     TrackModel* getTrackModel();
