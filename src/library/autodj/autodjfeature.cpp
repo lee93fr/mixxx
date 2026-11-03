@@ -4,6 +4,7 @@
 #include <QtDebug>
 
 #include "controllers/keyboard/keyboardeventfilter.h"
+#include "gameflorr/autodjbridge.h"
 #include "library/autodj/autodjprocessor.h"
 #include "library/autodj/dlgautodj.h"
 #include "library/dao/trackschema.h"
@@ -67,6 +68,11 @@ AutoDJFeature::AutoDJFeature(Library* pLibrary,
             Qt::QueuedConnection);
 
     m_playlistDao.setAutoDJProcessor(m_pAutoDJProcessor);
+    new gameflorr::AutoDjBridge(m_pAutoDJProcessor,
+            pLibrary,
+            pPlayerManager,
+            m_pAutoDJProcessor,
+            m_iAutoDJPlaylistId);
 
     // Create the "Crates" tree-item under the root item.
     std::unique_ptr<TreeItem> pRootItem = TreeItem::newRoot(this);

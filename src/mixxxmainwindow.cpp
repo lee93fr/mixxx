@@ -1221,6 +1221,8 @@ void MixxxMainWindow::slotGameflorrRequests() {
         auto* tabs = new QTabWidget(m_pGameflorrRequests);
         tabs->addTab(new gameflorr::RequestsPanel(tabs, m_pCoreServices->getLibrary().get()), tr("Demandes du public"));
         tabs->addTab(new gameflorr::MusicdlPanel(tabs, m_pCoreServices->getLibrary().get()), tr("Playlists MusicDL"));
+        tabs->addTab(
+                gameflorr::createAutoDjPanel(tabs), tr("Conducteur AutoDJ"));
         m_pGameflorrScreenButton = new QPushButton(tr("Écran Gameflorr…"), tabs);
         m_pGameflorrScreenButton->setObjectName(QStringLiteral("gameflorrScreenButton"));
         m_pGameflorrScreenButton->setToolTip(tr("Choisir le contenu diffusé sur l’écran public"));

@@ -5,11 +5,13 @@
 
 #include <QScopedPointer>
 #include <QString>
+#include <limits>
 
 #include "control/controllinpotmeter.h"
 #include "control/controlpotmeter.h"
 #include "control/controlpushbutton.h"
 #include "engine/engine.h"
+#include "gameflorr/transitionplan.h"
 #include "library/dao/trackschema.h"
 #include "library/playlisttablemodel.h"
 #include "mixer/basetrackplayer.h"
@@ -2055,4 +2057,136 @@ TEST_F(AutoDJProcessorTest, FadeToDeck2_ZeroTransition_DelayedPlaypositionAfterS
     EXPECT_DOUBLE_EQ(1.0, mixer.crossfader.get());
     EXPECT_DOUBLE_EQ(0.0, deck1.play.get());
     EXPECT_DOUBLE_EQ(1.0, deck2.play.get());
+}
+
+TEST(GameflorrTransitionTest, MusicalBarsFitBothMarkedRegions) {
+    const auto longMix =
+            gameflorr::planTransition(true, 0.9, 120, 122, true, 70, 68);
+    EXPECT_EQ(32, longMix.bars);
+    EXPECT_DOUBLE_EQ(64, longMix.seconds);
+    EXPECT_TRUE(longMix.sync);
+    EXPECT_TRUE(longMix.bassSwap);
+    const auto shortIntro =
+            gameflorr::planTransition(true, 0.9, 120, 122, true, 70, 20);
+    EXPECT_EQ(8, shortIntro.bars);
+    EXPECT_LE(shortIntro.seconds, 20);
+}
+
+TEST(GameflorrTransitionTest, MissingOrUnreliableAnalysisUsesConservativeFade) {
+    for (const auto& recipe : {
+                 gameflorr::planTransition(true, 0.9, 0, 120, true, 60, 60),
+                 gameflorr::planTransition(true, 0.9, 120, 122, false, 60, 60),
+                 gameflorr::planTransition(true, 0.9, 120, 122, true, 0, 60),
+                 gameflorr::planTransition(true,
+                         0.9,
+                         120,
+                         122,
+                         true,
+                         std::numeric_limits<double>::quiet_NaN(),
+                         60)}) {
+        EXPECT_FALSE(recipe.sync);
+        EXPECT_FALSE(recipe.bassSwap);
+        EXPECT_EQ(0, recipe.bars);
+        EXPECT_DOUBLE_EQ(8, recipe.seconds);
+    }
+}
+
+TEST(GameflorrTransitionTest, LargeTempoJumpAvoidsForcedSynchronization) {
+    const auto recipe =
+            gameflorr::planTransition(true, 1, 80, 130, true, 60, 60);
+    EXPECT_DOUBLE_EQ(3, recipe.seconds);
+    EXPECT_FALSE(recipe.sync);
+    EXPECT_FALSE(recipe.bassSwap);
+}
+
+TEST(GameflorrTransitionTest,
+        ShortAndGentleTransitionsDoNotAutomateEqualizers) {
+    const auto shortMix =
+            gameflorr::planTransition(true, 1, 120, 120, true, 4, 60);
+    EXPECT_LE(shortMix.seconds, 4);
+    EXPECT_FALSE(shortMix.bassSwap);
+    const auto gentle =
+            gameflorr::planTransition(false, 1, 120, 120, true, 60, 60);
+    EXPECT_FALSE(gentle.sync);
+    EXPECT_FALSE(gentle.bassSwap);
+}
+
+TEST_F(AutoDJProcessorTest, CreativeBarsDriveNativeFadeAndRestoreManualEq) {
+    pProcessor->setTransitionMode(
+            AutoDJProcessor::TransitionMode::FullIntroOutro);
+    pProcessor->setCreativeMixing(true, 0.5);
+    const auto id = addTrackToCollection(kTrackLocationTest);
+    ASSERT_TRUE(id.isValid());
+    const auto track = newTestTrack();
+    track->setDuration(200);
+    track->trySetBpm(120);
+    mixer.crossfader.set(-1);
+    ControlPotmeter fromEq(ConfigKey("[Channel1]", "filterLow"), 0, 4);
+    ControlPotmeter toEq(ConfigKey("[Channel2]", "filterLow"), 0, 4);
+    ControlPushButton tempo(ConfigKey("[Channel2]", "beatsync_tempo"));
+    ControlPushButton phase(ConfigKey("[Channel2]", "beatsync_phase"));
+    ControlPushButton keylock(ConfigKey("[Channel2]", "keylock"));
+    int tempoRequests = 0;
+    int phaseRequests = 0;
+    QObject::connect(&tempo,
+            &ControlObject::valueChanged,
+            [&tempoRequests](double value) {
+                if (value > 0)
+                    ++tempoRequests;
+            });
+    QObject::connect(&phase,
+            &ControlObject::valueChanged,
+            [&phaseRequests](double value) {
+                if (value > 0)
+                    ++phaseRequests;
+            });
+    fromEq.set(1.2);
+    toEq.set(0.8);
+    deck1.slotLoadTrack(track,
+#ifdef __STEM__
+            mixxx::StemChannelSelection(),
+#endif
+            true);
+    deck1.fakeTrackLoadedEvent(track);
+    pProcessor->getTableModel()->appendTrack(id);
+    EXPECT_CALL(*pProcessor,
+            emitLoadTrackToPlayer(_, QString("[Channel2]"), false));
+    EXPECT_CALL(*pProcessor, emitAutoDJStateChanged(AutoDJProcessor::ADJ_IDLE));
+    EXPECT_EQ(AutoDJProcessor::ADJ_OK, pProcessor->toggleAutoDJ(true));
+    deck2.slotLoadTrack(track,
+#ifdef __STEM__
+            mixxx::StemChannelSelection(),
+#endif
+            false);
+    const double samples = kChannelCount * track->getSampleRate();
+    deck1.outroStartPos.set(100 * samples);
+    deck1.outroEndPos.set(140 * samples);
+    deck2.introStartPos.set(0);
+    deck2.introEndPos.set(40 * samples);
+    deck2.fakeTrackLoadedEvent(track);
+    EXPECT_TRUE(pProcessor->creativeTransitionDescription().contains("16"));
+    pProcessor->setCreativeMixing(true, 0.2);
+    EXPECT_TRUE(pProcessor->creativeTransitionDescription().contains("8"));
+    pProcessor->setCreativeMixing(true, 0.5);
+    EXPECT_TRUE(pProcessor->creativeTransitionDescription().contains("16"));
+    deck1.playposition.set(107.0 / 200);
+    EXPECT_EQ(AutoDJProcessor::ADJ_IDLE, pProcessor->getState());
+    EXPECT_CALL(*pProcessor,
+            emitAutoDJStateChanged(AutoDJProcessor::ADJ_LEFT_FADING));
+    deck1.playposition.set(108.0 / 200);
+    EXPECT_EQ(AutoDJProcessor::ADJ_LEFT_FADING, pProcessor->getState());
+    EXPECT_DOUBLE_EQ(0, toEq.get());
+    EXPECT_EQ(1, tempoRequests);
+    EXPECT_EQ(1, phaseRequests);
+    EXPECT_DOUBLE_EQ(1, keylock.get());
+    deck1.playposition.set(124.0 / 200);
+    EXPECT_LT(fromEq.get(), 1.2);
+    toEq.set(0.7);
+    deck1.playposition.set(125.0 / 200);
+    EXPECT_DOUBLE_EQ(0.7, toEq.get());
+    EXPECT_DOUBLE_EQ(1.2, fromEq.get());
+    EXPECT_CALL(
+            *pProcessor, emitAutoDJStateChanged(AutoDJProcessor::ADJ_DISABLED));
+    pProcessor->toggleAutoDJ(false);
+    EXPECT_DOUBLE_EQ(0.7, toEq.get());
 }

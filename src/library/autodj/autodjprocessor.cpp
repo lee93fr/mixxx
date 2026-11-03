@@ -1,9 +1,11 @@
 #include "library/autodj/autodjprocessor.h"
 
 #include "engine/channels/enginedeck.h"
+#include "gameflorr/transitionplan.h"
 #include "mixer/basetrackplayer.h"
 #include "mixer/playermanager.h"
 #include "moc_autodjprocessor.cpp"
+#include "track/beats.h"
 #include "track/track.h"
 #include "util/logger.h"
 #include "util/math.h"
@@ -619,6 +621,7 @@ AutoDJProcessor::AutoDJError AutoDJProcessor::toggleAutoDJ(bool enable) {
         }
         emitAutoDJStateChanged(m_eState);
     } else { // Disable Auto DJ
+        restoreCreativeEq();
         m_enabledAutoDJ.setAndConfirm(0.0);
         qDebug() << "Auto DJ disabled";
         m_eState = ADJ_DISABLED;
@@ -887,6 +890,34 @@ void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
                                     << "fadeEnd" << thisDeck->fadeEndPos
                                     << "playing" << thisDeckPlaying;
                 }
+                restoreCreativeEq();
+                if (m_creative && m_creativeSync && !otherDeckPlaying) {
+                    PollingControlProxy sync(otherDeck->group,
+                            QStringLiteral("beatsync_tempo"),
+                            ControlFlag::AllowMissingOrInvalid);
+                    sync.set(1);
+                    sync.set(0);
+                    PollingControlProxy keylock(otherDeck->group,
+                            QStringLiteral("keylock"),
+                            ControlFlag::AllowMissingOrInvalid);
+                    keylock.set(1);
+                }
+                if (m_creative && m_creativeBass) {
+                    PollingControlProxy fromEq(thisDeck->group,
+                            QStringLiteral("filterLow"),
+                            ControlFlag::AllowMissingOrInvalid);
+                    PollingControlProxy toEq(otherDeck->group,
+                            QStringLiteral("filterLow"),
+                            ControlFlag::AllowMissingOrInvalid);
+                    if (fromEq.valid() && toEq.valid()) {
+                        m_eqFrom = thisDeck->group;
+                        m_eqTo = otherDeck->group;
+                        m_eqFromValue = m_eqFromLast = fromEq.get();
+                        m_eqToValue = m_eqToLast = toEq.get();
+                        m_eqActive = true;
+                        updateCreativeEq(0);
+                    }
+                }
                 m_transitionProgress = 0.0;
                 emitAutoDJStateChanged(m_eState);
 
@@ -906,6 +937,13 @@ void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
 
                 if (!otherDeckPlaying) {
                     otherDeck->play();
+                    if (m_creative && m_creativeSync) {
+                        PollingControlProxy phase(otherDeck->group,
+                                QStringLiteral("beatsync_phase"),
+                                ControlFlag::AllowMissingOrInvalid);
+                        phase.set(1);
+                        phase.set(0);
+                    }
                 }
 
                 // Now that we have started the other deck playing, remove the track
@@ -941,6 +979,7 @@ void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
             // the next playerPositionChanged call otherDeck (see the
             // P1/P2FADING case above).
             thisDeck->stop();
+            restoreCreativeEq();
             m_transitionProgress = 1.0;
             // Note: If the user has stopped the toDeck during the transition.
             // this deck just stops as well. In this case a stopped AutoDJ is accepted
@@ -964,6 +1003,7 @@ void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
                 // movements in this track's play position.
                 setCrossfader(currentCrossfader + adjustment);
             }
+            updateCreativeEq(transitionProgress);
             m_transitionProgress = transitionProgress;
             // if we are at 1.0 here, we need an additional callback until the last
             // step is processed and we can stop the deck.
@@ -1609,6 +1649,34 @@ void AutoDJProcessor::calculateTransition(DeckAttributes* pFromDeck,
         }
     }
 
+    if (m_creative) {
+        const auto from = pFromDeck->getLoadedTrack();
+        const auto to = pToDeck->getLoadedTrack();
+        const bool grids = from && to && from->getBeats() && to->getBeats() &&
+                from->getBeats()->hasConstantTempo() &&
+                to->getBeats()->hasConstantTempo();
+        const auto recipe = gameflorr::planTransition(true,
+                m_creativity,
+                from ? from->getBpm() * pFromDeck->rateRatio() : 0,
+                to ? to->getBpm() * pToDeck->rateRatio() : 0,
+                grids,
+                outroLength,
+                introLength);
+        const double length = std::min({recipe.seconds,
+                std::max(0.0, outroEnd - fromDeckPosition),
+                std::max(0.0, pToDeck->fadeBeginPos - pToDeck->startPos)});
+        pFromDeck->fadeEndPos = outroEnd;
+        pFromDeck->fadeBeginPos = std::max(fromDeckPosition, outroEnd - length);
+        m_creativeSync = recipe.sync;
+        m_creativeBass = recipe.bassSwap;
+        m_creativeDescription = recipe.bars
+                ? tr("%1 mesures · tempo synchronisé%2")
+                          .arg(recipe.bars)
+                          .arg(recipe.bassSwap ? tr(" · échange des basses")
+                                               : QString())
+                : tr("Fondu prudent · %1 s").arg(length, 0, 'f', 1);
+    }
+
     // These are expected to be a fraction of the track length.
     pFromDeck->fadeBeginPos /= fromDeckDuration;
     pFromDeck->fadeEndPos /= fromDeckDuration;
@@ -1966,4 +2034,62 @@ bool AutoDJProcessor::nextTrackLoaded() {
     }
 
     return loadedTrack == getNextTrackFromQueue();
+}
+
+void AutoDJProcessor::setCreativeMixing(bool enabled, double intensity) {
+    if (enabled == m_creative && intensity == m_creativity)
+        return;
+    restoreCreativeEq();
+    m_creative = enabled;
+    m_creativity = gameflorr::isFinite(intensity)
+            ? std::clamp(intensity, 0.0, 1.0)
+            : 0.4;
+    m_creativeSync = false;
+    m_creativeBass = false;
+    m_creativeDescription = enabled ? tr("Analyse de la prochaine transition")
+                                    : tr("Fondu sobre");
+    if (m_eState == ADJ_IDLE) {
+        auto* left = getLeftDeck();
+        auto* right = getRightDeck();
+        if (left && right && left->isPlaying() != right->isPlaying()) {
+            calculateTransition(left->isPlaying() ? left : right,
+                    left->isPlaying() ? right : left,
+                    false);
+        }
+    }
+}
+void AutoDJProcessor::restoreCreativeEq() {
+    if (!m_eqActive)
+        return;
+    PollingControlProxy from(m_eqFrom,
+            QStringLiteral("filterLow"),
+            ControlFlag::AllowMissingOrInvalid);
+    PollingControlProxy to(m_eqTo,
+            QStringLiteral("filterLow"),
+            ControlFlag::AllowMissingOrInvalid);
+    if (std::abs(from.get() - m_eqFromLast) < 1e-6)
+        from.set(m_eqFromValue);
+    if (std::abs(to.get() - m_eqToLast) < 1e-6)
+        to.set(m_eqToValue);
+    m_eqActive = false;
+}
+void AutoDJProcessor::updateCreativeEq(double progress) {
+    if (!m_eqActive)
+        return;
+    PollingControlProxy from(m_eqFrom,
+            QStringLiteral("filterLow"),
+            ControlFlag::AllowMissingOrInvalid);
+    PollingControlProxy to(m_eqTo,
+            QStringLiteral("filterLow"),
+            ControlFlag::AllowMissingOrInvalid);
+    if (std::abs(from.get() - m_eqFromLast) > 1e-6 ||
+            std::abs(to.get() - m_eqToLast) > 1e-6) {
+        restoreCreativeEq();
+        return;
+    }
+    const double swap = std::clamp((progress - 0.35) / 0.3, 0.0, 1.0);
+    m_eqFromLast = m_eqFromValue * (1 - swap);
+    m_eqToLast = m_eqToValue * swap;
+    from.set(m_eqFromLast);
+    to.set(m_eqToLast);
 }

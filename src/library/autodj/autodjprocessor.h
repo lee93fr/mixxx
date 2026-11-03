@@ -198,6 +198,10 @@ class AutoDJProcessor : public QObject {
 
     bool nextTrackLoaded();
 
+    void setCreativeMixing(bool enabled, double intensity);
+    QString creativeTransitionDescription() const {
+        return m_creativeDescription;
+    }
     void setTransitionTime(int seconds);
 
     void setTransitionMode(TransitionMode newMode);
@@ -304,6 +308,20 @@ class AutoDJProcessor : public QObject {
 
     AutoDJState m_eState;
     double m_transitionProgress;
+    void restoreCreativeEq();
+    void updateCreativeEq(double progress);
+    bool m_creative = false;
+    double m_creativity = 0.4;
+    bool m_creativeSync = false;
+    bool m_creativeBass = false;
+    QString m_creativeDescription;
+    QString m_eqFrom;
+    QString m_eqTo;
+    double m_eqFromValue = 1;
+    double m_eqToValue = 1;
+    double m_eqFromLast = 1;
+    double m_eqToLast = 1;
+    bool m_eqActive = false;
     double m_transitionTime; // the desired value set by the user
     TransitionMode m_transitionMode;
     bool m_crossfaderStartCenter;

@@ -20,6 +20,7 @@ class QTableWidget;
 class QWizard;
 
 namespace gameflorr {
+QWidget* createAutoDjPanel(QWidget* parent);
 class MusicdlPanel : public QWidget {
   public:
     MusicdlPanel(QWidget* parent, Library* library);

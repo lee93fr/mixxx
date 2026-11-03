@@ -1278,6 +1278,8 @@ add_library(
   src/controllers/scripting/legacy/scriptconnection.cpp
   src/controllers/scripting/legacy/scriptconnectionjsproxy.cpp
   src/controllers/softtakeover.cpp
+  src/gameflorr/autodjbridge.cpp
+  src/gameflorr/autodjpanel.cpp
   src/gameflorr/requestsnapshot.cpp
   src/gameflorr/gameflorrpanel.cpp
   src/coreservices.cpp
