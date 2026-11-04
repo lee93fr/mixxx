@@ -10,6 +10,7 @@
 #include "control/controlpushbutton.h"
 #include "control/pollingcontrolproxy.h"
 #include "engine/channels/enginechannel.h"
+#include "gameflorr/stemmashup.h"
 #include "library/playlisttablemodel.h"
 #include "preferences/usersettings.h"
 #include "track/track_decl.h"
@@ -174,10 +175,10 @@ class AutoDJProcessor : public QObject {
     };
 
     AutoDJProcessor(QObject* pParent,
-                    UserSettingsPointer pConfig,
-                    PlayerManagerInterface* pPlayerManager,
-                    TrackCollectionManager* pTrackCollectionManager,
-                    int iAutoDJPlaylistId);
+            UserSettingsPointer pConfig,
+            PlayerManagerInterface* pPlayerManager,
+            TrackCollectionManager* pTrackCollectionManager,
+            int iAutoDJPlaylistId);
     virtual ~AutoDJProcessor() = default;
 
     AutoDJState getState() const {
@@ -198,7 +199,7 @@ class AutoDJProcessor : public QObject {
 
     bool nextTrackLoaded();
 
-    void setCreativeMixing(bool enabled, double intensity);
+    void setCreativeMixing(bool enabled, double intensity, bool mashup = false);
     QString creativeTransitionDescription() const {
         return m_creativeDescription;
     }
@@ -310,6 +311,9 @@ class AutoDJProcessor : public QObject {
     double m_transitionProgress;
     void restoreCreativeEq();
     void updateCreativeEq(double progress);
+    gameflorr::StemMashup m_stemMashup;
+    bool m_mashupEnabled = false;
+    bool m_mashupReady = false;
     bool m_creative = false;
     double m_creativity = 0.4;
     bool m_creativeSync = false;

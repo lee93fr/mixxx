@@ -38,7 +38,8 @@ inline TransitionPlan planTransition(bool creative,
             outroSeconds <= 0 || introSeconds <= 0) {
         return {8.0, 0, false, false};
     }
-    const int desiredBars = intensity >= 0.75 ? 32 : intensity >= 0.35 ? 16 : 8;
+    const int desiredBars = intensity >= 0.75 ? 32 : intensity >= 0.35 ? 16
+                                                                       : 8;
     const double secondsPerBar = 240.0 / fromBpm;
     const double available = std::min(outroSeconds, introSeconds);
     int bars = desiredBars;
@@ -49,5 +50,10 @@ inline TransitionPlan planTransition(bool creative,
         return {std::min(8.0, available), 0, false, false};
     }
     return {bars * secondsPerBar, bars, true, intensity >= 0.35};
+}
+inline bool canMashup(bool requested, const TransitionPlan& plan, double length, double bpm, bool canonicalStems, bool sameKnownKey) {
+    return requested && plan.sync && plan.bars >= 8 && isFinite(length) &&
+            isFinite(bpm) && bpm >= 40 && length >= 8 * 240.0 / bpm &&
+            canonicalStems && sameKnownKey;
 }
 } // namespace gameflorr

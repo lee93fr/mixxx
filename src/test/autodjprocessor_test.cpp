@@ -90,7 +90,7 @@ class FakeDeck : public BaseTrackPlayer {
         return loadedTrack;
     }
 
-    void setupEqControls() override{};
+    void setupEqControls() override {};
 
     // This method emulates requesting a track load to a player and emits no
     // signals. Normally, the reader thread attempts to load the file and emits
@@ -168,12 +168,11 @@ class MockPlayerManager : public PlayerManagerInterface {
 class MockAutoDJProcessor : public AutoDJProcessor {
   public:
     MockAutoDJProcessor(QObject* pParent,
-                        UserSettingsPointer pConfig,
-                        PlayerManagerInterface* pPlayerManager,
-                        TrackCollectionManager* pTrackCollectionManager,
-                        int iAutoDJPlaylistId)
-            : AutoDJProcessor(pParent, pConfig, pPlayerManager,
-                              pTrackCollectionManager, iAutoDJPlaylistId) {
+            UserSettingsPointer pConfig,
+            PlayerManagerInterface* pPlayerManager,
+            TrackCollectionManager* pTrackCollectionManager,
+            int iAutoDJPlaylistId)
+            : AutoDJProcessor(pParent, pConfig, pPlayerManager, pTrackCollectionManager, iAutoDJPlaylistId) {
     }
 
     virtual ~MockAutoDJProcessor() {
@@ -1543,7 +1542,6 @@ TEST_F(AutoDJProcessorTest, FadeToDeck2_LoadOnDeck1_TrackLoadFailed) {
     EXPECT_DOUBLE_EQ(1.0, deck2.play.get());
 }
 
-
 TEST_F(AutoDJProcessorTest, FadeToDeck2_Long_Transition) {
     pProcessor->setTransitionMode(AutoDJProcessor::TransitionMode::FixedFullTrack);
 
@@ -2189,4 +2187,70 @@ TEST_F(AutoDJProcessorTest, CreativeBarsDriveNativeFadeAndRestoreManualEq) {
             *pProcessor, emitAutoDJStateChanged(AutoDJProcessor::ADJ_DISABLED));
     pProcessor->toggleAutoDJ(false);
     EXPECT_DOUBLE_EQ(0.7, toEq.get());
+}
+
+TEST(GameflorrTransitionTest, MashupsRequirePreparedStemsSameKnownKeyAndEightBars) {
+    const auto recipe = gameflorr::planTransition(true, .5, 120, 122, true, 60, 60);
+    EXPECT_TRUE(gameflorr::canMashup(true, recipe, 32, 120, true, true));
+    EXPECT_FALSE(gameflorr::canMashup(false, recipe, 32, 120, true, true));
+    EXPECT_FALSE(gameflorr::canMashup(true, recipe, 32, 120, false, true));
+    EXPECT_FALSE(gameflorr::canMashup(true, recipe, 32, 120, true, false));
+    EXPECT_FALSE(gameflorr::canMashup(true, recipe, 15, 120, true, true));
+    EXPECT_FALSE(gameflorr::canMashup(true, recipe, 32, 0, true, true));
+    EXPECT_FALSE(gameflorr::canMashup(true, {8, 0, false, false}, 32, 120, true, true));
+}
+
+namespace {
+struct FakeStemControls {
+    std::array<std::unique_ptr<ControlPotmeter>, 8> volumes;
+    std::array<std::unique_ptr<ControlPushButton>, 8> mutes;
+    FakeStemControls() {
+        for (int i = 0; i < 8; ++i) {
+            const QString group = QStringLiteral("[Channel%1_Stem%2]").arg(i / 4 + 1).arg(i % 4 + 1);
+            volumes[i] = std::make_unique<ControlPotmeter>(ConfigKey(group, QStringLiteral("volume")));
+            volumes[i]->set(1);
+            mutes[i] = std::make_unique<ControlPushButton>(ConfigKey(group, QStringLiteral("mute")));
+        }
+    }
+};
+} // namespace
+
+TEST_F(AutoDJProcessorTest, MashupOverlaysOutgoingVoiceAndRestoresStemGains) {
+    FakeStemControls stems;
+    gameflorr::StemMashup mashup;
+    ASSERT_TRUE(mashup.begin(QStringLiteral("[Channel1]"), QStringLiteral("[Channel2]")));
+    EXPECT_DOUBLE_EQ(0, stems.volumes[7]->get());
+    mashup.update(.5);
+    for (int i = 0; i < 3; ++i)
+        EXPECT_DOUBLE_EQ(0, stems.volumes[i]->get());
+    EXPECT_DOUBLE_EQ(1, stems.volumes[3]->get());
+    EXPECT_DOUBLE_EQ(1, stems.volumes[4]->get());
+    EXPECT_DOUBLE_EQ(0, stems.volumes[7]->get());
+    mashup.update(.825);
+    EXPECT_NEAR(.5, stems.volumes[3]->get(), 1e-6);
+    EXPECT_NEAR(.5, stems.volumes[7]->get(), 1e-6);
+    mashup.restore();
+    for (const auto& volume : stems.volumes)
+        EXPECT_DOUBLE_EQ(1, volume->get());
+    EXPECT_FALSE(mashup.active());
+}
+
+TEST_F(AutoDJProcessorTest, MashupYieldsToManualGainAndMuteChanges) {
+    FakeStemControls stems;
+    gameflorr::StemMashup mashup;
+    ASSERT_TRUE(mashup.begin(QStringLiteral("[Channel1]"), QStringLiteral("[Channel2]")));
+    mashup.update(.5);
+    stems.volumes[0]->set(.6);
+    mashup.update(.6);
+    EXPECT_FALSE(mashup.active());
+    EXPECT_DOUBLE_EQ(.6, stems.volumes[0]->get());
+    EXPECT_DOUBLE_EQ(1, stems.volumes[7]->get());
+    EXPECT_FALSE(mashup.begin(QStringLiteral("[Channel1]"), QStringLiteral("[Channel2]")));
+    stems.volumes[0]->set(1);
+    ASSERT_TRUE(mashup.begin(QStringLiteral("[Channel1]"), QStringLiteral("[Channel2]")));
+    stems.mutes[3]->set(1);
+    mashup.update(.5);
+    EXPECT_FALSE(mashup.active());
+    EXPECT_DOUBLE_EQ(1, stems.mutes[3]->get());
+    EXPECT_DOUBLE_EQ(1, stems.volumes[7]->get());
 }

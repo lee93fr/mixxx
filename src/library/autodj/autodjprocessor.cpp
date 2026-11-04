@@ -76,12 +76,9 @@ DeckAttributes::DeckAttributes(int index,
           m_sampleRate(group, "track_samplerate"),
           m_rateRatio(group, "rate_ratio"),
           m_pPlayer(pPlayer) {
-    connect(m_pPlayer, &BaseTrackPlayer::newTrackLoaded,
-            this, &DeckAttributes::slotTrackLoaded);
-    connect(m_pPlayer, &BaseTrackPlayer::loadingTrack,
-            this, &DeckAttributes::slotLoadingTrack);
-    connect(m_pPlayer, &BaseTrackPlayer::playerEmpty,
-            this, &DeckAttributes::slotPlayerEmpty);
+    connect(m_pPlayer, &BaseTrackPlayer::newTrackLoaded, this, &DeckAttributes::slotTrackLoaded);
+    connect(m_pPlayer, &BaseTrackPlayer::loadingTrack, this, &DeckAttributes::slotLoadingTrack);
+    connect(m_pPlayer, &BaseTrackPlayer::playerEmpty, this, &DeckAttributes::slotPlayerEmpty);
     m_playPos.connectValueChanged(this, &DeckAttributes::slotPlayPosChanged);
     m_play.connectValueChanged(this, &DeckAttributes::slotPlayChanged);
     m_introStartPos.connectValueChanged(this, &DeckAttributes::slotIntroStartPositionChanged);
@@ -385,7 +382,7 @@ AutoDJProcessor::AutoDJError AutoDJProcessor::skipNext() {
         TrackId leftId = pLeftDeck->getLoadedTrack()->getId();
         TrackId rightId = pRightDeck->getLoadedTrack()->getId();
         if (nextId == leftId || nextId == rightId) {
-        // One of the playing tracks is still on top of playlist, remove second item
+            // One of the playing tracks is still on top of playlist, remove second item
             m_pAutoDJTableModel->removeTrack(m_pAutoDJTableModel->index(1, 0));
         } else {
             m_pAutoDJTableModel->removeTrack(m_pAutoDJTableModel->index(0, 0));
@@ -724,7 +721,7 @@ void AutoDJProcessor::crossfaderChanged(double value) {
 }
 
 void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
-                                            double thisPlayPosition) {
+        double thisPlayPosition) {
     // qDebug() << "player" << pAttributes->group << "PositionChanged(" << value << ")";
     if (m_eState == ADJ_DISABLED) {
         // nothing to do
@@ -902,7 +899,8 @@ void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
                             ControlFlag::AllowMissingOrInvalid);
                     keylock.set(1);
                 }
-                if (m_creative && m_creativeBass) {
+                const bool mashup = m_mashupReady && m_stemMashup.begin(thisDeck->group, otherDeck->group);
+                if (m_creative && m_creativeBass && !mashup) {
                     PollingControlProxy fromEq(thisDeck->group,
                             QStringLiteral("filterLow"),
                             ControlFlag::AllowMissingOrInvalid);
@@ -1004,6 +1002,7 @@ void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
                 setCrossfader(currentCrossfader + adjustment);
             }
             updateCreativeEq(transitionProgress);
+            m_stemMashup.update(transitionProgress);
             m_transitionProgress = transitionProgress;
             // if we are at 1.0 here, we need an additional callback until the last
             // step is processed and we can stop the deck.
@@ -1646,7 +1645,7 @@ void AutoDJProcessor::calculateTransition(DeckAttributes* pFromDeck,
             startPoint = toDeckPositionSeconds;
         }
         useFixedFadeTime(pFromDeck, pToDeck, fromDeckPosition, fromDeckEndPosition, startPoint);
-        }
+    }
     }
 
     if (m_creative) {
@@ -1667,6 +1666,23 @@ void AutoDJProcessor::calculateTransition(DeckAttributes* pFromDeck,
                 std::max(0.0, pToDeck->fadeBeginPos - pToDeck->startPos)});
         pFromDeck->fadeEndPos = outroEnd;
         pFromDeck->fadeBeginPos = std::max(fromDeckPosition, outroEnd - length);
+        auto canonicalStems = [](const TrackPointer& track) {
+            if (!track)
+                return false;
+#ifdef __STEM__
+            const auto info = track->getStemInfo();
+            const QStringList expected = {QStringLiteral("Drums"), QStringLiteral("Bass"), QStringLiteral("Other"), QStringLiteral("Vocals")};
+            if (info.size() != expected.size())
+                return false;
+            for (int i = 0; i < info.size(); ++i)
+                if (info[i].getLabel() != expected[i])
+                    return false;
+            return true;
+#else
+            return false;
+#endif
+        };
+        m_mashupReady = gameflorr::canMashup(m_mashupEnabled, recipe, length, from ? from->getBpm() * pFromDeck->rateRatio() : 0, canonicalStems(from) && canonicalStems(to), from && to && from->getKey() != mixxx::track::io::key::INVALID && from->getKey() == to->getKey());
         m_creativeSync = recipe.sync;
         m_creativeBass = recipe.bassSwap;
         m_creativeDescription = recipe.bars
@@ -1675,6 +1691,10 @@ void AutoDJProcessor::calculateTransition(DeckAttributes* pFromDeck,
                           .arg(recipe.bassSwap ? tr(" · échange des basses")
                                                : QString())
                 : tr("Fondu prudent · %1 s").arg(length, 0, 'f', 1);
+        if (m_mashupReady)
+            m_creativeDescription = tr("Mashup vocal · %1 mesures · voix sortante sur instrumental entrant").arg(recipe.bars);
+        else if (m_mashupEnabled)
+            m_creativeDescription += tr(" · mashup indisponible (stems, tonalité ou grille)");
     }
 
     // These are expected to be a fraction of the track length.
@@ -1805,7 +1825,8 @@ void AutoDJProcessor::playerTrackLoaded(DeckAttributes* pDeck, TrackPointer pTra
 }
 
 void AutoDJProcessor::playerLoadingTrack(DeckAttributes* pDeck,
-        TrackPointer pNewTrack, TrackPointer pOldTrack) {
+        TrackPointer pNewTrack,
+        TrackPointer pOldTrack) {
     if (kLogger.debugEnabled()) {
         kLogger.debug() << "playerLoadingTrack" << pDeck->group
                         << "new:" << (pNewTrack ? pNewTrack->getLocation() : "(null)")
@@ -2036,10 +2057,12 @@ bool AutoDJProcessor::nextTrackLoaded() {
     return loadedTrack == getNextTrackFromQueue();
 }
 
-void AutoDJProcessor::setCreativeMixing(bool enabled, double intensity) {
-    if (enabled == m_creative && intensity == m_creativity)
+void AutoDJProcessor::setCreativeMixing(bool enabled, double intensity, bool mashup) {
+    if (enabled == m_creative && intensity == m_creativity && mashup == m_mashupEnabled)
         return;
     restoreCreativeEq();
+    m_mashupEnabled = mashup;
+    m_mashupReady = false;
     m_creative = enabled;
     m_creativity = gameflorr::isFinite(intensity)
             ? std::clamp(intensity, 0.0, 1.0)
@@ -2059,6 +2082,7 @@ void AutoDJProcessor::setCreativeMixing(bool enabled, double intensity) {
     }
 }
 void AutoDJProcessor::restoreCreativeEq() {
+    m_stemMashup.restore();
     if (!m_eqActive)
         return;
     PollingControlProxy from(m_eqFrom,

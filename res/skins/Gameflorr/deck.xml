@@ -21,6 +21,7 @@
         <Size>-1me,18f</Size>
       </SingletonContainer>
       <Template src="skins:Gameflorr/pads.xml" />
+      <Template src="skins:Gameflorr/stem_buttons.xml" />
       <Template src="skins:Gameflorr/transport.xml" />
       <Template src="skins:Gameflorr/deck_details.xml" />
     </Children>

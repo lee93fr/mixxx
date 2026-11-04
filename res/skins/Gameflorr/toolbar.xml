@@ -40,6 +40,13 @@
         <SetVariable name="control">[Skin],show_maximized_library</SetVariable>
         <SetVariable name="tip">Agrandir la bibliothèque ou revenir à la vue de mixage.</SetVariable>
       </Template>
+      <Template src="skins:Gameflorr/button.xml">
+        <SetVariable name="name">GameflorrNav</SetVariable>
+        <SetVariable name="size">58f,22f</SetVariable>
+        <SetVariable name="text">Stems</SetVariable>
+        <SetVariable name="control">[Skin],show_stem_controls</SetVariable>
+        <SetVariable name="tip">Afficher les commandes des quatre stems sur les titres préparés.</SetVariable>
+      </Template>
       <Template src="skins:Gameflorr/panel_button.xml">
         <SetVariable name="panel">1</SetVariable>
         <SetVariable name="name">GameflorrNav</SetVariable>

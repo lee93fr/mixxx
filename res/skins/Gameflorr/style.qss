@@ -17,10 +17,10 @@
 #GameflorrSectionLabel, #GameflorrUnit { color: #929292; font-size: 9px; }
 #GameflorrTrackInfo WKey { color: #e1a9e8; font-size: 12px; padding: 0px; }
 #GameflorrPads, #GameflorrLoops, #GameflorrTransport { qproperty-layoutSpacing: 3; }
-#GameflorrNav, #GameflorrLoad, #GameflorrCue, #GameflorrPlay, #GameflorrHeadphone, #GameflorrLoop, #GameflorrHotcue, #GameflorrSync, #GameflorrKeylock, #GameflorrNudge {
+#GameflorrStem, #GameflorrNav, #GameflorrLoad, #GameflorrCue, #GameflorrPlay, #GameflorrHeadphone, #GameflorrLoop, #GameflorrHotcue, #GameflorrSync, #GameflorrKeylock, #GameflorrNudge {
   background: #191919; color: #bcbcbc; border: 1px solid #414141; border-radius: 1px; font-size: 10px; font-weight: normal;
 }
-#GameflorrNav:hover, #GameflorrLoad:hover, #GameflorrCue:hover, #GameflorrPlay:hover, #GameflorrHeadphone:hover, #GameflorrLoop:hover, #GameflorrHotcue:hover, #GameflorrSync:hover, #GameflorrKeylock:hover, #GameflorrNudge:hover { background: #303030; border-color: #888; color: #fff; }
+#GameflorrStem:hover, #GameflorrNav:hover, #GameflorrLoad:hover, #GameflorrCue:hover, #GameflorrPlay:hover, #GameflorrHeadphone:hover, #GameflorrLoop:hover, #GameflorrHotcue:hover, #GameflorrSync:hover, #GameflorrKeylock:hover, #GameflorrNudge:hover { background: #303030; border-color: #888; color: #fff; }
 #GameflorrNav[displayValue="1"], #GameflorrHeadphone[displayValue="1"], #GameflorrLoop[displayValue="1"], #GameflorrSync[displayValue="1"], #GameflorrKeylock[displayValue="1"] { background: #225574; color: #fff; border-color: #69a9d1; }
 #GameflorrPlay { color: #8fda66; font-size: 17px; }
 #GameflorrPlay[displayValue="1"] { color: #a8ed7b; border-color: #73b34f; background: #223019; }
@@ -93,3 +93,5 @@
 #GameflorrScanStatus QPushButton:disabled { color: #777; border-color: #333; background: #202020; }
 #GameflorrScanStatus QProgressBar { background: #0b1116; border: 1px solid #3c4c5d; max-height: 10px; }
 #GameflorrScanStatus QProgressBar::chunk { background: #58b5ed; }
+
+#GameflorrStem[displayValue="1"] { background: #75402b; color: #fff; border-color: #e5a36f; }

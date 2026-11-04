@@ -1,0 +1,63 @@
+<!DOCTYPE template>
+<Template>
+  <WidgetGroup>
+    <Layout>vertical</Layout>
+    <Children>
+      <WidgetGroup><Layout>horizontal</Layout><Children>
+      <WidgetGroup>
+        <Layout>vertical</Layout>
+        <Children>
+          <StemLabel><Group><Variable name="group"/></Group><StemNum>1</StemNum><Alignment>center</Alignment><Size>-1me,18f</Size></StemLabel>
+          <Template src="skins:Gameflorr/button.xml">
+            <SetVariable name="name">GameflorrStem</SetVariable>
+            <SetVariable name="text">MUTE</SetVariable>
+            <SetVariable name="size">55me,20f</SetVariable>
+            <SetVariable name="control">[Channel<Variable name="i"/>_Stem1],mute</SetVariable>
+            <SetVariable name="tip">Couper ou rétablir ce stem. Une action manuelle interrompt le mashup automatique.</SetVariable>
+          </Template>
+        </Children>
+      </WidgetGroup>
+      <WidgetGroup>
+        <Layout>vertical</Layout>
+        <Children>
+          <StemLabel><Group><Variable name="group"/></Group><StemNum>2</StemNum><Alignment>center</Alignment><Size>-1me,18f</Size></StemLabel>
+          <Template src="skins:Gameflorr/button.xml">
+            <SetVariable name="name">GameflorrStem</SetVariable>
+            <SetVariable name="text">MUTE</SetVariable>
+            <SetVariable name="size">55me,20f</SetVariable>
+            <SetVariable name="control">[Channel<Variable name="i"/>_Stem2],mute</SetVariable>
+            <SetVariable name="tip">Couper ou rétablir ce stem. Une action manuelle interrompt le mashup automatique.</SetVariable>
+          </Template>
+        </Children>
+      </WidgetGroup>
+      <WidgetGroup>
+        <Layout>vertical</Layout>
+        <Children>
+          <StemLabel><Group><Variable name="group"/></Group><StemNum>3</StemNum><Alignment>center</Alignment><Size>-1me,18f</Size></StemLabel>
+          <Template src="skins:Gameflorr/button.xml">
+            <SetVariable name="name">GameflorrStem</SetVariable>
+            <SetVariable name="text">MUTE</SetVariable>
+            <SetVariable name="size">55me,20f</SetVariable>
+            <SetVariable name="control">[Channel<Variable name="i"/>_Stem3],mute</SetVariable>
+            <SetVariable name="tip">Couper ou rétablir ce stem. Une action manuelle interrompt le mashup automatique.</SetVariable>
+          </Template>
+        </Children>
+      </WidgetGroup>
+      <WidgetGroup>
+        <Layout>vertical</Layout>
+        <Children>
+          <StemLabel><Group><Variable name="group"/></Group><StemNum>4</StemNum><Alignment>center</Alignment><Size>-1me,18f</Size></StemLabel>
+          <Template src="skins:Gameflorr/button.xml">
+            <SetVariable name="name">GameflorrStem</SetVariable>
+            <SetVariable name="text">MUTE</SetVariable>
+            <SetVariable name="size">55me,20f</SetVariable>
+            <SetVariable name="control">[Channel<Variable name="i"/>_Stem4],mute</SetVariable>
+            <SetVariable name="tip">Couper ou rétablir ce stem. Une action manuelle interrompt le mashup automatique.</SetVariable>
+          </Template>
+        </Children>
+      </WidgetGroup>
+      </Children><Connection><ConfigKey><Variable name="group"/>,stem_count</ConfigKey><BindProperty>visible</BindProperty></Connection></WidgetGroup>
+    </Children>
+    <Connection><ConfigKey>[Skin],show_stem_controls</ConfigKey><BindProperty>visible</BindProperty></Connection>
+  </WidgetGroup>
+</Template>

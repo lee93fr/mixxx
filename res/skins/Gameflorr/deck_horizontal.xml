@@ -33,6 +33,7 @@
           </WidgetGroup>
         </Children>
       </WidgetGroup>
+      <Template src="skins:Gameflorr/stem_buttons.xml" />
       <Template src="skins:Gameflorr/transport.xml" />
       <Template src="skins:Gameflorr/deck_details.xml" />
       <WidgetGroup>

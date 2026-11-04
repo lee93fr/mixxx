@@ -18,6 +18,7 @@
 #include "library/trackcollectionmanager.h"
 #include "mixer/basetrackplayer.h"
 #include "mixer/playermanager.h"
+#include "mixer/previewdeck.h"
 #include "preferences/gameflorrsettings.h"
 #include "sources/soundsourceproxy.h"
 #include "track/track.h"
@@ -159,6 +160,35 @@ void AutoDjBridge::tick() {
                                 playingCount == 1);
                 m_takeover = false;
             }
+        } else if (action == QStringLiteral("preview") || action == QStringLiteral("stop-preview")) {
+            const QString group = QStringLiteral("[PreviewDeck1]");
+            if (m_players->numberOfPreviewDecks() < 1 || !m_players->getPreviewDeck(0)) {
+                ok = false;
+                error = tr("Activez une platine de préécoute dans Mixxx.");
+            } else if (action == QStringLiteral("stop-preview")) {
+                PollingControlProxy(group, QStringLiteral("play"), ControlFlag::AllowMissingOrInvalid).set(0);
+            } else {
+                const QFileInfo info(command.value(QStringLiteral("path")).toString());
+                if (!info.isAbsolute() || !info.isFile() || !info.isReadable() ||
+                        !SoundSourceProxy::isFileNameSupported(info.fileName())) {
+                    ok = false;
+                    error = tr("Fichier de préécoute indisponible.");
+                } else {
+                    const auto track = m_library->trackCollectionManager()->getOrAddTrack(TrackRef::fromFilePath(info.canonicalFilePath()));
+                    if (!track) {
+                        ok = false;
+                        error = tr("Impossible de charger la préécoute.");
+                    } else {
+                        PollingControlProxy(group, QStringLiteral("master"), ControlFlag::AllowMissingOrInvalid).set(0);
+                        PollingControlProxy(group, QStringLiteral("pfl"), ControlFlag::AllowMissingOrInvalid).set(1);
+                        m_players->getPreviewDeck(0)->slotLoadTrack(track,
+#ifdef __STEM__
+                                mixxx::StemChannelSelection(),
+#endif
+                                true);
+                    }
+                }
+            }
         } else if (action == QStringLiteral("takeover") ||
                 action == QStringLiteral("pause") ||
                 action == QStringLiteral("release")) {
@@ -226,6 +256,9 @@ void AutoDjBridge::tick() {
                         TrackRef::fromFilePath(path));
                 if (!track)
                     continue;
+                if (!entry.value(QStringLiteral("title")).toString().isEmpty())
+                    track->setTitle(entry.value(QStringLiteral("title")).toString());
+                track->setArtist(entry.value(QStringLiteral("artist")).toString());
                 m_tracks.insert(path, track);
                 m_analysis->scheduleTrack(
                         AnalyzerScheduledTrack(track->getId()));
@@ -282,7 +315,8 @@ void AutoDjBridge::tick() {
             m_processor->setCreativeMixing(
                     plan.value(QStringLiteral("mode")).toString() ==
                             QStringLiteral("creative"),
-                    plan.value(QStringLiteral("creativity")).toDouble(0.4));
+                    plan.value(QStringLiteral("creativity")).toDouble(0.4),
+                    plan.value(QStringLiteral("stemsEnabled")).toBool() && plan.value(QStringLiteral("mashupEnabled")).toBool());
         if (m_pendingStart && !dao.getAutoDJTrackIds().isEmpty()) {
             m_processor->setTransitionMode(
                     AutoDJProcessor::TransitionMode::FullIntroOutro);

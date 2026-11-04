@@ -59,6 +59,10 @@ QWidget* createAutoDjPanel(QWidget* parent) {
     weight->setRange(0, 100);
     weight->setValue(40);
     form->addRow(QObject::tr("Place des demandes"), weight);
+    auto* stems = new QCheckBox(QObject::tr("Utiliser les 4 stems préparés"), panel);
+    auto* mashup = new QCheckBox(QObject::tr("Mashup vocal en mode créatif (même tonalité)"), panel);
+    form->addRow(stems);
+    form->addRow(mashup);
     auto* excluded = new QLineEdit(panel);
     excluded->setPlaceholderText(
             QObject::tr("Artistes séparés par une virgule"));
@@ -134,6 +138,14 @@ QWidget* createAutoDjPanel(QWidget* parent) {
     auto* next = new QPushButton(QObject::tr("Enchaîner maintenant"), panel);
     auto* lock = new QPushButton(
             QObject::tr("Verrouiller / libérer le titre"), panel);
+    auto* prepare = new QPushButton(QObject::tr("Préparer 4 stems"), panel);
+    auto* cancel = new QPushButton(QObject::tr("Annuler préparation"), panel);
+    auto* listen = new QPushButton(QObject::tr("Préécouter au casque"), panel);
+    auto* stopListen = new QPushButton(QObject::tr("Arrêter préécoute"), panel);
+    auto* stemActions = new QHBoxLayout();
+    layout->addLayout(stemActions);
+    for (auto* button : {prepare, cancel, listen, stopListen})
+        stemActions->addWidget(button);
     auto* takeover = new QPushButton(QObject::tr("Reprendre la main"), panel);
     for (auto* button : {apply, start, next})
         actions->addWidget(button);
@@ -208,6 +220,8 @@ QWidget* createAutoDjPanel(QWidget* parent) {
                                 {"energyMode", energy->currentText()},
                                 {"creativity", intensity->value() / 100.0},
                                 {"requestWeight", weight->value() / 100.0},
+                                {"stemsEnabled", stems->isChecked()},
+                                {"mashupEnabled", mashup->isChecked()},
                                 {"playlistIds", selected},
                                 {"excludedArtists", artists},
                                 {"blocks", blocks}}}});
@@ -225,6 +239,13 @@ QWidget* createAutoDjPanel(QWidget* parent) {
                 {{"trackId", item->text()},
                         {"locked", !item->data(Qt::UserRole).toBool()}});
     });
+    for (const auto& entry : {qMakePair(prepare, QStringLiteral("prepare-stems")), qMakePair(listen, QStringLiteral("preview"))})
+        QObject::connect(entry.first, &QPushButton::clicked, panel, [=] {
+            if (preview->currentRow() >= 0)
+                send(entry.second, {{"trackId", preview->item(preview->currentRow(), 3)->text()}});
+        });
+    QObject::connect(cancel, &QPushButton::clicked, panel, [=] { send("cancel-stems"); });
+    QObject::connect(stopListen, &QPushButton::clicked, panel, [=] { send("stop-preview"); });
     auto refresh = [=] {
         QFile file(QFileInfo(gameflorrStatePath())
                         .absoluteDir()
@@ -266,6 +287,8 @@ QWidget* createAutoDjPanel(QWidget* parent) {
             const auto config = state->value("config").toObject();
             mode->setCurrentIndex(std::max(
                     0, mode->findData(config.value("mode").toString())));
+            stems->setChecked(config.value("stemsEnabled").toBool());
+            mashup->setChecked(config.value("mashupEnabled").toBool());
             theme->setText(config.value("theme").toString());
             energy->setCurrentText(config.value("energyMode").toString());
             intensity->setValue(
@@ -334,8 +357,12 @@ QWidget* createAutoDjPanel(QWidget* parent) {
             preview->insertRow(r);
             const QStringList cells = {t.value("title").toString() + " — " +
                             t.value("artist").toString(),
-                    t.value("ready").toBool() ? QObject::tr("Prêt")
-                                              : QObject::tr("À préparer"),
+                    !t.value("stems").toObject().value("error").toString().isEmpty()
+                            ? t.value("stems").toObject().value("error").toString()
+                            : !t.value("stems").toObject().value("stage").toString().isEmpty()
+                            ? t.value("stems").toObject().value("stage").toString()
+                            : t.value("ready").toBool() ? QObject::tr("Audio prêt")
+                                                        : QObject::tr("À télécharger"),
                     t.value("reason").toString(),
                     t.value("id").toString()};
             for (int c = 0; c < cells.size(); ++c)

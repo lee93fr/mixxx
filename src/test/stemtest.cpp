@@ -56,6 +56,42 @@ class StemFixture : public MixxxTest, public ::testing::WithParamInterface<StemP
     }
 };
 
+TEST_F(MixxxTest, GameflorrPreparedStemsImportAndDecode) {
+    const auto path = qEnvironmentVariable("GAMEFLORR_STEM_SMOKE_FILE");
+    if (path.isEmpty())
+        GTEST_SKIP() << "Set GAMEFLORR_STEM_SMOKE_FILE to a generated four-stem container";
+    ASSERT_TRUE(SoundSourceProxy::isFileTypeSupported("stem.m4a") || SoundSourceProxy::registerProviders());
+    auto track = Track::newTemporary(path);
+    AudioSource::OpenParams params;
+    params.setChannelCount(audio::ChannelCount::stem());
+    auto source = SoundSourceProxy(track).openAudioSource(params);
+    ASSERT_NE(source, nullptr);
+    const QStringList names = {"Drums", "Bass", "Other", "Vocals"};
+    const auto info = track->getStemInfo();
+    ASSERT_EQ(info.size(), 4);
+    for (int i = 0; i < 4; ++i)
+        EXPECT_EQ(info[i].getLabel(), names[i]);
+    EXPECT_EQ(source->getSignalInfo().getChannelCount(), audio::ChannelCount::stem());
+    SampleBuffer interleaved(512 * 8);
+    ASSERT_EQ(source->readSampleFrames(WritableSampleFrames(IndexRange::between(0, 512),
+                                               SampleBuffer::WritableSlice(interleaved.data(), interleaved.size())))
+                      .readableLength(),
+            interleaved.size());
+    params.setChannelCount(audio::ChannelCount::stereo());
+    for (int stem = 0; stem < 4; ++stem) {
+        SoundSourceFFmpeg standalone(QUrl::fromLocalFile(path), stem + 1);
+        ASSERT_EQ(standalone.open(AudioSource::OpenMode::Strict, params), AudioSource::OpenResult::Succeeded);
+        SampleBuffer stereo(512 * 2);
+        ASSERT_EQ(standalone.readSampleFrames(WritableSampleFrames(IndexRange::between(0, 512),
+                                                      SampleBuffer::WritableSlice(stereo.data(), stereo.size())))
+                          .readableLength(),
+                stereo.size());
+        for (int frame = 0; frame < 512; ++frame)
+            for (int side = 0; side < 2; ++side)
+                EXPECT_FLOAT_EQ(interleaved[frame * 8 + stem * 2 + side], stereo[frame * 2 + side]);
+    }
+}
+
 TEST_P(StemFixture, FetchStemInfo) {
     auto sourceStemPath = GetStemFilePath();
     TrackPointer pTrack(Track::newTemporary(sourceStemPath));
