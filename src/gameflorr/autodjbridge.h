@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QSet>
 #include <QTimer>
+#include <memory>
 
 #include "analyzer/trackanalysisscheduler.h"
 #include "track/track_decl.h"
@@ -13,6 +14,7 @@ class Library;
 class AutoDJProcessor;
 class PlayerManagerInterface;
 namespace gameflorr {
+class LiveMashupController;
 class AutoDjBridge : public QObject {
   public:
     AutoDjBridge(QObject* parent,
@@ -47,5 +49,6 @@ class AutoDjBridge : public QObject {
     bool m_assisted = true;
     bool m_observedFade = false;
     TrackAnalysisScheduler::Pointer m_analysis;
+    std::unique_ptr<LiveMashupController> m_liveMashup;
 };
 } // namespace gameflorr

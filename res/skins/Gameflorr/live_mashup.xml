@@ -1,0 +1,215 @@
+<!DOCTYPE template>
+<Template>
+  <WidgetGroup>
+    <Layout>vertical</Layout>
+    <SizePolicy>me,f</SizePolicy>
+    <Children>
+      <WidgetGroup>
+        <Layout>horizontal</Layout>
+        <Children>
+          <Label>
+            <Text>MASHUP LIVE</Text>
+            <Size>110f,28f</Size>
+          </Label>
+          <PushButton>
+            <ObjectName>GameflorrStem</ObjectName>
+            <Size>148f,28f</Size>
+            <NumberStates>2</NumberStates>
+            <LeftClickIsPushButton>true</LeftClickIsPushButton>
+            <Tooltip>Deux pistes préparées en lecture et synchronisées. Le DJ garde les départs et le crossfader.</Tooltip>
+            <State>
+              <Number>0</Number>
+              <Text>Voix A + instru B</Text>
+            </State>
+            <State>
+              <Number>1</Number>
+              <Text>Voix A + instru B</Text>
+            </State>
+            <Connection>
+              <ConfigKey>[Gameflorr],live_mashup_a</ConfigKey>
+              <ConnectValueToWidget>false</ConnectValueToWidget>
+              <EmitOnPressAndRelease>true</EmitOnPressAndRelease>
+            </Connection>
+            <Connection>
+              <ConfigKey>[Gameflorr],live_mashup_mode</ConfigKey>
+              <Transform>
+                <IsEqual>1</IsEqual>
+              </Transform>
+              <ConnectValueFromWidget>false</ConnectValueFromWidget>
+            </Connection>
+          </PushButton>
+          <PushButton>
+            <ObjectName>GameflorrStem</ObjectName>
+            <Size>148f,28f</Size>
+            <NumberStates>2</NumberStates>
+            <LeftClickIsPushButton>true</LeftClickIsPushButton>
+            <Tooltip>Deux pistes préparées en lecture et synchronisées. Le DJ garde les départs et le crossfader.</Tooltip>
+            <State>
+              <Number>0</Number>
+              <Text>Voix B + instru A</Text>
+            </State>
+            <State>
+              <Number>1</Number>
+              <Text>Voix B + instru A</Text>
+            </State>
+            <Connection>
+              <ConfigKey>[Gameflorr],live_mashup_b</ConfigKey>
+              <ConnectValueToWidget>false</ConnectValueToWidget>
+              <EmitOnPressAndRelease>true</EmitOnPressAndRelease>
+            </Connection>
+            <Connection>
+              <ConfigKey>[Gameflorr],live_mashup_mode</ConfigKey>
+              <Transform>
+                <IsEqual>2</IsEqual>
+              </Transform>
+              <ConnectValueFromWidget>false</ConnectValueFromWidget>
+            </Connection>
+          </PushButton>
+          <PushButton>
+            <ObjectName>GameflorrStem</ObjectName>
+            <Size>148f,28f</Size>
+            <NumberStates>2</NumberStates>
+            <LeftClickIsPushButton>true</LeftClickIsPushButton>
+            <Tooltip>Deux pistes préparées en lecture et synchronisées. Le DJ garde les départs et le crossfader.</Tooltip>
+            <State>
+              <Number>0</Number>
+              <Text>Passer la voix</Text>
+            </State>
+            <State>
+              <Number>1</Number>
+              <Text>Passer la voix</Text>
+            </State>
+            <Connection>
+              <ConfigKey>[Gameflorr],live_mashup_swap</ConfigKey>
+              <ConnectValueToWidget>false</ConnectValueToWidget>
+              <EmitOnPressAndRelease>true</EmitOnPressAndRelease>
+            </Connection>
+          </PushButton>
+          <PushButton>
+            <ObjectName>GameflorrStem</ObjectName>
+            <Size>148f,28f</Size>
+            <NumberStates>2</NumberStates>
+            <LeftClickIsPushButton>true</LeftClickIsPushButton>
+            <Tooltip>Deux pistes préparées en lecture et synchronisées. Le DJ garde les départs et le crossfader.</Tooltip>
+            <State>
+              <Number>0</Number>
+              <Text>Mix complet</Text>
+            </State>
+            <State>
+              <Number>1</Number>
+              <Text>Mix complet</Text>
+            </State>
+            <Connection>
+              <ConfigKey>[Gameflorr],live_mashup_reset</ConfigKey>
+              <ConnectValueToWidget>false</ConnectValueToWidget>
+              <EmitOnPressAndRelease>true</EmitOnPressAndRelease>
+            </Connection>
+            <Connection>
+              <ConfigKey>[Gameflorr],live_mashup_mode</ConfigKey>
+              <Transform>
+                <IsEqual>0</IsEqual>
+              </Transform>
+              <ConnectValueFromWidget>false</ConnectValueFromWidget>
+            </Connection>
+          </PushButton>
+          <Label>
+            <Text>A = platine 1 · B = platine 2 · volumes / crossfader manuels</Text>
+            <Size>0me,28f</Size>
+          </Label>
+        </Children>
+      </WidgetGroup>
+      <Label>
+        <Text>Prêt · démarrez sur les phrases choisies et réglez les volumes / le crossfader.</Text>
+        <Size>0me,20f</Size>
+        <Connection>
+          <ConfigKey>[Gameflorr],live_mashup_status</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>0</IsEqual>
+          </Transform>
+        </Connection>
+      </Label>
+      <Label>
+        <Text>Reprenez la main sur AutoDJ avant le mashup live.</Text>
+        <Size>0me,20f</Size>
+        <Connection>
+          <ConfigKey>[Gameflorr],live_mashup_status</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>1</IsEqual>
+          </Transform>
+        </Connection>
+      </Label>
+      <Label>
+        <Text>Chargez deux titres avec les 4 stems préparés sur A et B.</Text>
+        <Size>0me,20f</Size>
+        <Connection>
+          <ConfigKey>[Gameflorr],live_mashup_status</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>2</IsEqual>
+          </Transform>
+        </Connection>
+      </Label>
+      <Label>
+        <Text>Démarrez les deux platines et désactivez le passthrough.</Text>
+        <Size>0me,20f</Size>
+        <Connection>
+          <ConfigKey>[Gameflorr],live_mashup_status</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>3</IsEqual>
+          </Transform>
+        </Connection>
+      </Label>
+      <Label>
+        <Text>Grilles stables, même tonalité et verrouillage de tonalité requis.</Text>
+        <Size>0me,20f</Size>
+        <Connection>
+          <ConfigKey>[Gameflorr],live_mashup_status</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>4</IsEqual>
+          </Transform>
+        </Connection>
+      </Label>
+      <Label>
+        <Text>Synchronisez les tempos de A et B (écart maximal 0,5 %).</Text>
+        <Size>0me,20f</Size>
+        <Connection>
+          <ConfigKey>[Gameflorr],live_mashup_status</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>5</IsEqual>
+          </Transform>
+        </Connection>
+      </Label>
+      <Label>
+        <Text>Rétablissez les stems sans mute, avec des gains entre 0 et 1.</Text>
+        <Size>0me,20f</Size>
+        <Connection>
+          <ConfigKey>[Gameflorr],live_mashup_status</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>6</IsEqual>
+          </Transform>
+        </Connection>
+      </Label>
+      <Label>
+        <Text>Retour progressif au mix complet…</Text>
+        <Size>0me,20f</Size>
+        <Connection>
+          <ConfigKey>[Gameflorr],live_mashup_status</ConfigKey>
+          <BindProperty>visible</BindProperty>
+          <Transform>
+            <IsEqual>7</IsEqual>
+          </Transform>
+        </Connection>
+      </Label>
+    </Children>
+    <Connection>
+      <ConfigKey>[Skin],show_stem_controls</ConfigKey>
+      <BindProperty>visible</BindProperty>
+    </Connection>
+  </WidgetGroup>
+</Template>

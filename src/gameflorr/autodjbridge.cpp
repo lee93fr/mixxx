@@ -11,6 +11,7 @@
 #include <cmath>
 
 #include "control/pollingcontrolproxy.h"
+#include "gameflorr/livemashupcontroller.h"
 #include "gameflorr/transitionplan.h"
 #include "library/autodj/autodjprocessor.h"
 #include "library/library.h"
@@ -49,7 +50,8 @@ AutoDjBridge::AutoDjBridge(QObject* parent,
           m_folder(QFileInfo(gameflorrStatePath()).absolutePath()),
           m_analysis(library->createTrackAnalysisScheduler(1,
                   static_cast<AnalyzerModeFlags>(AnalyzerModeFlags::All |
-                          AnalyzerModeFlags::LowPriority))) {
+                          AnalyzerModeFlags::LowPriority))),
+          m_liveMashup(std::make_unique<LiveMashupController>(this, players, processor)) {
     connect(&m_timer, &QTimer::timeout, this, [this] { tick(); });
     m_timer.start(500);
 }
@@ -90,6 +92,7 @@ void AutoDjBridge::tick() {
             relinquish();
             m_takeover = true;
         }
+        writeState({}, m_error);
         return;
     }
     const auto plan = QJsonDocument::fromJson(file.readAll()).object();
@@ -105,6 +108,7 @@ void AutoDjBridge::tick() {
             relinquish();
             m_takeover = true;
         }
+        writeState({}, m_error);
         return;
     }
     if (session != m_session) {
@@ -133,11 +137,22 @@ void AutoDjBridge::tick() {
             m_processed = {id};
         bool ok = true;
         error.clear();
-        if (action == QStringLiteral("start") ||
+        if (action.startsWith(QStringLiteral("live-mashup-"))) {
+            const auto context = command.value(QStringLiteral("context")).toString();
+            const auto expires = command.value(QStringLiteral("expiresAt")).toVariant().toLongLong();
+            const bool fresh = !context.isEmpty() && expires > now && expires <= now + 10000;
+            ok = fresh && m_liveMashup->command(action, context);
+            if (!ok) {
+                error = m_liveMashup->state().value(QStringLiteral("reason")).toString();
+                if (m_liveMashup->state().value(QStringLiteral("ready")).toBool()) {
+                    error = tr("Commande mashup expirée ou platines modifiées. Vérifiez les stems et réessayez.");
+                }
+            }
+        } else if (action == QStringLiteral("start") ||
                 action == QStringLiteral("next")) {
-            bool unsafe =
+            bool unsafe = m_liveMashup->busy() ||
                     m_processor->getState() != AutoDJProcessor::ADJ_DISABLED &&
-                    !m_owns;
+                            !m_owns;
             int playingCount = 0;
             for (int i = 0; i < m_players->numberOfDecks(); ++i) {
                 if (playing(m_players, i))
@@ -230,6 +245,11 @@ void AutoDjBridge::tick() {
         relinquish();
     m_assisted = plan.value(QStringLiteral("mode")).toString() ==
             QStringLiteral("assisted");
+    if (m_pendingStart && m_liveMashup->busy()) {
+        relinquish();
+        m_takeover = true;
+        error = tr("Terminez le mashup live avant de lancer AutoDJ.");
+    }
     if (m_owns || m_pendingStart) {
         auto& dao = m_library->trackCollectionManager()
                             ->internalCollection()
@@ -425,6 +445,7 @@ void AutoDjBridge::writeState(const QJsonObject& plan, const QString& error) {
             {QStringLiteral("durationMs"),
                     onAir ? onAir->getDuration() * 1000 : 0},
             {QStringLiteral("metadata"), metadata},
+            {QStringLiteral("liveMashup"), m_liveMashup->state()},
             {QStringLiteral("lastCommand"), m_ack},
             {QStringLiteral("error"), error},
             {QStringLiteral("transition"),

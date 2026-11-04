@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QFormLayout>
+#include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QJsonArray>
@@ -21,7 +22,9 @@
 #include <QUuid>
 #include <QVBoxLayout>
 
+#include "control/pollingcontrolproxy.h"
 #include "gameflorr/gameflorrpanel.h"
+#include "gameflorr/livemashupcontroller.h"
 #include "preferences/gameflorrsettings.h"
 
 namespace gameflorr {
@@ -31,6 +34,29 @@ QWidget* createAutoDjPanel(QWidget* parent) {
     auto* panel = new QWidget(scroll);
     scroll->setWidget(panel);
     auto* layout = new QVBoxLayout(panel);
+    auto* liveBox = new QGroupBox(QObject::tr("Mashup live · platines A et B"), panel);
+    auto* liveLayout = new QVBoxLayout(liveBox);
+    auto* liveStatus = new QLabel(liveBox);
+    liveStatus->setWordWrap(true);
+    liveStatus->setTextFormat(Qt::PlainText);
+    liveLayout->addWidget(liveStatus);
+    auto* liveActions = new QHBoxLayout();
+    liveLayout->addLayout(liveActions);
+    auto liveButtons = std::make_shared<QList<QPushButton*>>();
+    const QStringList liveLabels = {QObject::tr("Voix A + instru B"), QObject::tr("Voix B + instru A"), QObject::tr("Passer la voix"), QObject::tr("Mix complet")};
+    const QStringList liveKeys = {QStringLiteral("live_mashup_a"), QStringLiteral("live_mashup_b"), QStringLiteral("live_mashup_swap"), QStringLiteral("live_mashup_reset")};
+    for (int i = 0; i < liveLabels.size(); ++i) {
+        auto* button = new QPushButton(liveLabels[i], liveBox);
+        button->setCheckable(i < 2);
+        liveButtons->append(button);
+        liveActions->addWidget(button);
+        QObject::connect(button, &QPushButton::clicked, panel, [key = liveKeys[i]] {
+            PollingControlProxy control(QStringLiteral("[Gameflorr]"), key, ControlFlag::AllowMissingOrInvalid);
+            control.set(1);
+            control.set(0);
+        });
+    }
+    layout->addWidget(liveBox);
     auto* status = new QLabel(panel);
     status->setWordWrap(true);
     status->setTextFormat(Qt::PlainText);
@@ -247,6 +273,16 @@ QWidget* createAutoDjPanel(QWidget* parent) {
     QObject::connect(cancel, &QPushButton::clicked, panel, [=] { send("cancel-stems"); });
     QObject::connect(stopListen, &QPushButton::clicked, panel, [=] { send("stop-preview"); });
     auto refresh = [=] {
+        PollingControlProxy liveMode(QStringLiteral("[Gameflorr]"), QStringLiteral("live_mashup_mode"), ControlFlag::AllowMissingOrInvalid);
+        PollingControlProxy liveState(QStringLiteral("[Gameflorr]"), QStringLiteral("live_mashup_status"), ControlFlag::AllowMissingOrInvalid);
+        const int currentMode = static_cast<int>(liveMode.get());
+        const int currentStatus = static_cast<int>(liveState.get());
+        liveStatus->setText(liveMode.valid() ? liveMashupReason(currentStatus) : QObject::tr("Initialisation du mashup live…"));
+        for (int i = 0; i < liveButtons->size(); ++i) {
+            auto* button = liveButtons->at(i);
+            button->setChecked(i < 2 && currentMode == i + 1);
+            button->setEnabled(liveMode.valid() && (i == 3 || (currentStatus == 0 && (i < 2 || currentMode > 0))));
+        }
         QFile file(QFileInfo(gameflorrStatePath())
                         .absoluteDir()
                         .filePath("mixxx-autodj-plan.json"));

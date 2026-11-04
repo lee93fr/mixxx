@@ -84,6 +84,36 @@ désactive le conducteur. Les gains contrôlés par l’automation sont restaur�
 sans démarrer AutoDJ ni déclarer le titre joué. Cette commande ne simule pas le
 mashup ; configurez d’abord une sortie casque distincte du mix principal.
 
+## Mashup live sur les platines A et B
+
+Les quatre boutons **Voix A + instru B**, **Voix B + instru A**,
+**Passer la voix** et **Mix complet** sont accessibles dans le skin Gameflorr
+(affichage Stems), le panneau Conducteur AutoDJ et la console DJ de Gameflorr.
+Les commandes natives fonctionnent aussi sans connexion à l’agent.
+
+1. Préparez les stems, puis chargez les conteneurs sur les platines 1 (A) et 2 (B).
+2. Reprenez la main sur AutoDJ. Vérifiez les grilles, la même tonalité connue,
+   le verrouillage de tonalité sur les deux platines et les tempos synchronisés
+   (écart maximal 0,5 %). Tous les stems doivent être sans mute, avec des gains
+   compris entre 0 et 1.
+3. Démarrez les deux pistes sur les phrases choisies et réglez les volumes et
+   le crossfader pour entendre les deux platines. Le mashup live ne les déplace pas.
+4. Choisissez la voix A ou B. Le mashup maintient cette voix sur l’instrumental
+   de l’autre platine jusqu’à une autre commande. **Passer la voix** inverse les
+   rôles. Chaque changement applique un fondu de 250 ms, sans augmenter les gains.
+5. **Mix complet** restitue progressivement les gains présents avant le mashup.
+
+Un gain ou mute modifié à la main arrête le mashup et conserve la modification.
+Un arrêt de platine, un changement de tempo incompatible ou de tonalité déclenche
+également la restitution des gains. Si une piste est remplacée, la restitution
+ne touche jamais les gains de sa remplaçante. AutoDJ doit rester désactivé pendant
+ce mode. Les commandes à distance expirent après cinq secondes et sont liées
+aux pistes chargées pour éviter leur application à une autre paire de titres.
+
+Le statut explique les conditions manquantes. L’alignement des phrases et des
+voix reste au DJ : ce mode ne détecte pas les passages chantés et ne simule pas
+la transition dans la préécoute casque.
+
 ## Fonctionnement et limites
 
 Le thème est comparé aux métadonnées textuelles disponibles : il ne s’agit pas

@@ -11,6 +11,8 @@
 #include "control/controlpotmeter.h"
 #include "control/controlpushbutton.h"
 #include "engine/engine.h"
+#include "gameflorr/livemashup.h"
+#include "gameflorr/livemashupcontroller.h"
 #include "gameflorr/transitionplan.h"
 #include "library/dao/trackschema.h"
 #include "library/playlisttablemodel.h"
@@ -2253,4 +2255,159 @@ TEST_F(AutoDJProcessorTest, MashupYieldsToManualGainAndMuteChanges) {
     EXPECT_FALSE(mashup.active());
     EXPECT_DOUBLE_EQ(1, stems.mutes[3]->get());
     EXPECT_DOUBLE_EQ(1, stems.volumes[7]->get());
+}
+
+TEST(GameflorrTransitionTest, LiveMashupRequiresMatchedFiniteTempos) {
+    EXPECT_TRUE(gameflorr::liveMashupTempoCompatible(120, 120.4));
+    EXPECT_FALSE(gameflorr::liveMashupTempoCompatible(120, 121));
+    EXPECT_FALSE(gameflorr::liveMashupTempoCompatible(0, 0));
+    EXPECT_FALSE(gameflorr::liveMashupTempoCompatible(120, std::numeric_limits<double>::infinity()));
+    EXPECT_FALSE(gameflorr::liveMashupTempoCompatible(std::numeric_limits<double>::quiet_NaN(), 120));
+}
+
+TEST_F(AutoDJProcessorTest, LiveMashupHoldsVoiceSwapsAndRestoresOriginalLevelsWithRamps) {
+    FakeStemControls stems;
+    stems.volumes[3]->set(.7);
+    gameflorr::LiveMashup mashup;
+    ASSERT_TRUE(mashup.select(1));
+    EXPECT_DOUBLE_EQ(1, stems.volumes[0]->get());
+    mashup.advance(.125);
+    EXPECT_DOUBLE_EQ(.5, stems.volumes[0]->get());
+    mashup.advance(.125);
+    mashup.advance(60);
+    EXPECT_DOUBLE_EQ(0, stems.volumes[0]->get());
+    EXPECT_DOUBLE_EQ(.7, stems.volumes[3]->get());
+    EXPECT_DOUBLE_EQ(1, stems.volumes[4]->get());
+    EXPECT_DOUBLE_EQ(0, stems.volumes[7]->get());
+    ASSERT_TRUE(mashup.select(2));
+    mashup.advance(.125);
+    EXPECT_DOUBLE_EQ(.35, stems.volumes[3]->get());
+    EXPECT_DOUBLE_EQ(.5, stems.volumes[7]->get());
+    mashup.advance(.125);
+    EXPECT_DOUBLE_EQ(1, stems.volumes[0]->get());
+    EXPECT_DOUBLE_EQ(0, stems.volumes[4]->get());
+    EXPECT_DOUBLE_EQ(1, stems.volumes[7]->get());
+    mashup.stop();
+    EXPECT_TRUE(mashup.busy());
+    mashup.advance(.25);
+    EXPECT_FALSE(mashup.busy());
+    EXPECT_EQ(0, mashup.mode());
+    for (int i = 0; i < 8; ++i) {
+        EXPECT_DOUBLE_EQ(i == 3 ? .7 : 1, stems.volumes[i]->get());
+    }
+}
+
+TEST_F(AutoDJProcessorTest, LiveMashupPreservesManualChangesWhileReleasingOtherGains) {
+    FakeStemControls stems;
+    gameflorr::LiveMashup mashup;
+    ASSERT_TRUE(mashup.select(1));
+    mashup.advance(.25);
+    stems.volumes[0]->set(.4);
+    stems.mutes[3]->set(1);
+    mashup.advance(.25);
+    EXPECT_FALSE(mashup.busy());
+    EXPECT_EQ(0, mashup.mode());
+    EXPECT_DOUBLE_EQ(.4, stems.volumes[0]->get());
+    EXPECT_DOUBLE_EQ(1, stems.mutes[3]->get());
+    EXPECT_DOUBLE_EQ(1, stems.volumes[7]->get());
+    EXPECT_FALSE(mashup.select(2));
+}
+
+TEST_F(AutoDJProcessorTest, LiveMashupCannotRestoreGainsIntoAReplacedTrack) {
+    FakeStemControls stems;
+    gameflorr::LiveMashup mashup;
+    ASSERT_TRUE(mashup.select(1));
+    mashup.advance(.25);
+    mashup.abandonDeck(0);
+    for (int i = 0; i < 4; ++i) {
+        stems.volumes[i]->set(.3);
+    }
+    mashup.stop();
+    mashup.advance(.25);
+    mashup.restore();
+    for (int i = 0; i < 8; ++i) {
+        EXPECT_DOUBLE_EQ(i < 4 ? .3 : 1, stems.volumes[i]->get());
+    }
+}
+
+TEST_F(AutoDJProcessorTest, LiveMashupRejectsInvalidOrMutedStemsWithoutChangingAudio) {
+    FakeStemControls stems;
+    gameflorr::LiveMashup mashup;
+    EXPECT_FALSE(mashup.select(3));
+    stems.volumes[7].reset();
+    stems.volumes[7] = std::make_unique<ControlPotmeter>(ConfigKey(QStringLiteral("[Channel2_Stem4]"), QStringLiteral("volume")), 0, 2);
+    stems.volumes[7]->set(1.2);
+    EXPECT_FALSE(mashup.select(1));
+    stems.volumes[7]->set(1);
+    stems.mutes[7]->set(1);
+    EXPECT_FALSE(mashup.select(1));
+    for (const auto& volume : stems.volumes) {
+        EXPECT_DOUBLE_EQ(1, volume->get());
+    }
+    EXPECT_FALSE(mashup.busy());
+}
+
+TEST_F(AutoDJProcessorTest, LiveMashupControlsRequirePreparedTracksAndRejectOldDeckContext) {
+    mixer.crossfader.set(-1);
+    EXPECT_CALL(*pPlayerManager, getDeckBase(0)).Times(::testing::AnyNumber());
+    EXPECT_CALL(*pPlayerManager, getDeckBase(1)).Times(::testing::AnyNumber());
+    FakeStemControls stems;
+    gameflorr::LiveMashupController live(nullptr, pPlayerManager.data(), pProcessor.data());
+    EXPECT_FALSE(live.state().value(QStringLiteral("ready")).toBool());
+    EXPECT_FALSE(live.command(QStringLiteral("live-mashup-a")));
+    EXPECT_FALSE(live.command(QStringLiteral("live-mashup-reset"), QStringLiteral("old-deck-context")));
+    EXPECT_TRUE(live.command(QStringLiteral("live-mashup-reset")));
+    EXPECT_DOUBLE_EQ(-1, mixer.crossfader.get());
+    EXPECT_FALSE(deck1.play.toBool());
+    EXPECT_FALSE(deck2.play.toBool());
+}
+
+TEST_F(AutoDJProcessorTest, LiveMashupControlsUsePreparedDecksAndPreservePlaybackAndCrossfader) {
+#ifdef __STEM__
+    const auto path = qEnvironmentVariable("GAMEFLORR_STEM_SMOKE_FILE");
+    if (path.isEmpty()) {
+        GTEST_SKIP();
+    }
+    EXPECT_CALL(*pPlayerManager, getDeckBase(0)).Times(::testing::AnyNumber());
+    EXPECT_CALL(*pPlayerManager, getDeckBase(1)).Times(::testing::AnyNumber());
+    FakeStemControls stems;
+    ControlPushButton lockA(ConfigKey(QStringLiteral("[Channel1]"), QStringLiteral("keylock")));
+    ControlPushButton lockB(ConfigKey(QStringLiteral("[Channel2]"), QStringLiteral("keylock")));
+    lockA.set(1);
+    lockB.set(1);
+    ASSERT_TRUE(SoundSourceProxy::isFileTypeSupported("stem.m4a") || SoundSourceProxy::registerProviders());
+    for (auto* deck : {&deck1, &deck2}) {
+        const auto track = Track::newTemporary(path);
+        mixxx::AudioSource::OpenParams params;
+        params.setChannelCount(mixxx::audio::ChannelCount::stem());
+        ASSERT_NE(SoundSourceProxy(track).openAudioSource(params), nullptr);
+        ASSERT_EQ(track->getStemInfo().size(), 4);
+        track->trySetBpm(120);
+        track->setKeyText(QStringLiteral("Am"));
+        deck->loadedTrack = track;
+        deck->play.set(1);
+    }
+    mixer.crossfader.set(.2);
+    gameflorr::LiveMashupController live(nullptr, pPlayerManager.data(), pProcessor.data());
+    ASSERT_TRUE(live.state().value(QStringLiteral("ready")).toBool()) << live.state().value(QStringLiteral("reason")).toString().toStdString();
+    const auto context = live.state().value(QStringLiteral("context")).toString();
+    ASSERT_TRUE(live.command(QStringLiteral("live-mashup-a"), context));
+    EXPECT_EQ(live.state().value(QStringLiteral("mode")).toInt(), 1);
+    ASSERT_TRUE(live.command(QStringLiteral("live-mashup-swap"), context));
+    EXPECT_EQ(live.state().value(QStringLiteral("mode")).toInt(), 2);
+    EXPECT_DOUBLE_EQ(.2, mixer.crossfader.get());
+    EXPECT_TRUE(deck1.play.toBool());
+    EXPECT_TRUE(deck2.play.toBool());
+    deck1.loadedTrack = newTestTrack();
+    for (int i = 0; i < 4; ++i) {
+        stems.volumes[i]->set(.4);
+    }
+    EXPECT_FALSE(live.command(QStringLiteral("live-mashup-a"), context));
+    EXPECT_FALSE(live.command(QStringLiteral("live-mashup-reset"), context));
+    EXPECT_NE(live.state().value(QStringLiteral("context")).toString(), context);
+    EXPECT_TRUE(live.command(QStringLiteral("live-mashup-reset")));
+    for (int i = 0; i < 4; ++i) {
+        EXPECT_DOUBLE_EQ(.4, stems.volumes[i]->get());
+    }
+#endif
 }
