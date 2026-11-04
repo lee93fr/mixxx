@@ -3,6 +3,7 @@
 #include <QElapsedTimer>
 #include <QJsonObject>
 #include <QObject>
+#include <QPointer>
 #include <QTimer>
 #include <memory>
 
@@ -31,8 +32,10 @@ class LiveMashupController : public QObject {
     int availability() const;
     void tick();
     void protectLoadedTracks();
-    PlayerManagerInterface* m_players;
-    AutoDJProcessor* m_processor;
+    void shutdown();
+    QPointer<PlayerManagerInterface> m_players;
+    QPointer<AutoDJProcessor> m_processor;
+    bool m_shuttingDown = false;
     LiveMashup m_mashup;
     std::array<TrackPointer, 2> m_tracks;
     std::array<TrackPointer, 2> m_observedTracks;
